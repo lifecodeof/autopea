@@ -1,0 +1,50 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`should record operations 1`] = `
+[
+  {
+    "get": "user",
+  },
+  {
+    "get": "getName",
+  },
+  {
+    "call": [
+      42,
+    ],
+  },
+]
+`;
+
+exports[`should record operations 2`] = `
+[
+  {
+    "get": "user",
+  },
+  {
+    "get": "address",
+  },
+  {
+    "get": "getCity",
+  },
+  {
+    "call": [],
+  },
+  {
+    "get": "altitude",
+  },
+]
+`;
+
+exports[`should record operations 3`] = `
+[
+  {
+    "get": "log",
+  },
+  {
+    "call": [
+      "Hello",
+    ],
+  },
+]
+`;
