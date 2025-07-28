@@ -1,16 +1,11 @@
 import z from "zod"
 import { App } from "./App"
-import {
-  FFICollection,
-  FFITypeName,
-  PhotopeaFFI
-} from "./base/PhotopeaFFI"
+import { FFICollection, FFITypeName, PhotopeaFFI } from "./base/PhotopeaFFI"
 import type { ElementPlacement, RasterizeType } from "./enums"
 import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
 import { Layer } from "./Layer"
 import { SolidColor } from "./SolidColor"
 
-@FFITypeName("ArtLayer")
 export class ArtLayer extends Layer {
   get fillOpacity() {
     return this.$value(z.number())`.fillOpacity`

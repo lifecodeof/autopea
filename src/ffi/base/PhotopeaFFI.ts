@@ -1,6 +1,5 @@
 import type { PhotopeaChannel } from "@/PhotopeaChannel"
 import { z, type ZodType } from "zod"
-import { App } from "../App"
 
 export type PhotopeaFFIConstructor<T extends PhotopeaFFI> = new (
   channel: PhotopeaChannel,
@@ -26,15 +25,16 @@ export class PhotopeaFFI {
     return instance.expression
   }
 
-  protected get app() {
-    return App.get(this.channel)
-  }
-
   private transfer(value: any) {
     if (value instanceof PhotopeaFFI) {
       return value.expression
-    } else if (typeof value[rawStringSymbol] === "string") {
+    } else if (
+      typeof value === "object" &&
+      typeof value[rawStringSymbol] === "string"
+    ) {
       return value[rawStringSymbol]
+    } else if (typeof value === "undefined") {
+      return "undefined"
     } else {
       return JSON.stringify(value)
     }

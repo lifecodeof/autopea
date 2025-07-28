@@ -48,7 +48,7 @@ export const channelTest = pageTest.extend<{
   channel: PhotopeaChannel
 }>({
   channel: async ({ page, signal }, use) => {
-    const channel = new PhotopeaChannel(page, signal)
+    const channel = new PhotopeaChannel(page)
     channel.timeout = 0 // Disable timeout for tests
     await use(channel)
   }
@@ -59,7 +59,7 @@ export const sharedChannelTest = sharedPageTest.extend<{
 }>({
   sharedChannel: [
     async ({ sharedPage, signal }, use) => {
-      await use(new PhotopeaChannel(sharedPage, signal))
+      await use(new PhotopeaChannel(sharedPage))
     },
     { scope: "worker" }
   ]
