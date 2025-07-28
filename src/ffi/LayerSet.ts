@@ -1,7 +1,8 @@
 import { ArtLayers } from "./ArtLayer"
-import { FFICollection, PhotopeaFFI } from "./base/PhotopeaFFI"
+import { FFICollection } from "./base/PhotopeaFFI"
+import { Layer } from "./Layer"
 
-export class LayerSet extends PhotopeaFFI {
+export class LayerSet extends Layer {
   get artLayers() {
     return this.$(ArtLayers)`.artLayers`
   }
@@ -10,11 +11,15 @@ export class LayerSet extends PhotopeaFFI {
     return this.$(LayerSets)`.layerSets`
   }
 
-  duplicate() {
+  override duplicate() {
     return this.$evalHandle(LayerSet)`.duplicate()`
   }
 }
 
 export class LayerSets extends FFICollection<LayerSet> {
   protected itemType = () => LayerSet
+
+  getByName(name: string) {
+    return this.$(LayerSet)`.getByName(${name})`
+  }
 }

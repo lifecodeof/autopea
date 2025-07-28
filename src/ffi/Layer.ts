@@ -4,6 +4,8 @@ import { LayerSet } from "./LayerSet"
 import { PDocument } from "./PDocument"
 import { UnitRect } from "./UnitRect"
 import type { AnchorPosition, ElementPlacement } from "./enums"
+import { App } from "./App"
+import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
 
 export class Layer extends PhotopeaFFI {
   get name() {
@@ -67,7 +69,9 @@ export class Layer extends PhotopeaFFI {
   }
 
   duplicate(relativeObject?: Layer, insertionLocation?: ElementPlacement) {
-    return this.$evalHandle(Layer)`.duplicate(${relativeObject}, ${insertionLocation})`
+    return this.$evalHandle(
+      Layer
+    )`.duplicate(${relativeObject}, ${insertionLocation})`
   }
 
   move(relativeObject: Layer, insertionLocation: ElementPlacement) {
@@ -100,6 +104,51 @@ export class Layer extends PhotopeaFFI {
 
   merge() {
     return this.$(Layer)`.merge()`
+  }
+
+  // Utils
+  async centerHorizontally() {
+    const doc = App.get(this.channel).activeDocument
+    const docCenter = (await doc.width.$get()) / 2
+    const layerCenter = await this.bounds.centerX.$get()
+    const offset = docCenter - layerCenter
+    if (offset !== 0) {
+      await this.translate(offset, 0)
+    }
+  }
+
+  async centerVertically() {
+    const doc = App.get(this.channel).activeDocument
+    const docCenter = (await doc.height.$get()) / 2
+    const layerCenter = await this.bounds.centerY.$get()
+    const offset = docCenter - layerCenter
+    if (offset !== 0) {
+      await this.translate(0, offset)
+    }
+  }
+
+  private hexToRgb(hex: string) {
+    const parsedHex = z
+      .string()
+      .regex(/^#[0-9A-Fa-f]{6}$/i)
+      .parse(hex)
+
+    const bigint = parseInt(parsedHex.slice(1), 16)
+    return {
+      red: (bigint >> 16) & 255,
+      green: (bigint >> 8) & 255,
+      blue: bigint & 255
+    }
+  }
+
+  async setSolidFill(hex: string) {
+    const { red, green, blue } = this.hexToRgb(hex)
+    await this.$script(changeLayerSolidFill, {
+      layer: this,
+      red,
+      green,
+      blue
+    })
   }
 }
 

@@ -37,7 +37,13 @@
     "type-fest": "^4.41.0"
   },
   "exports": {
-    ".": "./dist/index.js",
-    "./ffi/*": "./dist/ffi/*.js"
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./ffi/*": {
+      "types": "./src/ffi/*.ts",
+      "default": "./dist/ffi/*.js"
+    }
   }
 }

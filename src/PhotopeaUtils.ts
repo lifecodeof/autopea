@@ -5,6 +5,7 @@ import { PhotopeaHandle } from "./ffi/base/PhotopeaHandle"
 import { timeoutAbortSignal } from "./helpers"
 import { type Handleable, type PhotopeaChannel } from "./PhotopeaChannel"
 import { makeBase64ToArrayBufferFnHandle } from "./playwrightLib"
+import type { Dialog } from "playwright"
 
 export enum SaveFormat {
   PNG = "png",
@@ -155,6 +156,7 @@ export class PhotopeaUtils {
 
     const toArrayBuffer = await makeBase64ToArrayBufferFnHandle(page)
 
+    let dialogListener: ((dialog: Dialog) => void) | null = null
     try {
       const dataTransfer = await page.evaluateHandle(
         ([fontsBase64, toArrayBuffer]) => {
@@ -168,18 +170,31 @@ export class PhotopeaUtils {
         [fontsBase64, toArrayBuffer] as const
       )
 
-      const dialogPromise = page.waitForEvent("dialog")
+      dialogListener = (dialog: Dialog) => dialog.dismiss()
+      page.addListener("dialog", dialogListener)
+
+      // wait for console message: [{_data: Uint8Array}]
+      const consolePromise = page.waitForEvent("console", async (msg) => {
+        const args = msg.args()
+        if (args.length == 0) return false
+        const firstArg = args[0]
+
+        return await firstArg.evaluate((arg) => {
+          return arg[0]?._data instanceof Uint8Array
+        })
+      })
+
       await page.dispatchEvent(
         ".mainblock > .block > .body",
         "drop",
         { dataTransfer },
         { strict: true }
       )
-      const dialog = await dialogPromise
 
-      await dialog.dismiss() // Deny saving to localstorage
+      await consolePromise
     } finally {
       await toArrayBuffer.dispose()
+      if (dialogListener) page.removeListener("dialog", dialogListener)
     }
   }
 }
