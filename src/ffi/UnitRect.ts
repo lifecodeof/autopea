@@ -1,3 +1,4 @@
+import z from "zod"
 import { PhotopeaFFI } from "./base/PhotopeaFFI"
 import { UnitValue } from "./UnitValue"
 
@@ -37,7 +38,7 @@ export class UnitRect extends PhotopeaFFI {
   get width() {
     const left = this.left
     const right = this.right
-    return this.$value(this.z.number(), {
+    return this.$value(z.number(), {
       absolute: true,
       wrapParentheses: true
     })`${right} - ${left}`
@@ -46,7 +47,7 @@ export class UnitRect extends PhotopeaFFI {
   get height() {
     const top = this.top
     const bottom = this.bottom
-    return this.$value(this.z.number(), {
+    return this.$value(z.number(), {
       absolute: true,
       wrapParentheses: true
     })`${bottom} - ${top}`
@@ -55,7 +56,7 @@ export class UnitRect extends PhotopeaFFI {
   get centerX() {
     const left = this.left
     const right = this.right
-    return this.$value(this.z.number(), {
+    return this.$value(z.number(), {
       absolute: true,
       wrapParentheses: true
     })`${left} + ((${right} - ${left}) / 2)`
@@ -64,7 +65,7 @@ export class UnitRect extends PhotopeaFFI {
   get centerY() {
     const top = this.top
     const bottom = this.bottom
-    return this.$value(this.z.number(), {
+    return this.$value(z.number(), {
       absolute: true,
       wrapParentheses: true
     })`${top} + ((${bottom} - ${top}) / 2)`

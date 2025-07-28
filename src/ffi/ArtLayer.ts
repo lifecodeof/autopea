@@ -1,12 +1,21 @@
-import { FFICollection, PhotopeaFFI } from "./base/PhotopeaFFI"
+import {
+  FFICollection,
+  FFIEither,
+  FFITypeName,
+  PhotopeaFFI
+} from "./base/PhotopeaFFI"
 import { PDocument } from "./PDocument"
 import { SolidColor } from "./SolidColor"
 import { UnitRect } from "./UnitRect"
 import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
+import { LayerSet } from "./LayerSet"
+import { App } from "./App"
+import z from "zod"
 
+@FFITypeName("ArtLayer")
 export class ArtLayer extends PhotopeaFFI {
   get id() {
-    return this.$value(this.z.number())`.id`
+    return this.$value(z.number())`.id`
   }
 
   get textItem() {
@@ -14,7 +23,7 @@ export class ArtLayer extends PhotopeaFFI {
   }
 
   get visible() {
-    return this.$value(this.z.boolean())`.visible`
+    return this.$value(z.boolean())`.visible`
   }
 
   get bounds() {
@@ -22,7 +31,7 @@ export class ArtLayer extends PhotopeaFFI {
   }
 
   get parent() {
-    return this.$(PDocument)`.parent`
+    return this.$(FFIEither.for(PDocument, LayerSet))`.parent`
   }
 
   translate(x: number, y: number) {
@@ -30,7 +39,7 @@ export class ArtLayer extends PhotopeaFFI {
   }
 
   async centerHorizontally() {
-    const doc = this.parent
+    const doc = App.get(this.channel).activeDocument
     const docCenter = (await doc.width.$get()) / 2
     const layerCenter = await this.bounds.centerX.$get()
     const offset = docCenter - layerCenter
@@ -40,7 +49,7 @@ export class ArtLayer extends PhotopeaFFI {
   }
 
   async centerVertically() {
-    const doc = this.parent
+    const doc = App.get(this.channel).activeDocument
     const docCenter = (await doc.height.$get()) / 2
     const layerCenter = await this.bounds.centerY.$get()
     const offset = docCenter - layerCenter
@@ -50,7 +59,7 @@ export class ArtLayer extends PhotopeaFFI {
   }
 
   private hexToRgb(hex: string) {
-    const parsedHex = this.z
+    const parsedHex = z
       .string()
       .regex(/^#[0-9A-Fa-f]{6}$/i)
       .parse(hex)
@@ -76,7 +85,7 @@ export class ArtLayer extends PhotopeaFFI {
 
 export class TextItem extends PhotopeaFFI {
   get contents() {
-    return this.$value(this.z.string())`.contents`
+    return this.$value(z.string())`.contents`
   }
 
   get color() {
@@ -85,7 +94,7 @@ export class TextItem extends PhotopeaFFI {
 }
 
 export class ArtLayers extends FFICollection<ArtLayer> {
-  protected _itemType = () => ArtLayer
+  protected itemType = () => ArtLayer
 
   add() {
     return this.$evalHandle(ArtLayer)`.add()`

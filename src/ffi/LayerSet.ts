@@ -1,5 +1,5 @@
-import { PhotopeaFFI, FFICollection } from "./base/PhotopeaFFI"
 import { ArtLayers } from "./ArtLayer"
+import { FFICollection, PhotopeaFFI } from "./base/PhotopeaFFI"
 
 export class LayerSet extends PhotopeaFFI {
   get artLayers() {
@@ -16,7 +16,5 @@ export class LayerSet extends PhotopeaFFI {
 }
 
 export class LayerSets extends FFICollection<LayerSet> {
-  protected _itemType() {
-    return LayerSet
-  }
+  protected itemType = () => LayerSet
 }
