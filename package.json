@@ -32,17 +32,12 @@
     "jest-image-snapshot": "^6.5.1",
     "looks-same": "^9.0.1",
     "sharp": "^0.34.3",
+    "tsdown": "^0.13.0",
     "tsup": "^8.5.0",
     "type-fest": "^4.41.0"
   },
   "exports": {
-    ".": {
-      "default": "./dist/index.js",
-      "types": "./src/index.ts"
-    },
-    "./ffi/*": {
-      "default": "./dist/ffi/*.js",
-      "types": "./src/ffi/*.ts"
-    }
+    ".": "./dist/index.js",
+    "./ffi/*": "./dist/ffi/*.js"
   }
 }
