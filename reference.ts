@@ -339,7 +339,6 @@ declare namespace Photoshop {
     ): ArtLayer
     invert(): void
     rasterize(type: RasterizeType): void
-    remove(): void
   }
 
   interface ArtLayers {

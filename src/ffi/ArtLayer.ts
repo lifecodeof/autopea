@@ -1,43 +1,61 @@
+import z from "zod"
+import { App } from "./App"
 import {
   FFICollection,
-  FFIEither,
   FFITypeName,
   PhotopeaFFI
 } from "./base/PhotopeaFFI"
-import { PDocument } from "./PDocument"
-import { SolidColor } from "./SolidColor"
-import { UnitRect } from "./UnitRect"
+import type { ElementPlacement, RasterizeType } from "./enums"
 import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
-import { LayerSet } from "./LayerSet"
-import { App } from "./App"
-import z from "zod"
+import { Layer } from "./Layer"
+import { SolidColor } from "./SolidColor"
 
 @FFITypeName("ArtLayer")
-export class ArtLayer extends PhotopeaFFI {
-  get id() {
-    return this.$value(z.number())`.id`
+export class ArtLayer extends Layer {
+  get fillOpacity() {
+    return this.$value(z.number())`.fillOpacity`
   }
-
+  get grouped() {
+    return this.$value(z.boolean())`.grouped`
+  }
   get textItem() {
     return this.$(TextItem)`.textItem`
   }
 
-  get visible() {
-    return this.$value(z.boolean())`.visible`
+  applyGaussianBlur(radius: number) {
+    return this.$eval()`.applyGaussianBlur(${radius})`
+  }
+  applySharpen() {
+    return this.$eval()`.applySharpen()`
+  }
+  applyUnSharpMask(amount: number, radius: number, threshold: number) {
+    return this.$eval()`.applyUnSharpMask(${amount}, ${radius}, ${threshold})`
+  }
+  clear() {
+    return this.$eval()`.clear()`
+  }
+  copy() {
+    return this.$eval()`.copy()`
+  }
+  cut() {
+    return this.$eval()`.cut()`
+  }
+  override duplicate(
+    relativeObject?: Layer,
+    insertionLocation?: ElementPlacement
+  ) {
+    return this.$evalHandle(
+      ArtLayer
+    )`.duplicate(${relativeObject}, ${insertionLocation})`
+  }
+  invert() {
+    return this.$eval()`.invert()`
+  }
+  rasterize(type: RasterizeType) {
+    return this.$eval()`.rasterize(${type})`
   }
 
-  get bounds() {
-    return this.$(UnitRect)`.bounds`
-  }
-
-  get parent() {
-    return this.$(FFIEither.for(PDocument, LayerSet))`.parent`
-  }
-
-  translate(x: number, y: number) {
-    return this.$eval()`.translate(${x}, ${y})`
-  }
-
+  // Utils
   async centerHorizontally() {
     const doc = App.get(this.channel).activeDocument
     const docCenter = (await doc.width.$get()) / 2
@@ -99,11 +117,9 @@ export class ArtLayers extends FFICollection<ArtLayer> {
   add() {
     return this.$evalHandle(ArtLayer)`.add()`
   }
-
   getByName(name: string) {
     return this.$(ArtLayer)`.getByName(${name})`
   }
-
   removeAll() {
     return this.$eval()`.removeAll()`
   }

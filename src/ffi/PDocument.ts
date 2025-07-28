@@ -6,31 +6,8 @@ import z from "zod"
 import type { UnitRect } from "./UnitRect"
 import type { UnitValue } from "./UnitValue"
 import type { SaveFormat } from "@/PhotopeaUtils"
+import type { AnchorPosition, ResampleMethod, TrimType } from "./enums"
 
-type ResampleMethod =
-  | "automatic"
-  | "preserveDetails"
-  | "bicubic"
-  | "bicubicSharper"
-  | "bicubicSmoother"
-  | "bilinear"
-  | "nearestNeighbor"
-
-type AnchorPosition =
-  | "topLeft"
-  | "topCenter"
-  | "topRight"
-  | "middleLeft"
-  | "middleCenter"
-  | "middleRight"
-  | "bottomLeft"
-  | "bottomCenter"
-  | "bottomRight"
-
-type TrimType =
-  | "transparentPixels"
-  | "topLeftPixelColor"
-  | "bottomRightPixelColor"
 
 export class PDocument extends PhotopeaFFI {
   // FFI object properties
@@ -94,7 +71,7 @@ export class PDocument extends PhotopeaFFI {
     return this.$eval()`.flipCanvas(${direction})`
   }
   trim(
-    trimType: TrimType,
+    trimType?: TrimType,
     top?: boolean,
     left?: boolean,
     bottom?: boolean,

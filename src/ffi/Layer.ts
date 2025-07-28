@@ -3,19 +3,7 @@ import { PhotopeaFFI, FFICollection, FFIEither } from "./base/PhotopeaFFI"
 import { LayerSet } from "./LayerSet"
 import { PDocument } from "./PDocument"
 import { UnitRect } from "./UnitRect"
-
-type ElementPlacement = "PLACEBEFORE" | "PLACEAFTER" | "INSIDE"
-
-type AnchorPosition =
-  | "topLeft"
-  | "topCenter"
-  | "topRight"
-  | "middleLeft"
-  | "middleCenter"
-  | "middleRight"
-  | "bottomLeft"
-  | "bottomCenter"
-  | "bottomRight"
+import type { AnchorPosition, ElementPlacement } from "./enums"
 
 export class Layer extends PhotopeaFFI {
   get name() {
@@ -79,7 +67,7 @@ export class Layer extends PhotopeaFFI {
   }
 
   duplicate(relativeObject?: Layer, insertionLocation?: ElementPlacement) {
-    return this.$(Layer)`.duplicate(${relativeObject}, ${insertionLocation})`
+    return this.$evalHandle(Layer)`.duplicate(${relativeObject}, ${insertionLocation})`
   }
 
   move(relativeObject: Layer, insertionLocation: ElementPlacement) {
