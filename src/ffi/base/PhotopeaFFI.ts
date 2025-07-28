@@ -141,6 +141,14 @@ export class PhotopeaFFI {
     const fullScript = `\n${paramString}\n${script}`
     return await this.channel.evaluate<T>(fullScript)
   }
+
+  protected $arrayOf<T extends PhotopeaFFI>(
+    constructor: PhotopeaFFIConstructor<T>
+  ): PhotopeaFFIConstructor<FFICollection<T>> {
+    return class extends FFICollection<T> {
+      protected itemType = () => constructor
+    }
+  }
 }
 
 export class FFIValue<T> extends PhotopeaFFI {

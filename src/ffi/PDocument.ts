@@ -1,9 +1,20 @@
 import { PhotopeaFFI } from "./base/PhotopeaFFI"
 import { ArtLayer, ArtLayers } from "./ArtLayer"
+import {  LayerSets } from "./LayerSet"
+import { Layers } from "./Layer"
+import z from "zod"
 
 export class PDocument extends PhotopeaFFI {
+  get layers() {
+    return this.$(Layers)`.layers`
+  }
+
   get artLayers() {
     return this.$(ArtLayers)`.artLayers`
+  }
+
+  get layerSets() {
+    return this.$(LayerSets)`.layerSets`
   }
 
   get activeLayer() {
@@ -15,10 +26,10 @@ export class PDocument extends PhotopeaFFI {
   }
 
   get width() {
-    return this.$value(this.z.number())`.width`
+    return this.$value(z.number())`.width`
   }
 
   get height() {
-    return this.$value(this.z.number())`.height`
+    return this.$value(z.number())`.height`
   }
 }
