@@ -3,6 +3,10 @@ import invariant from "tiny-invariant"
 import { PhotopeaUtils } from "./PhotopeaUtils"
 import { PhotopeaHandle } from "./ffi/base/PhotopeaHandle"
 import { abortOnTimeout } from "./helpers"
+import { PhotopeaFFI } from "./ffi/base/PhotopeaFFI"
+
+export type Handleable<T = any> = PhotopeaHandle<T> | PhotopeaFFI | string
+export type HandleVars = Record<string, Handleable>
 
 /**
  * Generates a random string ID for request identification.
@@ -46,17 +50,23 @@ export class PhotopeaChannel {
   public timeout: number = 5_000
 
   /** @param page The PhotopeaPage instance to communicate with. */
-  constructor(
-    public readonly page: PhotopeaPage,
-    private readonly abortSignal?: AbortSignal // For test cancellation
-  ) {}
+  constructor(public readonly page: PhotopeaPage) {}
 
-  private makeHandleVarsStatement(handleVars: Record<string, string>) {
+  private makeHandleVarsStatement(handleVars: Record<string, Handleable>) {
+    const getExpression = (handleable: Handleable) => {
+      if (typeof handleable === "string") {
+        return this.getExpressionForHandle(handleable)
+      } else if (handleable instanceof PhotopeaHandle) {
+        return this.getExpressionForHandle(handleable.handle)
+      } else if (handleable instanceof PhotopeaFFI) {
+        return PhotopeaFFI.getExpression(handleable)
+      } else {
+        throw new Error(`Unsupported handleable type: ${typeof handleable}.`)
+      }
+    }
+
     return Object.entries(handleVars)
-      .map(
-        ([key, value]) =>
-          `const ${key} = globalThis["${handlePrefix + value}"];`
-      )
+      .map(([key, value]) => `const ${key} = ` + getExpression(value) + ";")
       .join()
   }
 
@@ -67,7 +77,7 @@ export class PhotopeaChannel {
   private prepareScript(
     requestId: string,
     functionBody: string,
-    handleVars: Record<string, string> = {},
+    handleVars: HandleVars = {},
     options: EvaluateOptions = {}
   ) {
     const handleVarsStatement = this.makeHandleVarsStatement(handleVars)
@@ -126,7 +136,7 @@ export class PhotopeaChannel {
    */
   async evaluate<T = any>(
     functionBody: string,
-    handleVars: Record<string, string> = {},
+    handleVars: HandleVars = {},
     options: EvaluateOptions = {}
   ): Promise<T> {
     const requestId = randomId()
@@ -180,7 +190,7 @@ export class PhotopeaChannel {
    */
   async evaluateHandle(
     functionBody: string,
-    handleVars: Record<string, string> = {},
+    handleVars: HandleVars = {},
     options?: EvaluateOptions
   ) {
     const handle = randomId()

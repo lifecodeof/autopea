@@ -3,7 +3,7 @@ import AdmZip from "adm-zip"
 import { buffer } from "stream/consumers"
 import { PhotopeaHandle } from "./ffi/base/PhotopeaHandle"
 import { timeoutAbortSignal } from "./helpers"
-import { type PhotopeaChannel } from "./PhotopeaChannel"
+import { type Handleable, type PhotopeaChannel } from "./PhotopeaChannel"
 import { makeBase64ToArrayBufferFnHandle } from "./playwrightLib"
 
 export enum SaveFormat {
@@ -114,13 +114,10 @@ export class PhotopeaUtils {
    * @param document Optional PhotopeaHandle for a specific document. If omitted, uses the active document.
    * @returns Promise that resolves to a Buffer containing the saved file data.
    */
-  async saveToBuffer(
-    format: SaveFormat,
-    document?: PhotopeaHandle<PP.Document>
-  ) {
+  async saveToBuffer(format: SaveFormat, document?: Handleable<PP.Document>) {
     const saveAs = async () => {
-      const documentHandle =
-        document?.handle ??
+      const doc =
+        document ??
         (await this.channel.evaluateHandle("return app.activeDocument;"))
 
       const saveFormatCode = saveFormatMap[format as SaveFormat]
@@ -130,7 +127,7 @@ export class PhotopeaUtils {
 
       await this.channel.evaluate<void>(
         `doc.saveAs(new File(""), ${saveFormatCode})`,
-        { doc: documentHandle }
+        { doc }
       )
     }
 

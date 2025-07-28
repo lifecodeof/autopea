@@ -22,7 +22,9 @@ export class PhotopeaFFI {
     protected readonly expression: string
   ) {}
 
-  protected z = z
+  public static getExpression(instance: PhotopeaFFI): string {
+    return instance.expression
+  }
 
   protected get app() {
     return App.get(this.channel)

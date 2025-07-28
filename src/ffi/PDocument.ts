@@ -1,8 +1,36 @@
 import { PhotopeaFFI } from "./base/PhotopeaFFI"
 import { ArtLayer, ArtLayers } from "./ArtLayer"
-import {  LayerSets } from "./LayerSet"
+import { LayerSets } from "./LayerSet"
 import { Layers } from "./Layer"
 import z from "zod"
+import type { UnitRect } from "./UnitRect"
+import type { UnitValue } from "./UnitValue"
+import type { SaveFormat } from "@/PhotopeaUtils"
+
+type ResampleMethod =
+  | "automatic"
+  | "preserveDetails"
+  | "bicubic"
+  | "bicubicSharper"
+  | "bicubicSmoother"
+  | "bilinear"
+  | "nearestNeighbor"
+
+type AnchorPosition =
+  | "topLeft"
+  | "topCenter"
+  | "topRight"
+  | "middleLeft"
+  | "middleCenter"
+  | "middleRight"
+  | "bottomLeft"
+  | "bottomCenter"
+  | "bottomRight"
+
+type TrimType =
+  | "transparentPixels"
+  | "topLeftPixelColor"
+  | "bottomRightPixelColor"
 
 export class PDocument extends PhotopeaFFI {
   // FFI object properties
@@ -41,26 +69,22 @@ export class PDocument extends PhotopeaFFI {
 
   // Methods
   crop(
-    bounds: any[], // UnitValue[]
+    bounds: UnitRect,
     angle?: number,
-    width?: any, // UnitValue
-    height?: any // UnitValue
+    width?: UnitValue,
+    height?: UnitValue
   ) {
     return this.$eval()`.crop(${bounds},${angle},${width},${height})`
   }
   resizeImage(
-    width?: any, // UnitValue
-    height?: any, // UnitValue
+    width?: UnitValue,
+    height?: UnitValue,
     resolution?: number,
-    resampleMethod?: string // ResampleMethod
+    resampleMethod?: ResampleMethod
   ) {
     return this.$eval()`.resizeImage(${width},${height},${resolution},${resampleMethod})`
   }
-  resizeCanvas(
-    width: any, // UnitValue
-    height: any, // UnitValue
-    anchor?: string // AnchorPosition
-  ) {
+  resizeCanvas(width: UnitValue, height: UnitValue, anchor?: AnchorPosition) {
     return this.$eval()`.resizeCanvas(${width},${height},${anchor})`
   }
   rotateCanvas(angle: number) {
@@ -70,7 +94,7 @@ export class PDocument extends PhotopeaFFI {
     return this.$eval()`.flipCanvas(${direction})`
   }
   trim(
-    trimType: string, // TrimType
+    trimType: TrimType,
     top?: boolean,
     left?: boolean,
     bottom?: boolean,
@@ -80,17 +104,6 @@ export class PDocument extends PhotopeaFFI {
   }
   close(saveOptions?: string) {
     return this.$eval()`.close(${saveOptions})`
-  }
-  save() {
-    return this.$eval()`.save()`
-  }
-  saveAs(
-    file?: any, // File
-    options?: any,
-    asCopy?: boolean,
-    extensionType?: string // Extension
-  ) {
-    return this.$eval()`.saveAs(${file},${options},${asCopy},${extensionType})`
   }
   duplicate(name?: string, mergeLayersOnly?: boolean) {
     return this.$eval()`.duplicate(${name},${mergeLayersOnly})`
@@ -107,11 +120,9 @@ export class PDocument extends PhotopeaFFI {
   paste() {
     return this.$eval()`.paste()`
   }
-  exportDocument(
-    file?: any, // File
-    exportType?: string, // ExportType
-    options?: any
-  ) {
-    return this.$eval()`.exportDocument(${file},${exportType},${options})`
+
+  // Extra Utils
+  saveToBuffer(format: SaveFormat) {
+    return this.channel.utils.saveToBuffer(format, this)
   }
 }
