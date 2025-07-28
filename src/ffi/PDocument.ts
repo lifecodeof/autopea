@@ -82,9 +82,6 @@ export class PDocument extends PhotopeaFFI {
   close(saveOptions?: string) {
     return this.$eval()`.close(${saveOptions})`
   }
-  duplicate(name?: string, mergeLayersOnly?: boolean) {
-    return this.$eval()`.duplicate(${name},${mergeLayersOnly})`
-  }
   flatten() {
     return this.$eval()`.flatten()`
   }
