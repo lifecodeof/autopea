@@ -26,7 +26,7 @@ export class MyType extends PhotopeaFFI {
 ## 2. **Expose Properties**
 
 - Use the protected helpers from `PhotopeaFFI` to expose properties.
-- Use `this.$(OtherFFIType)\`.<property>\`` for properties that return other FFI objects.
+- Use `this.$(FFIType)\`.<property>\`` for properties that return FFI objects.
 - Use `this.$value(schema)\`.<property>\`` for JSON serializable properties.
 
 **Example:**
@@ -43,6 +43,7 @@ get width() {
 
 - Use `this.$eval()\`.<method>(...)\``for methods that return`void`.
 - Use `this.$eval(schema)\`.<method>(...)\`` for methods that return a value.
+- Use `this.$evalHandle(FFIType)\`.<method>(...)\`` for methods that return a FFI objects.
 
 **Example:**
 
@@ -87,7 +88,7 @@ In most cases, you either write methods or getters that:
 - Dispatch actions by using `this.$eval()`
 
 If you are forwarding expressions, return the result of the `this.$()` or `this.$value()` call directly. This means no checks or conditionals. Remote runtime will handle those cases.
-If you are dispatching actions, make sure this is right thing to do, for example, if you are making a method that goes like `.getX()`, you should forward it as an expression instead.
+If you are dispatching actions, return the result of the `this.$eval()` or `this.$evalHandle()` call directly. This means no checks or conditionals. Remote runtime will handle those cases.
 
 `this.$()` requires a constructor of the FFI type you want to return. This means it cannot accept arrays. For arrays, use `this.$arrayOf(FFIType)` to create a constructor that returns an FFI collection of the specified FFI type.
 
