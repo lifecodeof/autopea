@@ -169,7 +169,6 @@ declare namespace Photoshop {
     resolution: number
     mode: DocumentMode
     path: Folder
-    parent: any
     saved: boolean
     artLayers: ArtLayers
     layerSets: LayerSets

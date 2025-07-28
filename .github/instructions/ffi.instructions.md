@@ -75,9 +75,11 @@ get layers() {
 - Avoid direct channel calls; always use the provided helpers for consistency and safety.
 - When interpolated values of helper tagged function methods:
   - If the value is a `PhotopeaFFI` instance, it will replaced with its expression.
+  - If the value is undefined, it will be replaced with `undefined`.
   - Else, it will be converted to string via `JSON.stringify()`.
   - If still need to pass arbitrary JS expressions, use `this.$raw(string)`.
   - So most of the time you can just pass the value directly into template literal.
+  - DO NOT use `JSON.stringify()` in tagged template functions that start with $. Its unnecessary and will wrap the value in quotes, which is not what you want.
 
 In most cases, you either write methods or getters that:
 
