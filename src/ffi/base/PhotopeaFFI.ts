@@ -1,5 +1,5 @@
 import type { PhotopeaChannel } from "@/PhotopeaChannel"
-import { z, type ZodSchema } from "zod/v3"
+import { z, type ZodType } from "zod"
 import { App } from "../App"
 
 export type PhotopeaFFIConstructor<T extends PhotopeaFFI> = new (
@@ -77,7 +77,7 @@ export class PhotopeaFFI {
     }
   }
 
-  protected $value<T>(schema: ZodSchema<T>, options?: Options) {
+  protected $value<T>(schema: ZodType<T>, options?: Options) {
     return (template: TemplateStringsArray, ...values: any[]) => {
       const childExpression = this.templateExpression(template, values)
       const expression = this.extendExpression(childExpression, options)
@@ -87,14 +87,14 @@ export class PhotopeaFFI {
   }
 
   protected $eval(): TemplateFn<Promise<void>>
-  protected $eval<T>(schema: ZodSchema<T>): TemplateFn<Promise<T>>
+  protected $eval<T>(schema: ZodType<T>): TemplateFn<Promise<T>>
   protected $eval<T>(schema?: any): TemplateFn<Promise<T>> {
     return async (template: TemplateStringsArray, ...values: any[]) => {
       const childExpression = this.templateExpression(template, values)
 
       const fullExpression = `${this.expression}${childExpression}`
       const value = await this.channel.evaluate(fullExpression)
-      schema ??= this.z.any()
+      schema ??= z.any()
       return schema.parse(value)
     }
   }
@@ -147,7 +147,7 @@ export class FFIValue<T> extends PhotopeaFFI {
   constructor(
     channel: PhotopeaChannel,
     expression: string,
-    private readonly schema: ZodSchema<T>
+    private readonly schema: ZodType<T>
   ) {
     super(channel, expression)
   }
@@ -163,13 +163,93 @@ export class FFIValue<T> extends PhotopeaFFI {
 }
 
 export abstract class FFICollection<T extends PhotopeaFFI> extends PhotopeaFFI {
-  protected abstract _itemType(): PhotopeaFFIConstructor<T>
+  protected abstract itemType(): PhotopeaFFIConstructor<T>
 
   get(index: number): T {
-    return this.$(this._itemType())`[${index}]`
+    return this.$(this.itemType())`[${index}]`
   }
 
   get length() {
-    return this.$value(this.z.number())`.length`
+    return this.$value(z.number())`.length`
+  }
+}
+
+export abstract class FFIEither<
+  Left extends PhotopeaFFI,
+  Right extends PhotopeaFFI
+> extends PhotopeaFFI {
+  protected constructor(
+    channel: PhotopeaChannel,
+    expression: string,
+    private readonly leftType: PhotopeaFFIConstructor<Left>,
+    private readonly rightType: PhotopeaFFIConstructor<Right>
+  ) {
+    super(channel, expression)
+  }
+
+  public static for<Left extends PhotopeaFFI, Right extends PhotopeaFFI>(
+    leftType: PhotopeaFFIConstructor<Left>,
+    rightType: PhotopeaFFIConstructor<Right>
+  ): PhotopeaFFIConstructor<FFIEither<Left, Right>> {
+    return class extends FFIEither<Left, Right> {
+      constructor(channel: PhotopeaChannel, expression: string) {
+        super(channel, expression, leftType, rightType)
+      }
+    }
+  }
+
+  private get repr() {
+    return `FFIEither<${this.leftType.name}, ${this.rightType.name}>`
+  }
+
+  async isLeft(): Promise<boolean> {
+    const typename = await this.channel.evaluate(
+      `return ${this.expression}.typename`
+    )
+    return typename === this.leftType.prototype.typename
+  }
+
+  async isRight(): Promise<boolean> {
+    const typename = await this.channel.evaluate(
+      `return ${this.expression}.typename`
+    )
+    return typename === this.rightType.prototype.typename
+  }
+
+  async left(): Promise<Left> {
+    if (!(await this.isLeft())) {
+      throw new Error(`This ${this.repr} instance is not a Left type`)
+    }
+
+    return this.unsafeLeft
+  }
+
+  async right(): Promise<Right> {
+    if (!(await this.isRight())) {
+      throw new Error(`This ${this.repr} instance is not a Right type`)
+    }
+
+    return this.unsafeRight
+  }
+
+  get unsafeLeft(): Left {
+    return new this.leftType(this.channel, this.expression)
+  }
+
+  get unsafeRight(): Right {
+    return new this.rightType(this.channel, this.expression)
+  }
+
+  get either(): Left | Right {
+    return new this.leftType(this.channel, this.expression)
+  }
+}
+
+export const FFITypeName = (typename: string) => {
+  return <ClassType extends PhotopeaFFIConstructor<any>>(
+    target: ClassType,
+    context: ClassDecoratorContext<ClassType>
+  ) => {
+    target.prototype.typename = typename
   }
 }
