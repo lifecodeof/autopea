@@ -3,6 +3,14 @@ import { PhotopeaFFI } from "./base/PhotopeaFFI"
 import { UnitValue } from "./UnitValue"
 
 export class UnitRect extends PhotopeaFFI {
+  async $fetch() {
+    const left = await this.left.value.$get()
+    const top = await this.top.value.$get()
+    const right = await this.right.value.$get()
+    const bottom = await this.bottom.value.$get()
+    return new UnitRectLocal(left, top, right, bottom)
+  }
+
   get left() {
     return this[0]
   }
@@ -69,5 +77,42 @@ export class UnitRect extends PhotopeaFFI {
       absolute: true,
       wrapParentheses: true
     })`${top} + ((${bottom} - ${top}) / 2)`
+  }
+}
+
+// client-side version of UnitRect for frequent access
+export class UnitRectLocal {
+  constructor(
+    public readonly left: number,
+    public readonly top: number,
+    public readonly right: number,
+    public readonly bottom: number
+  ) {}
+
+  get width() {
+    return this.right - this.left
+  }
+  get height() {
+    return this.bottom - this.top
+  }
+
+  get centerX() {
+    return this.left + this.width / 2
+  }
+  get centerY() {
+    return this.top + this.height / 2
+  }
+
+  get [0]() {
+    return this.left
+  }
+  get [1]() {
+    return this.top
+  }
+  get [2]() {
+    return this.right
+  }
+  get [3]() {
+    return this.bottom
   }
 }

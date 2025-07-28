@@ -3,11 +3,10 @@ import { ArtLayer, ArtLayers } from "./ArtLayer"
 import { LayerSets } from "./LayerSet"
 import { Layers } from "./Layer"
 import z from "zod"
-import type { UnitRect } from "./UnitRect"
+import { UnitRectLocal, type UnitRect } from "./UnitRect"
 import type { UnitValue } from "./UnitValue"
 import type { SaveFormat } from "@/PhotopeaUtils"
 import type { AnchorPosition, ResampleMethod, TrimType } from "./enums"
-
 
 export class PDocument extends PhotopeaFFI {
   // FFI object properties
@@ -98,5 +97,11 @@ export class PDocument extends PhotopeaFFI {
   // Extra Utils
   saveToBuffer(format: SaveFormat) {
     return this.channel.utils.saveToBuffer(format, this)
+  }
+  async makeBounds() {
+    const width = await this.width.$get()
+    const height = await this.height.$get()
+
+    return new UnitRectLocal(0, 0, width, height)
   }
 }

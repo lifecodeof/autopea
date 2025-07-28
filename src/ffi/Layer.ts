@@ -150,6 +150,45 @@ export class Layer extends PhotopeaFFI {
       blue
     })
   }
+
+  // Shrink layer (preserve aspect and center) and transform so it does not overflow document bounds
+  async fitToBounds() {
+    const doc = App.get(this.channel).activeDocument
+    const docBounds = await doc.makeBounds()
+    const bounds = await this.bounds.$fetch()
+
+    const layerWidth = bounds.right - bounds.left
+    const layerHeight = bounds.bottom - bounds.top
+    const docWidth = docBounds.right - docBounds.left
+    const docHeight = docBounds.bottom - docBounds.top
+
+    const scaleX = docWidth / layerWidth
+    const scaleY = docHeight / layerHeight
+    const scale = Math.min(scaleX, scaleY, 1)
+
+
+    if (scale < 1) {
+      await this.resize(scale * 100, scale * 100)
+    }
+
+    // Recalculate bounds and move if needed to fit within doc
+    const newBounds = await this.bounds.$fetch()
+    let deltaX = 0
+    let deltaY = 0
+    if (newBounds.left < docBounds.left) {
+      deltaX = docBounds.left - newBounds.left
+    } else if (newBounds.right > docBounds.right) {
+      deltaX = docBounds.right - newBounds.right
+    }
+    if (newBounds.top < docBounds.top) {
+      deltaY = docBounds.top - newBounds.top
+    } else if (newBounds.bottom > docBounds.bottom) {
+      deltaY = docBounds.bottom - newBounds.bottom
+    }
+    if (deltaX !== 0 || deltaY !== 0) {
+      await this.translate(deltaX, deltaY)
+    }
+  }
 }
 
 export class Layers extends FFICollection<Layer> {
