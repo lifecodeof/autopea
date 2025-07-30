@@ -95,7 +95,7 @@ export class PDocument extends PhotopeaFFI {
   }
 
   // Extra Utils
-  saveToBuffer(format: SaveFormat): Promise<Buffer<ArrayBufferLike>> {
+  saveToBuffer(format: SaveFormat): Promise<Buffer> {
     return this.channel.utils.saveToBuffer(format, this)
   }
   async makeBounds() {
