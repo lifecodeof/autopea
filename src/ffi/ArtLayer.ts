@@ -3,6 +3,7 @@ import { FFICollection, PhotopeaFFI } from "./base/PhotopeaFFI"
 import type { ElementPlacement, RasterizeType } from "./enums"
 import { Layer } from "./Layer"
 import { SolidColor } from "./SolidColor"
+import { UnitValue } from "./UnitValue"
 
 export class ArtLayer extends Layer {
   get fillOpacity() {
@@ -56,6 +57,10 @@ export class TextItem extends PhotopeaFFI {
 
   get color() {
     return this.$(SolidColor)`.color`
+  }
+
+  get leading() {
+    return this.$(UnitValue)`.leading`
   }
 }
 

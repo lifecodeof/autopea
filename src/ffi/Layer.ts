@@ -33,19 +33,7 @@ export class Layer extends PhotopeaFFI {
   }
 
   get kind() {
-    return this.$value(
-      z.enum([
-        "any",
-        "normal",
-        "textLayer",
-        "solidFill",
-        "gradientFill",
-        "patternFill",
-        "smartObject",
-        "video",
-        "adjustmentLayer"
-      ] as const)
-    )`.kind`
+    return this.$value(z.enum(LayerKind))`.kind`
   }
 
   get allLocked() {
@@ -166,7 +154,6 @@ export class Layer extends PhotopeaFFI {
     const scaleY = docHeight / layerHeight
     const scale = Math.min(scaleX, scaleY, 1)
 
-
     if (scale < 1) {
       await this.resize(scale * 100, scale * 100)
     }
@@ -205,4 +192,29 @@ export class Layers extends FFICollection<Layer> {
   removeAll() {
     return this.$eval()`.removeAll()`
   }
+}
+
+export enum LayerKind {
+  NORMAL = 0,
+  SMARTOBJECT = 1,
+  TEXT = 2,
+  SOLIDFILL = 3,
+  GRADIENTFILL = 4,
+  PATTERNFILL = 5,
+  BRIGHTNESSCONTRAST = 6,
+  LEVELS = 7,
+  CURVES = 8,
+  EXPOSURE = 9,
+  VIBRANCE = 10,
+  HUESATURATION = 11,
+  COLORBALANCE = 12,
+  BLACKANDWHITE = 13,
+  PHOTOFILTER = 14,
+  CHANNELMIXER = 15,
+  LAYER3D = 16,
+  INVERSION = 17,
+  POSTERIZE = 18,
+  THRESHOLD = 19,
+  GRADIENTMAP = 20,
+  SELECTIVECOLOR = 21
 }
