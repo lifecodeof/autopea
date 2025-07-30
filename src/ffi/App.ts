@@ -1,6 +1,6 @@
 import type { PhotopeaChannel } from "@/PhotopeaChannel"
 import { PhotopeaFFI } from "./base/PhotopeaFFI"
-import { PDocument } from "./PDocument"
+import { PDocument, PDocuments } from "./PDocument"
 import z from "zod"
 import { Preferences } from "./Preferences"
 import { PFile } from "./PFile"
@@ -16,7 +16,7 @@ export class App extends PhotopeaFFI {
   }
 
   get documents() {
-    return this.$(this.$arrayOf(PDocument))`.documents`
+    return this.$(PDocuments)`.documents`
   }
 
   get name() {

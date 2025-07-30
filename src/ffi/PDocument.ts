@@ -1,4 +1,4 @@
-import { PhotopeaFFI } from "./base/PhotopeaFFI"
+import { FFICollection, PhotopeaFFI } from "./base/PhotopeaFFI"
 import { ArtLayer, ArtLayers } from "./ArtLayer"
 import { LayerSets } from "./LayerSet"
 import { Layers } from "./Layer"
@@ -95,7 +95,7 @@ export class PDocument extends PhotopeaFFI {
   }
 
   // Extra Utils
-  saveToBuffer(format: SaveFormat) {
+  saveToBuffer(format: SaveFormat): Promise<Buffer<ArrayBufferLike>> {
     return this.channel.utils.saveToBuffer(format, this)
   }
   async makeBounds() {
@@ -103,5 +103,19 @@ export class PDocument extends PhotopeaFFI {
     const height = await this.height.$get()
 
     return new UnitRectLocal(0, 0, width, height)
+  }
+}
+
+export class PDocuments extends FFICollection<PDocument> {
+  itemType = () => PDocument
+
+  getByName(name: string) {
+    return this.$(PDocument)`.getByName(${name})`
+  }
+
+  add(width?: number, height?: number, resolution?: number, name?: string) {
+    return this.$evalHandle(
+      PDocument
+    )`.add(${width},${height},${resolution},${name})`
   }
 }
