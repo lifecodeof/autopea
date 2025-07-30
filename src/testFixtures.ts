@@ -1,10 +1,9 @@
+import { toMatchImageSnapshot } from "jest-image-snapshot"
 import { chromium, type BrowserContext } from "playwright"
 import { expect, test } from "vitest"
+import { App } from "./ffi/App"
 import { PhotopeaChannel } from "./PhotopeaChannel"
 import { PhotopeaPage } from "./PhotopeaPage"
-import { toMatchImageSnapshot } from "jest-image-snapshot"
-import { App } from "./ffi/App"
-import { PhotopeaFFI } from "./ffi/base/PhotopeaFFI"
 
 export const browserTest = test.extend<{
   browserCtx: BrowserContext
