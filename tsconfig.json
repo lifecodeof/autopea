@@ -18,5 +18,5 @@
     "esModuleInterop": true,
     "isolatedModules": true
   },
-  "include": ["./src/**/*", "./tests/**/*", "tsdown-env.d.ts"],
+  "include": ["./src/**/*", "./tests/**/*", "tsdown-env.d.ts", "src/repl.ts"],
 }
