@@ -151,6 +151,10 @@ export class PhotopeaFFI {
       protected itemType = () => constructor
     }
   }
+
+  async $set(value: this extends FFIValue<infer V> ? V : this): Promise<void> {
+    await this.channel.evaluate(`${this.expression} = ${JSON.stringify(value)}`)
+  }
 }
 
 export class FFIValue<T> extends PhotopeaFFI {
@@ -165,10 +169,6 @@ export class FFIValue<T> extends PhotopeaFFI {
   async $get(): Promise<T> {
     const value = await this.channel.evaluate("return " + this.expression)
     return this.schema.parse(value)
-  }
-
-  async $set(value: T): Promise<void> {
-    await this.channel.evaluate(`${this.expression} = ${JSON.stringify(value)}`)
   }
 }
 
