@@ -153,7 +153,7 @@ export class PhotopeaFFI {
   }
 
   async $set(value: this extends FFIValue<infer V> ? V : this): Promise<void> {
-    await this.channel.evaluate(`${this.expression} = ${JSON.stringify(value)}`)
+    await this.channel.evaluate(`${this.expression} = ${this.transfer(value)}`)
   }
 }
 
