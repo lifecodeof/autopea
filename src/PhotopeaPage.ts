@@ -80,10 +80,11 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
 
     await page.addInitScript((toBase64) => {
       const pageWindow = window as any
+      pageWindow.__name = (fn: Function) => fn
       pageWindow.isFirstDoneFired = false
       pageWindow.showOpenFilePicker = undefined // Disable file access API
 
-      const listener = (event: MessageEvent): void => {
+      function listener(event: MessageEvent): void {
         if (event.origin === "https://www.photopea.com") {
           if (event.data === "done") {
             pageWindow.isFirstDoneFired = true
@@ -233,5 +234,9 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
     predicate?: (...args: any[]) => boolean
   ): Promise<T> {
     return await waitForEvent(this, event, selector, signal, predicate)
+  }
+
+  [Symbol.asyncDispose]() {
+    return this.close()
   }
 }
