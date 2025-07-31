@@ -153,12 +153,21 @@ export class PhotopeaFFI {
     }
   }
 
-  async $set(value: this extends FFIValue<infer V> ? V : this): Promise<void> {
+  async $set(value: InferFFIValue<this>): Promise<void> {
     await this.channel.evaluate(`${this.expression} = ${this.transfer(value)}`)
   }
 }
 
-export class FFIValue<T> extends PhotopeaFFI {
+export type InferFFIValue<T extends PhotopeaFFI> =
+  T extends BrandedFFIValue<infer V> ? V : T
+
+interface BrandedFFIValue<T> {
+  __typeBrand: T
+}
+
+export class FFIValue<T> extends PhotopeaFFI implements BrandedFFIValue<T> {
+  __typeBrand!: T
+
   constructor(
     channel: PhotopeaChannel,
     expression: string,

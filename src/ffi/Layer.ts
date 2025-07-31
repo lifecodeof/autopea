@@ -25,7 +25,7 @@ export class Layer extends PhotopeaFFI {
   }
 
   get parent() {
-    return this.$(FFIEither.for(LayerSet, PDocument))`.parent`
+    return this.$(FFIEither.for<LayerSet, PDocument>(LayerSet, PDocument))`.parent`
   }
 
   get isBackgroundLayer() {
