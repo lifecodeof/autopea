@@ -42,9 +42,9 @@
       "types": "./src/index.ts",
       "default": "./dist/index.js"
     },
-    "./ffi/*": {
-      "types": "./src/ffi/*.ts",
-      "default": "./dist/ffi/*.js"
+    "./contracts/*": {
+      "types": "./src/contracts/*.ts",
+      "default": "./dist/contracts/*.js"
     }
   }
 }
