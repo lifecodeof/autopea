@@ -165,7 +165,12 @@ export class PhotopeaChannel {
       .catch((_) => {}) // Ignore timeout errors
 
     // Abort on timeout
-    abortOnTimeout(abort, options.timeout ?? this.timeout)
+    const timeout = options.timeout ?? this.timeout
+    abortOnTimeout(
+      abort,
+      timeout,
+      new Error(`Script evaluation timed out (${timeout}ms)`)
+    )
 
     try {
       await this.page.sendMessage(script)

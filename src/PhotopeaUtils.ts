@@ -61,7 +61,7 @@ export class PhotopeaUtils {
 
     await fileChooser.setFiles(path)
 
-    abortOnTimeout(abort, 10_000)
+    abortOnTimeout(abort, 10_000, new Error("openFile() timed out"))
 
     await blankDonePromise
   }

@@ -17,12 +17,13 @@ export class TimeoutError extends Error {
 
 export const abortOnTimeout = (
   abortController: AbortController,
-  timeout: number
+  timeout: number,
+  error: Error
 ) => {
   if (timeout > 0) {
     const timeoutId = setTimeout(() => {
       if (!abortController.signal.aborted) {
-        abortController.abort(new TimeoutError(timeout))
+        abortController.abort(error)
       }
     }, timeout)
 
@@ -37,10 +38,10 @@ type DefaultEventMap = [never]
 type Listener<K, T, F> = T extends DefaultEventMap
   ? F
   : K extends keyof T
-  ? T[K] extends unknown[]
-    ? (...args: T[K]) => void
+    ? T[K] extends unknown[]
+      ? (...args: T[K]) => void
+      : never
     : never
-  : never
 type Key<K, T> = T extends DefaultEventMap ? string | symbol : K | keyof T
 type Listener1<K, T> = Listener<K, T, (...args: any[]) => void>
 
