@@ -1,12 +1,26 @@
-import { FFICollection, Contract } from "./base/Contract"
-import { ArtLayer, ArtLayers } from "./ArtLayer"
-import { LayerSets } from "./LayerSet"
-import { Layers } from "./Layer"
+import type { Handleable } from "@/Channel"
+import AdmZip from "adm-zip"
+import { buffer } from "stream/consumers"
 import z from "zod"
+import { ArtLayer, ArtLayers } from "./ArtLayer"
+import { Layers } from "./Layer"
+import { LayerSets } from "./LayerSet"
 import { UnitRectLocal, type UnitRect } from "./UnitRect"
 import type { UnitValue } from "./UnitValue"
-import { PhotopeaUtils, type SaveFormat } from "@/PhotopeaUtils"
+import { Contract, FFICollection } from "./base/Contract"
 import type { AnchorPosition, ResampleMethod, TrimType } from "./enums"
+
+export enum SaveFormat {
+  PNG = "png",
+  JPG = "jpg",
+  PSD = "psd"
+}
+
+const saveFormatMap = {
+  [SaveFormat.PNG]: "new PNGSaveOptions()",
+  [SaveFormat.JPG]: "new JPEGSaveOptions()",
+  [SaveFormat.PSD]: "new PhotoshopSaveOptions()"
+}
 
 export class PDocument extends Contract {
   // FFI object properties
@@ -95,9 +109,43 @@ export class PDocument extends Contract {
   }
 
   // Extra Utils
-  saveToBuffer(format: SaveFormat): Promise<Buffer> {
-    return new PhotopeaUtils(this.channel).saveToBuffer(format, this)
+  /**
+   * Saves the current or specified document to a buffer in the given format.
+   * @param format The format to save as (e.g., 'png', 'jpg').
+   * @param document Optional PhotopeaHandle for a specific document. If omitted, uses the active document.
+   * @returns Promise that resolves to a Buffer containing the saved file data.
+   */
+  async saveToBuffer(
+    format: SaveFormat,
+    document?: Handleable
+  ): Promise<Buffer> {
+    const saveAs = async () => {
+      const doc =
+        document ??
+        (await this.channel.evaluateHandle("return app.activeDocument;"))
+
+      const saveFormatCode = saveFormatMap[format as SaveFormat]
+      if (!saveFormatCode) {
+        throw new Error(`Unsupported save format: ${format}`)
+      }
+
+      await this.channel.evaluate<void>(
+        `doc.saveAs(new File(""), ${saveFormatCode})`,
+        { doc }
+      )
+    }
+
+    const page = this.channel.page.page
+
+    const downloadPromise = page.waitForEvent("download")
+    await saveAs()
+    const download = await downloadPromise
+
+    const zipBuffer = await buffer(await download.createReadStream())
+    const fileBuffer = extractSingleFileFromZip(zipBuffer)
+    return fileBuffer
   }
+
   async makeBounds() {
     const width = await this.width.$get()
     const height = await this.height.$get()
@@ -118,4 +166,17 @@ export class PDocuments extends FFICollection<PDocument> {
       PDocument
     )`.add(${width},${height},${resolution},${name})`
   }
+}
+
+function extractSingleFileFromZip(zipBuffer: Buffer): Buffer {
+  const zip = new AdmZip(zipBuffer)
+  const entries = zip.getEntries()
+
+  if (entries.length !== 1) {
+    throw new Error(
+      `Zip archive must contain exactly one file, found ${entries.length}`
+    )
+  }
+
+  return entries[0].getData()
 }

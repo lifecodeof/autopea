@@ -42,3 +42,23 @@ export enum LayerKind {
   GRADIENTMAP = 20,
   SELECTIVECOLOR = 21
 }
+
+export enum ResampleMethod
+{
+  AUTOMATIC = 0,
+  BICUBIC = 1,
+  BICUBICAUTOMATIC = 2,
+  BICUBICSHARPER = 3,
+  BICUBICSMOOTHER = 4,
+  BILINEAR = 5,
+  NEARESTNEIGHBOR = 6,
+  NONE = 7,
+  PRESERVEDETAILS = 8
+}
+
+export enum TrimType
+{
+  TOPLEFT = 0,
+  BOTTOMRIGHT = 1,
+  TRANSPARENT = 2
+}

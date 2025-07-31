@@ -1,27 +1,13 @@
 import type { Handleable, PhotopeaChannel } from "@/Channel"
-import { Contract } from "./base/Contract"
-import { PDocument, PDocuments } from "./PDocument"
-import z from "zod"
-import { Preferences } from "./Preferences"
-import { PFile } from "./PFile"
-import { SolidColor } from "./SolidColor"
-import AdmZip from "adm-zip"
 import type { Dialog } from "playwright"
-import { buffer } from "stream/consumers"
+import z from "zod"
 import { abortOnTimeout, timeoutAbortSignal } from "../helpers"
 import { makeBase64ToArrayBufferFnHandle } from "../playwrightLib"
-
-export enum SaveFormat {
-  PNG = "png",
-  JPG = "jpg",
-  PSD = "psd"
-}
-
-const saveFormatMap = {
-  [SaveFormat.PNG]: "new PNGSaveOptions()",
-  [SaveFormat.JPG]: "new JPEGSaveOptions()",
-  [SaveFormat.PSD]: "new PhotoshopSaveOptions()"
-}
+import { Contract } from "./base/Contract"
+import { PDocument, PDocuments, type SaveFormat } from "./PDocument"
+import { PFile } from "./PFile"
+import { Preferences } from "./Preferences"
+import { SolidColor } from "./SolidColor"
 
 export class App extends Contract {
   static get(channel: PhotopeaChannel) {
@@ -139,6 +125,13 @@ export class App extends Contract {
   }
 
   // Extra Utils
+  async saveToBuffer(
+    format: SaveFormat,
+    document?: Handleable
+  ): Promise<Buffer> {
+    return await this.activeDocument.saveToBuffer(format, document)
+  }
+
   /**
    * Opens an image in Photopea from a given URL.
    * Waits for Photopea to be ready and the file to be loaded.
@@ -176,43 +169,6 @@ export class App extends Contract {
     abortOnTimeout(abort, 10_000, new Error("openFile() timed out"))
 
     await blankDonePromise
-  }
-
-  /**
-   * Saves the current or specified document to a buffer in the given format.
-   * @param format The format to save as (e.g., 'png', 'jpg').
-   * @param document Optional PhotopeaHandle for a specific document. If omitted, uses the active document.
-   * @returns Promise that resolves to a Buffer containing the saved file data.
-   */
-  async saveToBuffer(
-    format: SaveFormat,
-    document?: Handleable
-  ): Promise<Buffer> {
-    const saveAs = async () => {
-      const doc =
-        document ??
-        (await this.channel.evaluateHandle("return app.activeDocument;"))
-
-      const saveFormatCode = saveFormatMap[format as SaveFormat]
-      if (!saveFormatCode) {
-        throw new Error(`Unsupported save format: ${format}`)
-      }
-
-      await this.channel.evaluate<void>(
-        `doc.saveAs(new File(""), ${saveFormatCode})`,
-        { doc }
-      )
-    }
-
-    const page = this.channel.page.page
-
-    const downloadPromise = page.waitForEvent("download")
-    await saveAs()
-    const download = await downloadPromise
-
-    const zipBuffer = await buffer(await download.createReadStream())
-    const fileBuffer = extractSingleFileFromZip(zipBuffer)
-    return fileBuffer
   }
 
   uploadFont(font: Buffer, name: string) {
@@ -271,17 +227,4 @@ export class App extends Contract {
   }
 
   pause = () => this.channel.page.page.pause()
-}
-
-function extractSingleFileFromZip(zipBuffer: Buffer): Buffer {
-  const zip = new AdmZip(zipBuffer)
-  const entries = zip.getEntries()
-
-  if (entries.length !== 1) {
-    throw new Error(
-      `Zip archive must contain exactly one file, found ${entries.length}`
-    )
-  }
-
-  return entries[0].getData()
 }
