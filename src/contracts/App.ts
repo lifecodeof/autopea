@@ -1,4 +1,4 @@
-import type { Handleable, PhotopeaChannel } from "@/PhotopeaChannel"
+import type { Handleable, PhotopeaChannel } from "@/Channel"
 import { Contract } from "./base/Contract"
 import { PDocument, PDocuments } from "./PDocument"
 import z from "zod"

@@ -2,7 +2,7 @@ import AdmZip from "adm-zip"
 import type { Dialog } from "playwright"
 import { buffer } from "stream/consumers"
 import { abortOnTimeout, timeoutAbortSignal } from "./helpers"
-import { type Handleable, type PhotopeaChannel } from "./PhotopeaChannel"
+import { type Handleable, type PhotopeaChannel } from "./Channel"
 import { makeBase64ToArrayBufferFnHandle } from "./playwrightLib"
 
 export enum SaveFormat {

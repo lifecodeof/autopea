@@ -1,4 +1,4 @@
-import type { PhotopeaChannel } from "@/PhotopeaChannel"
+import type { PhotopeaChannel } from "@/Channel"
 import { type Class, type Constructor } from "type-fest"
 import { z, type ZodType } from "zod"
 

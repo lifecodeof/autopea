@@ -1,4 +1,4 @@
-import { PhotopeaChannel } from "@/PhotopeaChannel"
+import { PhotopeaChannel } from "@/Channel"
 import { PhotopeaPage } from "@/PhotopeaPage"
 import { chromium } from "playwright"
 import readline from "readline"

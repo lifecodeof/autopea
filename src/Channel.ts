@@ -5,6 +5,9 @@ import { Contract } from "./contracts/base/Contract"
 
 export type Handleable = Contract | string
 export type HandleVars = Record<string, Handleable>
+export type EvaluateOptions = {
+  timeout?: number
+}
 
 /**
  * Generates a random string ID for request identification.
@@ -35,9 +38,6 @@ export class PhotopeaChannelError extends Error {
   }
 }
 
-export type EvaluateOptions = {
-  timeout?: number
-}
 
 /**
  * Communication channel for interacting with a PhotopeaPage instance.

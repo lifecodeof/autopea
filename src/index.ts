@@ -1,4 +1,4 @@
 export { PP } from "./PhotopeaTypes"
 export { PhotopeaPage } from "./PhotopeaPage"
 export { PhotopeaUtils, SaveFormat } from "./PhotopeaUtils"
-export { PhotopeaChannel } from "./PhotopeaChannel"
+export { PhotopeaChannel } from "./Channel"
