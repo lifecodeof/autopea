@@ -1,4 +1,5 @@
 import type { PhotopeaChannel } from "@/PhotopeaChannel"
+import { type Class, type Constructor } from "type-fest"
 import { z, type ZodType } from "zod"
 
 export type PhotopeaFFIConstructor<T extends PhotopeaFFI> = new (
@@ -146,7 +147,7 @@ export class PhotopeaFFI {
 
   protected $arrayOf<T extends PhotopeaFFI>(
     constructor: PhotopeaFFIConstructor<T>
-  ): PhotopeaFFIConstructor<FFICollection<T>> {
+  ): Class<FFICollection<T>> {
     return class extends FFICollection<T> {
       protected itemType = () => constructor
     }
@@ -198,8 +199,11 @@ export abstract class FFIEither<
   }
 
   public static for<Left extends PhotopeaFFI, Right extends PhotopeaFFI>(
-    leftType: PhotopeaFFIConstructor<Left>,
-    rightType: PhotopeaFFIConstructor<Right>
+    leftType: Constructor<Left, [channel: PhotopeaChannel, expression: string]>,
+    rightType: Constructor<
+      Right,
+      [channel: PhotopeaChannel, expression: string]
+    >
   ): PhotopeaFFIConstructor<FFIEither<Left, Right>> {
     return class extends FFIEither<Left, Right> {
       constructor(channel: PhotopeaChannel, expression: string) {

@@ -70,6 +70,13 @@ export class Layer extends PhotopeaFFI {
     return this.$eval()`.remove()`
   }
 
+  /**
+   * Resize the layer.
+   * @param horizontal The horizontal scale factor (percentage).
+   * @param vertical The vertical scale factor (percentage).
+   * @param anchor The anchor position for the resize.
+   * @returns A promise that resolves when the resize is complete.
+   */
   resize(horizontal: number, vertical: number, anchor?: AnchorPosition) {
     return this.$eval()`.resize(${horizontal}, ${vertical}, ${anchor})`
   }
