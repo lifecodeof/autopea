@@ -1,7 +1,7 @@
 import z from "zod"
 import { App } from "./App"
 import { FFICollection, Contract } from "./base/Contract"
-import type { AnchorPosition, ElementPlacement } from "./enums"
+import { LayerKind, type AnchorPosition, type ElementPlacement } from "./enums"
 import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
 import { PDocument } from "./PDocument"
 import { UnitRect } from "./UnitRect"
@@ -194,29 +194,4 @@ export class Layers extends FFICollection<Layer> {
   removeAll() {
     return this.$eval()`.removeAll()`
   }
-}
-
-export enum LayerKind {
-  NORMAL = 0,
-  SMARTOBJECT = 1,
-  TEXT = 2,
-  SOLIDFILL = 3,
-  GRADIENTFILL = 4,
-  PATTERNFILL = 5,
-  BRIGHTNESSCONTRAST = 6,
-  LEVELS = 7,
-  CURVES = 8,
-  EXPOSURE = 9,
-  VIBRANCE = 10,
-  HUESATURATION = 11,
-  COLORBALANCE = 12,
-  BLACKANDWHITE = 13,
-  PHOTOFILTER = 14,
-  CHANNELMIXER = 15,
-  LAYER3D = 16,
-  INVERSION = 17,
-  POSTERIZE = 18,
-  THRESHOLD = 19,
-  GRADIENTMAP = 20,
-  SELECTIVECOLOR = 21
 }

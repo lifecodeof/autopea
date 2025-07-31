@@ -1,7 +1,6 @@
 import type { PhotopeaChannel } from "@/PhotopeaChannel"
 import { type Class, type Constructor } from "type-fest"
 import { z, type ZodType } from "zod"
-import { SerializableContract, type InferContractValue } from "./SerializableContract"
 
 type TemplateFn<T> = (strings: TemplateStringsArray, ...values: any[]) => T
 
@@ -154,6 +153,33 @@ export class Contract {
   }
 }
 
+export type InferContractValue<T extends Contract> =
+  T extends BrandedSerializable<infer V> ? V | T : T
+
+interface BrandedSerializable<T> {
+  __typeBrand: T
+}
+
+export class SerializableContract<T>
+  extends Contract
+  implements BrandedSerializable<T>
+{
+  __typeBrand!: T
+
+  constructor(
+    channel: PhotopeaChannel,
+    expression: string,
+    private readonly schema: ZodType<T>
+  ) {
+    super(channel, expression)
+  }
+
+  async $get(): Promise<T> {
+    const value = await this.channel.evaluate("return " + this.expression)
+    return this.schema.parse(value)
+  }
+}
+
 export abstract class FFICollection<T extends Contract> extends Contract {
   protected abstract itemType(): Constructor<T>
 
@@ -237,5 +263,14 @@ export abstract class FFIEither<
 
   get either(): Left | Right {
     return new this.leftType(this.channel, this.expression)
+  }
+}
+
+export const FFITypeName = (typename: string) => {
+  return <ClassType extends Constructor<any>>(
+    target: ClassType,
+    context: ClassDecoratorContext<ClassType>
+  ) => {
+    target.prototype.typename = typename
   }
 }

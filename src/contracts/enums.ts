@@ -1,36 +1,44 @@
-export type ResampleMethod =
-  | "automatic"
-  | "preserveDetails"
-  | "bicubic"
-  | "bicubicSharper"
-  | "bicubicSmoother"
-  | "bilinear"
-  | "nearestNeighbor"
+export enum AnchorPosition {
+  TOPLEFT = 0,
+  TOPCENTER = 1,
+  TOPRIGHT = 2,
+  MIDDLELEFT = 3,
+  MIDDLECENTER = 4,
+  MIDDLERIGHT = 5,
+  BOTTOMLEFT = 6,
+  BOTTOMCENTER = 7,
+  BOTTOMRIGHT = 8
+}
 
-export type AnchorPosition =
-  | "topLeft"
-  | "topCenter"
-  | "topRight"
-  | "middleLeft"
-  | "middleCenter"
-  | "middleRight"
-  | "bottomLeft"
-  | "bottomCenter"
-  | "bottomRight"
+export enum ElementPlacement {
+  INSIDE = 0,
+  PLACEATBEGINNING = 1,
+  PLACEATEND = 2,
+  PLACEBEFORE = 3,
+  PLACEAFTER = 4
+}
 
-export type TrimType =
-  | "transparentPixels"
-  | "topLeftPixelColor"
-  | "bottomRightPixelColor"
-
-export type ElementPlacement = "PLACEBEFORE" | "PLACEAFTER" | "INSIDE"
-
-export type RasterizeType =
-    | "entireLayer"
-    | "shape"
-    | "textContents"
-    | "layerStyle"
-    | "smartObject"
-    | "placed"
-    | "video"
-    | "all"
+export enum LayerKind {
+  NORMAL = 0,
+  SMARTOBJECT = 1,
+  TEXT = 2,
+  SOLIDFILL = 3,
+  GRADIENTFILL = 4,
+  PATTERNFILL = 5,
+  BRIGHTNESSCONTRAST = 6,
+  LEVELS = 7,
+  CURVES = 8,
+  EXPOSURE = 9,
+  VIBRANCE = 10,
+  HUESATURATION = 11,
+  COLORBALANCE = 12,
+  BLACKANDWHITE = 13,
+  PHOTOFILTER = 14,
+  CHANNELMIXER = 15,
+  LAYER3D = 16,
+  INVERSION = 17,
+  POSTERIZE = 18,
+  THRESHOLD = 19,
+  GRADIENTMAP = 20,
+  SELECTIVECOLOR = 21
+}
