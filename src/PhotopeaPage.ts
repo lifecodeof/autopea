@@ -1,10 +1,7 @@
 import EventEmitter from "events"
 import { type Browser, type BrowserContext, type Page } from "playwright"
-import { PhotopeaChannel } from "./PhotopeaChannel"
-import { PhotopeaHandle } from "./ffi/base/PhotopeaHandle"
-import { PhotopeaUtils } from "./PhotopeaUtils"
-import { makeArrayBufferToBase64FnHandle } from "./playwrightLib"
 import { waitForEvent } from "./helpers"
+import { makeArrayBufferToBase64FnHandle } from "./playwrightLib"
 
 type EventMap = {
   message: [string]
@@ -202,21 +199,6 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
    */
   waitForBufferMessage(signal?: AbortSignal) {
     return this.waitForEvent("bufferMessage", (buffer) => buffer, signal)
-  }
-
-  /** Returns a PhotopeaChannel for advanced scripting and communication. */
-  get channel() {
-    return new PhotopeaChannel(this)
-  }
-
-  /** Returns Photopea utility methods for common operations. */
-  get utils() {
-    return new PhotopeaUtils(this.channel)
-  }
-
-  /** Returns a handle to the Photopea app object. */
-  app() {
-    return PhotopeaHandle.getApp(this.channel)
   }
 
   /**

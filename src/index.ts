@@ -1,5 +1,4 @@
 export { PP } from "./PhotopeaTypes"
 export { PhotopeaPage } from "./PhotopeaPage"
-export { PhotopeaHandle } from "./ffi/base/PhotopeaHandle"
 export { PhotopeaUtils, SaveFormat } from "./PhotopeaUtils"
 export { PhotopeaChannel } from "./PhotopeaChannel"

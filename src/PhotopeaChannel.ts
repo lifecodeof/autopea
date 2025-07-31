@@ -1,11 +1,9 @@
 import type { PhotopeaPage } from "@/PhotopeaPage"
 import invariant from "tiny-invariant"
-import { PhotopeaUtils } from "./PhotopeaUtils"
-import { PhotopeaHandle } from "./ffi/base/PhotopeaHandle"
 import { abortOnTimeout } from "./helpers"
 import { PhotopeaFFI } from "./ffi/base/PhotopeaFFI"
 
-export type Handleable<T = any> = PhotopeaHandle<T> | PhotopeaFFI | string
+export type Handleable = PhotopeaFFI | string
 export type HandleVars = Record<string, Handleable>
 
 /**
@@ -56,8 +54,6 @@ export class PhotopeaChannel {
     const getExpression = (handleable: Handleable) => {
       if (typeof handleable === "string") {
         return this.getExpressionForHandle(handleable)
-      } else if (handleable instanceof PhotopeaHandle) {
-        return this.getExpressionForHandle(handleable.handle)
       } else if (handleable instanceof PhotopeaFFI) {
         return PhotopeaFFI.getExpression(handleable)
       } else {
@@ -263,16 +259,6 @@ export class PhotopeaChannel {
     invariant(typeof result === "boolean", "Result should be a boolean")
 
     return result
-  }
-
-  /** Provides utility methods for Photopea operations. */
-  get utils() {
-    return new PhotopeaUtils(this)
-  }
-
-  /** Returns a handle to the Photopea app object. */
-  app() {
-    return PhotopeaHandle.getApp(this)
   }
 
   /**

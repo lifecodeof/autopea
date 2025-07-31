@@ -1,11 +1,10 @@
 import z from "zod"
-import { PhotopeaFFI, FFICollection, FFIEither } from "./base/PhotopeaFFI"
-import { LayerSet } from "./LayerSet"
+import { App } from "./App"
+import { FFICollection, PhotopeaFFI } from "./base/PhotopeaFFI"
+import type { AnchorPosition, ElementPlacement } from "./enums"
+import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
 import { PDocument } from "./PDocument"
 import { UnitRect } from "./UnitRect"
-import type { AnchorPosition, ElementPlacement } from "./enums"
-import { App } from "./App"
-import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
 
 export class Layer extends PhotopeaFFI {
   get name() {
@@ -25,7 +24,9 @@ export class Layer extends PhotopeaFFI {
   }
 
   get parent() {
-    return this.$(FFIEither.for<LayerSet, PDocument>(LayerSet, PDocument))`.parent`
+    // FIXME: This line causes infinite recursion in TypeScript type resolution
+    // return this.$(FFIEither.for(LayerSet, PDocument))`.parent`
+    return "TODO"
   }
 
   get isBackgroundLayer() {

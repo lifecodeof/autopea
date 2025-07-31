@@ -1,11 +1,9 @@
-import { PP } from "./PhotopeaTypes"
 import AdmZip from "adm-zip"
+import type { Dialog } from "playwright"
 import { buffer } from "stream/consumers"
-import { PhotopeaHandle } from "./ffi/base/PhotopeaHandle"
 import { abortOnTimeout, timeoutAbortSignal } from "./helpers"
 import { type Handleable, type PhotopeaChannel } from "./PhotopeaChannel"
 import { makeBase64ToArrayBufferFnHandle } from "./playwrightLib"
-import type { Dialog } from "playwright"
 
 export enum SaveFormat {
   PNG = "png",
@@ -67,49 +65,6 @@ export class PhotopeaUtils {
   }
 
   /**
-   * Opens the smart object for editing by layer ID.
-   * @param layerIdOrHandle The ID or handle of the layer containing the smart object.
-   * If not provided, the active layer will be used.
-   *
-   * @returns Promise that resolves when the smart object is opened.
-   */
-  async openSmartObject(layer: PhotopeaHandle<PP.Layer>) {
-    const isSmartObject =
-      (await layer.$eval((layer) => layer.kind)) === PP.LayerKind.SMARTOBJECT
-
-    if (!isSmartObject) {
-      const layerName = await layer.$eval((layer) => layer.name)
-      throw new Error(`Layer "${layerName}" is not a smart object.`)
-    }
-
-    const layerId = await layer.$eval((layer) => layer.id)
-    await this.channel.evaluate<void>(
-      `
-      const desc = new ActionDescriptor();
-      const ref = new ActionReference();
-      ref.putIdentifier(charIDToTypeID("Lyr "), ${layerId});
-      desc.putReference(charIDToTypeID("null"), ref);
-      executeAction(stringIDToTypeID("placedLayerEditContents"), desc, DialogModes.NO);
-      `
-    )
-  }
-
-  async convertToSmartObject(layer: PhotopeaHandle<PP.Layer>) {
-    const layerId = await layer.$eval((layer) => layer.id)
-    const layerHandle = await this.channel.evaluateHandle(
-      `
-      const desc = new ActionDescriptor();
-      const ref = new ActionReference();
-      // ref.putIdentifier(charIDToTypeID("Lyr "), ${layerId});
-      desc.putReference(charIDToTypeID("null"), ref);
-      executeAction(stringIDToTypeID("newPlacedLayer"), desc, DialogModes.NO);
-      `
-    )
-
-    return new PhotopeaHandle<PP.Layer>(this.channel, layerHandle)
-  }
-
-  /**
    * Saves the current or specified document to a buffer in the given format.
    * @param format The format to save as (e.g., 'png', 'jpg').
    * @param document Optional PhotopeaHandle for a specific document. If omitted, uses the active document.
@@ -117,7 +72,7 @@ export class PhotopeaUtils {
    */
   async saveToBuffer(
     format: SaveFormat,
-    document?: Handleable<PP.Document>
+    document?: Handleable
   ): Promise<Buffer> {
     const saveAs = async () => {
       const doc =

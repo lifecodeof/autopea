@@ -1,10 +1,11 @@
-import type { PhotopeaChannel } from "@/PhotopeaChannel"
+import type { Handleable, PhotopeaChannel } from "@/PhotopeaChannel"
 import { PhotopeaFFI } from "./base/PhotopeaFFI"
 import { PDocument, PDocuments } from "./PDocument"
 import z from "zod"
 import { Preferences } from "./Preferences"
 import { PFile } from "./PFile"
 import { SolidColor } from "./SolidColor"
+import { PhotopeaUtils, type SaveFormat } from "@/PhotopeaUtils"
 
 export class App extends PhotopeaFFI {
   static get(channel: PhotopeaChannel) {
@@ -122,8 +123,11 @@ export class App extends PhotopeaFFI {
   }
 
   // Extra Utils
-  uploadFont = this.channel.utils.uploadFont.bind(this.channel.utils)
-  openFile = this.channel.utils.openFile.bind(this.channel.utils)
-  saveToBuffer = this.channel.utils.saveToBuffer.bind(this.channel.utils)
-  pause = this.channel.page.page.pause.bind(this.channel.page.page)
+  utils = () => new PhotopeaUtils(this.channel)
+  uploadFont = (font: Buffer, name: string) =>
+    this.utils().uploadFont(font, name)
+  openFile = (path: string) => this.utils().openFile(path)
+  saveToBuffer = (format: SaveFormat, document?: Handleable) =>
+    this.utils().saveToBuffer(format, document)
+  pause = () => this.channel.page.page.pause()
 }

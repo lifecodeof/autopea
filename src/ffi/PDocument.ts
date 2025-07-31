@@ -5,7 +5,7 @@ import { Layers } from "./Layer"
 import z from "zod"
 import { UnitRectLocal, type UnitRect } from "./UnitRect"
 import type { UnitValue } from "./UnitValue"
-import type { SaveFormat } from "@/PhotopeaUtils"
+import { PhotopeaUtils, type SaveFormat } from "@/PhotopeaUtils"
 import type { AnchorPosition, ResampleMethod, TrimType } from "./enums"
 
 export class PDocument extends PhotopeaFFI {
@@ -96,7 +96,7 @@ export class PDocument extends PhotopeaFFI {
 
   // Extra Utils
   saveToBuffer(format: SaveFormat): Promise<Buffer> {
-    return this.channel.utils.saveToBuffer(format, this)
+    return new PhotopeaUtils(this.channel).saveToBuffer(format, this)
   }
   async makeBounds() {
     const width = await this.width.$get()
