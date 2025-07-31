@@ -1,7 +1,7 @@
 import type { PhotopeaPage } from "@/PhotopeaPage"
 import invariant from "tiny-invariant"
 import { abortOnTimeout } from "./helpers"
-import { PhotopeaFFI } from "./ffi/base/PhotopeaFFI"
+import { PhotopeaFFI } from "./contracts/base/PhotopeaFFI"
 
 export type Handleable = PhotopeaFFI | string
 export type HandleVars = Record<string, Handleable>

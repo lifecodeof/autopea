@@ -1,7 +1,7 @@
 import { toMatchImageSnapshot } from "jest-image-snapshot"
 import { chromium, type BrowserContext } from "playwright"
 import { expect, test } from "vitest"
-import { App } from "./ffi/App"
+import { App } from "./contracts/App"
 import { PhotopeaChannel } from "./PhotopeaChannel"
 import { PhotopeaPage } from "./PhotopeaPage"
 
