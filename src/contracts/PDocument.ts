@@ -1,4 +1,4 @@
-import { FFICollection, PhotopeaFFI } from "./base/PhotopeaFFI"
+import { FFICollection, Contract } from "./base/Contract"
 import { ArtLayer, ArtLayers } from "./ArtLayer"
 import { LayerSets } from "./LayerSet"
 import { Layers } from "./Layer"
@@ -8,7 +8,7 @@ import type { UnitValue } from "./UnitValue"
 import { PhotopeaUtils, type SaveFormat } from "@/PhotopeaUtils"
 import type { AnchorPosition, ResampleMethod, TrimType } from "./enums"
 
-export class PDocument extends PhotopeaFFI {
+export class PDocument extends Contract {
   // FFI object properties
   get layers() {
     return this.$(Layers)`.layers`

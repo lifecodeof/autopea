@@ -1,7 +1,7 @@
-import { PhotopeaFFI } from "./base/PhotopeaFFI"
+import { Contract } from "./base/Contract"
 import z from "zod"
 
-export class PFile extends PhotopeaFFI {
+export class PFile extends Contract {
   get fsName() {
     return this.$value(z.string())`.fsName`
   }

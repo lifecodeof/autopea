@@ -1,5 +1,5 @@
 import { ArtLayers } from "./ArtLayer"
-import { FFICollection } from "./base/PhotopeaFFI"
+import { FFICollection } from "./base/Contract"
 import { Layer } from "./Layer"
 
 export class LayerSet extends Layer {

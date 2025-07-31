@@ -1,9 +1,9 @@
 import type { PhotopeaPage } from "@/PhotopeaPage"
 import invariant from "tiny-invariant"
 import { abortOnTimeout } from "./helpers"
-import { PhotopeaFFI } from "./contracts/base/PhotopeaFFI"
+import { Contract } from "./contracts/base/Contract"
 
-export type Handleable = PhotopeaFFI | string
+export type Handleable = Contract | string
 export type HandleVars = Record<string, Handleable>
 
 /**
@@ -54,8 +54,8 @@ export class PhotopeaChannel {
     const getExpression = (handleable: Handleable) => {
       if (typeof handleable === "string") {
         return this.getExpressionForHandle(handleable)
-      } else if (handleable instanceof PhotopeaFFI) {
-        return PhotopeaFFI.getExpression(handleable)
+      } else if (handleable instanceof Contract) {
+        return Contract.getExpression(handleable)
       } else {
         throw new Error(`Unsupported handleable type: ${typeof handleable}.`)
       }

@@ -1,11 +1,7 @@
 import type { PhotopeaChannel } from "@/PhotopeaChannel"
 import { type Class, type Constructor } from "type-fest"
 import { z, type ZodType } from "zod"
-
-export type PhotopeaFFIConstructor<T extends PhotopeaFFI> = new (
-  channel: PhotopeaChannel,
-  expression: string
-) => T
+import { SerializableContract, type InferContractValue } from "./SerializableContract"
 
 type TemplateFn<T> = (strings: TemplateStringsArray, ...values: any[]) => T
 
@@ -16,18 +12,18 @@ type Options = {
 
 export const rawStringSymbol = Symbol("rawString")
 
-export class PhotopeaFFI {
+export class Contract {
   constructor(
     protected readonly channel: PhotopeaChannel,
     protected readonly expression: string
   ) {}
 
-  public static getExpression(instance: PhotopeaFFI): string {
+  public static getExpression(instance: Contract): string {
     return instance.expression
   }
 
   private transfer(value: any) {
-    if (value instanceof PhotopeaFFI) {
+    if (value instanceof Contract) {
       return value.expression
     } else if (
       typeof value === "object" &&
@@ -68,8 +64,8 @@ export class PhotopeaFFI {
     return expression
   }
 
-  protected $<T extends PhotopeaFFI>(
-    constructor: PhotopeaFFIConstructor<T>,
+  protected $<T extends Contract>(
+    constructor: Constructor<T>,
     options?: Options
   ) {
     return (template: TemplateStringsArray, ...values: any[]) => {
@@ -85,7 +81,7 @@ export class PhotopeaFFI {
       const childExpression = this.templateExpression(template, values)
       const expression = this.extendExpression(childExpression, options)
 
-      return new FFIValue<T>(this.channel, expression, schema)
+      return new SerializableContract<T>(this.channel, expression, schema)
     }
   }
 
@@ -102,8 +98,8 @@ export class PhotopeaFFI {
     }
   }
 
-  protected $evalHandle<T extends PhotopeaFFI>(
-    constructor: PhotopeaFFIConstructor<T>,
+  protected $evalHandle<T extends Contract>(
+    constructor: Constructor<T>,
     options?: Options
   ): TemplateFn<Promise<T>> {
     return async (template: TemplateStringsArray, ...values: any[]) => {
@@ -129,7 +125,7 @@ export class PhotopeaFFI {
     )
     const expression = this.channel.getExpressionForHandle(handle)
 
-    const constructor = this.constructor as PhotopeaFFIConstructor<this>
+    const constructor = this.constructor as Constructor<this>
     return new constructor(this.channel, expression)
   }
 
@@ -145,45 +141,21 @@ export class PhotopeaFFI {
     return await this.channel.evaluate<T>(fullScript)
   }
 
-  protected $arrayOf<T extends PhotopeaFFI>(
-    constructor: PhotopeaFFIConstructor<T>
+  protected $arrayOf<T extends Contract>(
+    constructor: Constructor<T>
   ): Class<FFICollection<T>> {
     return class extends FFICollection<T> {
       protected itemType = () => constructor
     }
   }
 
-  async $set(value: InferFFIValue<this>): Promise<void> {
+  async $set(value: InferContractValue<this>): Promise<void> {
     await this.channel.evaluate(`${this.expression} = ${this.transfer(value)}`)
   }
 }
 
-export type InferFFIValue<T extends PhotopeaFFI> =
-  T extends BrandedFFIValue<infer V> ? V : T
-
-interface BrandedFFIValue<T> {
-  __typeBrand: T
-}
-
-export class FFIValue<T> extends PhotopeaFFI implements BrandedFFIValue<T> {
-  __typeBrand!: T
-
-  constructor(
-    channel: PhotopeaChannel,
-    expression: string,
-    private readonly schema: ZodType<T>
-  ) {
-    super(channel, expression)
-  }
-
-  async $get(): Promise<T> {
-    const value = await this.channel.evaluate("return " + this.expression)
-    return this.schema.parse(value)
-  }
-}
-
-export abstract class FFICollection<T extends PhotopeaFFI> extends PhotopeaFFI {
-  protected abstract itemType(): PhotopeaFFIConstructor<T>
+export abstract class FFICollection<T extends Contract> extends Contract {
+  protected abstract itemType(): Constructor<T>
 
   get(index: number): T {
     return this.$(this.itemType())`[${index}]`
@@ -195,25 +167,25 @@ export abstract class FFICollection<T extends PhotopeaFFI> extends PhotopeaFFI {
 }
 
 export abstract class FFIEither<
-  Left extends PhotopeaFFI,
-  Right extends PhotopeaFFI
-> extends PhotopeaFFI {
+  Left extends Contract,
+  Right extends Contract
+> extends Contract {
   protected constructor(
     channel: PhotopeaChannel,
     expression: string,
-    private readonly leftType: PhotopeaFFIConstructor<Left>,
-    private readonly rightType: PhotopeaFFIConstructor<Right>
+    private readonly leftType: Constructor<Left>,
+    private readonly rightType: Constructor<Right>
   ) {
     super(channel, expression)
   }
 
-  public static for<Left extends PhotopeaFFI, Right extends PhotopeaFFI>(
+  public static for<Left extends Contract, Right extends Contract>(
     leftType: Constructor<Left, [channel: PhotopeaChannel, expression: string]>,
     rightType: Constructor<
       Right,
       [channel: PhotopeaChannel, expression: string]
     >
-  ): PhotopeaFFIConstructor<FFIEither<Left, Right>> {
+  ): Constructor<FFIEither<Left, Right>> {
     return class extends FFIEither<Left, Right> {
       constructor(channel: PhotopeaChannel, expression: string) {
         super(channel, expression, leftType, rightType)
@@ -265,14 +237,5 @@ export abstract class FFIEither<
 
   get either(): Left | Right {
     return new this.leftType(this.channel, this.expression)
-  }
-}
-
-export const FFITypeName = (typename: string) => {
-  return <ClassType extends PhotopeaFFIConstructor<any>>(
-    target: ClassType,
-    context: ClassDecoratorContext<ClassType>
-  ) => {
-    target.prototype.typename = typename
   }
 }

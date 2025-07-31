@@ -1,5 +1,5 @@
 import type { Handleable, PhotopeaChannel } from "@/PhotopeaChannel"
-import { PhotopeaFFI } from "./base/PhotopeaFFI"
+import { Contract } from "./base/Contract"
 import { PDocument, PDocuments } from "./PDocument"
 import z from "zod"
 import { Preferences } from "./Preferences"
@@ -7,7 +7,7 @@ import { PFile } from "./PFile"
 import { SolidColor } from "./SolidColor"
 import { PhotopeaUtils, type SaveFormat } from "@/PhotopeaUtils"
 
-export class App extends PhotopeaFFI {
+export class App extends Contract {
   static get(channel: PhotopeaChannel) {
     return new App(channel, "app")
   }

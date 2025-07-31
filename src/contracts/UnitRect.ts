@@ -1,8 +1,8 @@
 import z from "zod"
-import { PhotopeaFFI } from "./base/PhotopeaFFI"
+import { Contract } from "./base/Contract"
 import { UnitValue } from "./UnitValue"
 
-export class UnitRect extends PhotopeaFFI {
+export class UnitRect extends Contract {
   async $fetch() {
     const left = await this.left.value.$get()
     const top = await this.top.value.$get()

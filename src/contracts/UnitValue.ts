@@ -1,7 +1,7 @@
 import z from "zod"
-import { PhotopeaFFI } from "./base/PhotopeaFFI"
+import { Contract } from "./base/Contract"
 
-export class UnitValue extends PhotopeaFFI {
+export class UnitValue extends Contract {
   get value() {
     return this.$value(z.number())`.value`
   }

@@ -1,7 +1,7 @@
-import { PhotopeaFFI } from "./base/PhotopeaFFI"
+import { Contract } from "./base/Contract"
 import z from "zod"
 
-export class Preferences extends PhotopeaFFI {
+export class Preferences extends Contract {
   get additionalPluginFolder() {
     return this.$value(z.string())`.additionalPluginFolder`
   }

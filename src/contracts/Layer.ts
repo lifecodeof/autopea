@@ -1,12 +1,12 @@
 import z from "zod"
 import { App } from "./App"
-import { FFICollection, PhotopeaFFI } from "./base/PhotopeaFFI"
+import { FFICollection, Contract } from "./base/Contract"
 import type { AnchorPosition, ElementPlacement } from "./enums"
 import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
 import { PDocument } from "./PDocument"
 import { UnitRect } from "./UnitRect"
 
-export class Layer extends PhotopeaFFI {
+export class Layer extends Contract {
   get name() {
     return this.$value(z.string())`.name`
   }
@@ -21,12 +21,6 @@ export class Layer extends PhotopeaFFI {
 
   get blendMode() {
     return this.$value(z.string())`.blendMode`
-  }
-
-  get parent() {
-    // FIXME: This line causes infinite recursion in TypeScript type resolution
-    // return this.$(FFIEither.for(LayerSet, PDocument))`.parent`
-    return "TODO"
   }
 
   get isBackgroundLayer() {

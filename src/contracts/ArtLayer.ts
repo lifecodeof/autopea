@@ -1,5 +1,5 @@
 import z from "zod"
-import { FFICollection, PhotopeaFFI } from "./base/PhotopeaFFI"
+import { FFICollection, Contract } from "./base/Contract"
 import type { ElementPlacement, RasterizeType } from "./enums"
 import { Layer } from "./Layer"
 import { SolidColor } from "./SolidColor"
@@ -50,7 +50,7 @@ export class ArtLayer extends Layer {
   }
 }
 
-export class TextItem extends PhotopeaFFI {
+export class TextItem extends Contract {
   get contents() {
     return this.$value(z.string())`.contents`
   }
