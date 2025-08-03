@@ -1,6 +1,6 @@
 import z from "zod"
 import { App } from "./App"
-import { FFICollection, Contract } from "./base/Contract"
+import { ContractCollection, Contract } from "./base/Contract"
 import { LayerKind, type AnchorPosition, type ElementPlacement } from "./enums"
 import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
 import { PDocument } from "./PDocument"
@@ -180,7 +180,7 @@ export class Layer extends Contract {
   }
 }
 
-export class Layers extends FFICollection<Layer> {
+export class Layers extends ContractCollection<Layer> {
   protected itemType = () => Layer
 
   get parent() {

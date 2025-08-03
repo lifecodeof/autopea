@@ -1,5 +1,5 @@
 import { ArtLayers } from "./ArtLayer"
-import { FFICollection } from "./base/Contract"
+import { ContractCollection } from "./base/Contract"
 import { Layer } from "./Layer"
 
 export class LayerSet extends Layer {
@@ -16,7 +16,7 @@ export class LayerSet extends Layer {
   }
 }
 
-export class LayerSets extends FFICollection<LayerSet> {
+export class LayerSets extends ContractCollection<LayerSet> {
   protected itemType = () => LayerSet
 
   getByName(name: string) {

@@ -62,3 +62,14 @@ export enum TrimType
   BOTTOMRIGHT = 1,
   TRANSPARENT = 2
 }
+
+export enum RasterizeType
+{
+  ENTIRELAYER= 0,
+  FILLCONTENT= 1,
+  LAYERCLIPPINGPATH= 2,
+  LINKEDLAYERS= 3,
+  SHAPE= 4,
+  TEXTCONTENTS= 5
+}
+

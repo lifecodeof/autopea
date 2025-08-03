@@ -66,7 +66,7 @@ export const sharedChannelTest = sharedPageTest.extend<{
 
 expect.extend({ toMatchImageSnapshot })
 
-export const ffiTest = channelTest.extend<{
+export const appTest = channelTest.extend<{
   app: App
 }>({
   app: async ({ channel }, use) => {

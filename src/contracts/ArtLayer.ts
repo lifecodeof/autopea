@@ -1,5 +1,5 @@
 import z from "zod"
-import { FFICollection, Contract } from "./base/Contract"
+import { ContractCollection, Contract } from "./base/Contract"
 import type { ElementPlacement, RasterizeType } from "./enums"
 import { Layer } from "./Layer"
 import { SolidColor } from "./SolidColor"
@@ -64,7 +64,7 @@ export class TextItem extends Contract {
   }
 }
 
-export class ArtLayers extends FFICollection<ArtLayer> {
+export class ArtLayers extends ContractCollection<ArtLayer> {
   protected itemType = () => ArtLayer
 
   add() {

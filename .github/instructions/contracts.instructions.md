@@ -1,22 +1,22 @@
 ---
-applyTo: "src/ffi/*.ts"
+applyTo: "src/contracts/*.ts"
 ---
 
-# How to Extend `PhotopeaFFI`
+# How to Extend `Contract`
 
-This guide explains how to create new FFI (Foreign Function Interface) classes for Photopea by extending the `PhotopeaFFI` base class. Please read this before contributing new FFI types.
+This guide explains how to create new Contract classes that represents remote objects for Photopea by extending the `Contract` base class. Please read this before contributing new Contract types.
 
 ---
 
-## 1. **Create a New FFI Class**
+## 1. **Create a New Contract Class**
 
-- Import `PhotopeaFFI` from `base/PhotopeaFFI`.
-- Extend your new class from `PhotopeaFFI`.
+- Import `Contract` from `base/Contract`.
+- Extend your new class from `Contract`.
 
 ```typescript
-import { PhotopeaFFI } from "./base/PhotopeaFFI"
+import { Contract } from "./base/Contract"
 
-export class MyType extends PhotopeaFFI {
+export class MyType extends Contract {
   // Add properties and methods here
 }
 ```
@@ -25,8 +25,8 @@ export class MyType extends PhotopeaFFI {
 
 ## 2. **Expose Properties**
 
-- Use the protected helpers from `PhotopeaFFI` to expose properties.
-- Use `this.$(FFIType)\`.<property>\`` for properties that return FFI objects.
+- Use the protected helpers from `Contract` to expose properties.
+- Use `this.$(ContractType)\`.<property>\`` for properties that return Contract objects.
 - Use `this.$value(schema)\`.<property>\`` for JSON serializable properties.
 
 **Example:**
@@ -43,7 +43,7 @@ get width() {
 
 - Use `this.$eval()\`.<method>(...)\``for methods that return`void`.
 - Use `this.$eval(schema)\`.<method>(...)\`` for methods that return a value.
-- Use `this.$evalHandle(FFIType)\`.<method>(...)\`` for methods that return a FFI objects.
+- Use `this.$evalHandle(ContractType)\`.<method>(...)\`` for methods that return a Contract objects.
 
 **Example:**
 
@@ -55,9 +55,9 @@ trim() {
 
 ---
 
-## 4. **Accessing Nested FFI Types**
+## 4. **Accessing Nested Contract Types**
 
-- For nested FFI objects, use the `$` helper with the constructor of the target FFI type.
+- For nested Contract objects, use the `$` helper with the constructor of the target Contract type.
 
 **Example:**
 
@@ -75,7 +75,7 @@ get layers() {
 - Use template literals for property/method expressions.
 - Avoid direct channel calls; always use the provided helpers for consistency and safety.
 - When interpolated values of helper tagged function methods:
-  - If the value is a `PhotopeaFFI` instance, it will replaced with its expression.
+  - If the value is a `Contract` instance, it will replaced with its expression.
   - If the value is undefined, it will be replaced with `undefined`.
   - Else, it will be converted to string via `JSON.stringify()`.
   - If still need to pass arbitrary JS expressions, use `this.$raw(string)`.
@@ -90,28 +90,57 @@ In most cases, you either write methods or getters that:
 If you are forwarding expressions, return the result of the `this.$()` or `this.$value()` call directly. This means no checks or conditionals. Remote runtime will handle those cases.
 If you are dispatching actions, return the result of the `this.$eval()` or `this.$evalHandle()` call directly. This means no checks or conditionals. Remote runtime will handle those cases.
 
-`this.$()` requires a constructor of the FFI type you want to return. This means it cannot accept arrays. For arrays, use `this.$arrayOf(FFIType)` to create a constructor that returns an FFI collection of the specified FFI type.
+`this.$()` requires a constructor of the Contract type you want to return. This means it cannot accept arrays. For arrays, use `this.$arrayOf(ContractType)` to create a constructor that returns an Contract collection of the specified Contract type.
 
 All class names should match foreign type names but there are exceptions:
 
 - Types that conflict with JavaScript classes (e.g., `File`, `Date`, `Document`, etc.) should be prefixed with `P` (e.g., `PFile`, `PDate`, `PDocument`).
-- `Application` is renamed to `App` for convenience since that class is entrypoint of the FFI API.
+- `Application` is renamed to `App` for convenience since that class is entrypoint of the Contract API.
 
 ---
 
-## 6. **Example: Minimal FFI Extension**
+## 6. **Example: Minimal Contract Extension**
 
 ```typescript
 import z from "zod"
-import { PhotopeaFFI } from "./base/PhotopeaFFI"
+import { Contract } from "./base/Contract"
 
-export class ExampleFFI extends PhotopeaFFI {
-  get name() {
-    return this.$value(z.string())`.name`
+export class ColorSampler extends Contract {
+  get color() {
+    return this.$(SolidColor)`.color`
   }
 
-  doSomething() {
-    return this.$eval()`.doSomething()`
+  move(position: [number, number]) {
+    return this.$eval()`.move(${position})`
   }
+
+  remove() {
+    return this.$eval()`.remove()`
+  }
+
+  // ...
+}
+```
+
+---
+
+## 7. **Example: Collecition typed Contract Classes**
+
+```typescript
+import { Contract, ContractCollection } from "./base/Contract"
+import { ColorSampler } from "./ColorSampler"
+
+export class ColorSamplers extends ContractCollection<ColorSampler> {
+  protected itemType = () => ColorSampler
+  
+  add(position: [number, number]) {
+    return this.$evalHandle(ColorSampler)`.add(${position})`
+  }
+
+  removeAll() {
+    return this.$eval()`.removeAll()`
+  }
+
+  // ...
 }
 ```

@@ -142,8 +142,8 @@ export class Contract {
 
   protected $arrayOf<T extends Contract>(
     constructor: Constructor<T>
-  ): Class<FFICollection<T>> {
-    return class extends FFICollection<T> {
+  ): Class<ContractCollection<T>> {
+    return class extends ContractCollection<T> {
       protected itemType = () => constructor
     }
   }
@@ -180,7 +180,7 @@ export class SerializableContract<T>
   }
 }
 
-export abstract class FFICollection<T extends Contract> extends Contract {
+export abstract class ContractCollection<T extends Contract> extends Contract {
   protected abstract itemType(): Constructor<T>
 
   get(index: number): T {
@@ -189,88 +189,5 @@ export abstract class FFICollection<T extends Contract> extends Contract {
 
   get length() {
     return this.$value(z.number())`.length`
-  }
-}
-
-export abstract class FFIEither<
-  Left extends Contract,
-  Right extends Contract
-> extends Contract {
-  protected constructor(
-    channel: PhotopeaChannel,
-    expression: string,
-    private readonly leftType: Constructor<Left>,
-    private readonly rightType: Constructor<Right>
-  ) {
-    super(channel, expression)
-  }
-
-  public static for<Left extends Contract, Right extends Contract>(
-    leftType: Constructor<Left, [channel: PhotopeaChannel, expression: string]>,
-    rightType: Constructor<
-      Right,
-      [channel: PhotopeaChannel, expression: string]
-    >
-  ): Constructor<FFIEither<Left, Right>> {
-    return class extends FFIEither<Left, Right> {
-      constructor(channel: PhotopeaChannel, expression: string) {
-        super(channel, expression, leftType, rightType)
-      }
-    }
-  }
-
-  private get repr() {
-    return `FFIEither<${this.leftType.name}, ${this.rightType.name}>`
-  }
-
-  async isLeft(): Promise<boolean> {
-    const typename = await this.channel.evaluate(
-      `return ${this.expression}.typename`
-    )
-    return typename === this.leftType.prototype.typename
-  }
-
-  async isRight(): Promise<boolean> {
-    const typename = await this.channel.evaluate(
-      `return ${this.expression}.typename`
-    )
-    return typename === this.rightType.prototype.typename
-  }
-
-  async left(): Promise<Left> {
-    if (!(await this.isLeft())) {
-      throw new Error(`This ${this.repr} instance is not a Left type`)
-    }
-
-    return this.unsafeLeft
-  }
-
-  async right(): Promise<Right> {
-    if (!(await this.isRight())) {
-      throw new Error(`This ${this.repr} instance is not a Right type`)
-    }
-
-    return this.unsafeRight
-  }
-
-  get unsafeLeft(): Left {
-    return new this.leftType(this.channel, this.expression)
-  }
-
-  get unsafeRight(): Right {
-    return new this.rightType(this.channel, this.expression)
-  }
-
-  get either(): Left | Right {
-    return new this.leftType(this.channel, this.expression)
-  }
-}
-
-export const FFITypeName = (typename: string) => {
-  return <ClassType extends Constructor<any>>(
-    target: ClassType,
-    context: ClassDecoratorContext<ClassType>
-  ) => {
-    target.prototype.typename = typename
   }
 }

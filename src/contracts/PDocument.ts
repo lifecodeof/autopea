@@ -7,7 +7,7 @@ import { Layers } from "./Layer"
 import { LayerSets } from "./LayerSet"
 import { UnitRectLocal, type UnitRect } from "./UnitRect"
 import type { UnitValue } from "./UnitValue"
-import { Contract, FFICollection } from "./base/Contract"
+import { Contract, ContractCollection } from "./base/Contract"
 import type { AnchorPosition, ResampleMethod, TrimType } from "./enums"
 
 export enum SaveFormat {
@@ -23,7 +23,6 @@ const saveFormatMap = {
 }
 
 export class PDocument extends Contract {
-  // FFI object properties
   get layers() {
     return this.$(Layers)`.layers`
   }
@@ -154,7 +153,7 @@ export class PDocument extends Contract {
   }
 }
 
-export class PDocuments extends FFICollection<PDocument> {
+export class PDocuments extends ContractCollection<PDocument> {
   itemType = () => PDocument
 
   getByName(name: string) {
