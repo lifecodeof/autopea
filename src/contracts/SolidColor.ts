@@ -36,5 +36,6 @@ export class RGBColor extends Contract {
   get blue() { return this.$value(z.number())`.blue` }
   get green() { return this.$value(z.number())`.green` }
   get red() { return this.$value(z.number())`.red` }
+  /** @returns Hexadecimal color value without the '#' prefix */
   get hexValue() { return this.$value(z.string())`.hexValue` }
 }

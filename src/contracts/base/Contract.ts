@@ -90,7 +90,7 @@ export class Contract {
     return async (template: TemplateStringsArray, ...values: any[]) => {
       const childExpression = this.templateExpression(template, values)
 
-      const fullExpression = `${this.expression}${childExpression}`
+      const fullExpression = `return ${this.expression}${childExpression}`
       const value = await this.channel.evaluate(fullExpression)
       schema ??= z.any()
       return schema.parse(value)
@@ -104,7 +104,7 @@ export class Contract {
     return async (template: TemplateStringsArray, ...values: any[]) => {
       const childExpression = this.templateExpression(template, values)
 
-      const fullExpression = `${this.expression}${childExpression}`
+      const fullExpression = `return ${this.expression}${childExpression}`
       const handle = await this.channel.evaluateHandle(fullExpression)
 
       const expression = this.channel.getExpressionForHandle(handle)

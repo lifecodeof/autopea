@@ -9,6 +9,7 @@ import { UnitRectLocal, type UnitRect } from "./UnitRect"
 import type { UnitValue } from "./UnitValue"
 import { Contract, ContractCollection } from "./base/Contract"
 import type { AnchorPosition, ResampleMethod, TrimType } from "./enums"
+import { ColorSamplers } from './ColorSampler'
 
 export enum SaveFormat {
   PNG = "png",
@@ -34,6 +35,9 @@ export class PDocument extends Contract {
   }
   get activeLayer() {
     return this.$(ArtLayer)`.activeLayer`
+  }
+  get colorSamplers() {
+    return this.$(ColorSamplers)`.colorSamplers`
   }
 
   // Value properties

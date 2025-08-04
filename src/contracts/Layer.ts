@@ -4,7 +4,7 @@ import { ContractCollection, Contract } from "./base/Contract"
 import { LayerKind, type AnchorPosition, type ElementPlacement } from "./enums"
 import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
 import { PDocument } from "./PDocument"
-import { UnitRect } from "./UnitRect"
+import { UnitRect, type UnitRectLocal } from "./UnitRect"
 
 export class Layer extends Contract {
   get name() {
@@ -118,12 +118,14 @@ export class Layer extends Contract {
   }
 
   private hexToRgb(hex: string) {
-    const parsedHex = z
-      .string()
-      .regex(/^#[0-9A-Fa-f]{6}$/i)
-      .parse(hex)
+    const pattern = /^#?([0-9A-Fa-f]{6})$/
 
-    const bigint = parseInt(parsedHex.slice(1), 16)
+    const parsedHex = hex.match(pattern)
+    if (!parsedHex) {
+      throw new Error(`Invalid hex color: ${hex}`)
+    }
+
+    const bigint = parseInt(parsedHex[1], 16)
     return {
       red: (bigint >> 16) & 255,
       green: (bigint >> 8) & 255,
@@ -141,22 +143,31 @@ export class Layer extends Contract {
     })
   }
 
-  // Shrink layer (preserve aspect and center) and transform so it does not overflow document bounds
-  async fitToBounds() {
+  /** Shrink or grow layer (preserve aspect and center) and transform so it does not overflow document bounds */
+  async fitToBounds({
+    targetBounds,
+    grow = false
+  }: {
+    targetBounds?: UnitRectLocal // Default to document bounds
+    grow?: boolean // If true, will also grow the layer if needed
+  } = {}) {
     const doc = App.get(this.channel).activeDocument
-    const docBounds = await doc.makeBounds()
+    targetBounds ??= await doc.makeBounds()
     const bounds = await this.bounds.$fetch()
 
     const layerWidth = bounds.right - bounds.left
     const layerHeight = bounds.bottom - bounds.top
-    const docWidth = docBounds.right - docBounds.left
-    const docHeight = docBounds.bottom - docBounds.top
+    const docWidth = targetBounds.right - targetBounds.left
+    const docHeight = targetBounds.bottom - targetBounds.top
 
     const scaleX = docWidth / layerWidth
     const scaleY = docHeight / layerHeight
-    const scale = Math.min(scaleX, scaleY, 1)
 
-    if (scale < 1) {
+    // If grow is true, don't limit scale to 1
+    const scale = grow ? Math.min(scaleX, scaleY) : Math.min(scaleX, scaleY, 1)
+
+    // Resize if we need to shrink (scale < 1) or if we need to grow (scale > 1 && grow)
+    if (scale < 1 || (scale > 1 && grow)) {
       await this.resize(scale * 100, scale * 100)
     }
 
@@ -164,15 +175,15 @@ export class Layer extends Contract {
     const newBounds = await this.bounds.$fetch()
     let deltaX = 0
     let deltaY = 0
-    if (newBounds.left < docBounds.left) {
-      deltaX = docBounds.left - newBounds.left
-    } else if (newBounds.right > docBounds.right) {
-      deltaX = docBounds.right - newBounds.right
+    if (newBounds.left < targetBounds.left) {
+      deltaX = targetBounds.left - newBounds.left
+    } else if (newBounds.right > targetBounds.right) {
+      deltaX = targetBounds.right - newBounds.right
     }
-    if (newBounds.top < docBounds.top) {
-      deltaY = docBounds.top - newBounds.top
-    } else if (newBounds.bottom > docBounds.bottom) {
-      deltaY = docBounds.bottom - newBounds.bottom
+    if (newBounds.top < targetBounds.top) {
+      deltaY = targetBounds.top - newBounds.top
+    } else if (newBounds.bottom > targetBounds.bottom) {
+      deltaY = targetBounds.bottom - newBounds.bottom
     }
     if (deltaX !== 0 || deltaY !== 0) {
       await this.translate(deltaX, deltaY)

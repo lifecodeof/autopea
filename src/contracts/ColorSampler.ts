@@ -9,7 +9,7 @@ export class ColorSampler extends Contract {
   }
 
   get position() {
-    return this.$value(z.array(z.number()))`.position`
+    return this.$value(z.tuple([z.number(), z.number()] as const))`.position`
   }
 
   get parent() {
@@ -32,8 +32,8 @@ export class ColorSamplers extends ContractCollection<ColorSampler> {
     return this.$(PDocument)`.parent`
   }
 
-  add(position: [number, number]) {
-    return this.$evalHandle(ColorSampler)`.add(${position})`
+  add(x: number, y: number) {
+    return this.$evalHandle(ColorSampler)`.add(${[x, y]})`
   }
 
   removeAll() {
