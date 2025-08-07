@@ -1,11 +1,15 @@
 import z from "zod"
 import { ContractCollection, Contract } from "./base/Contract"
-import type { ElementPlacement, RasterizeType } from "./enums"
+import { LayerKind, type ElementPlacement, type RasterizeType } from "./enums"
 import { Layer } from "./Layer"
 import { SolidColor } from "./SolidColor"
 import { UnitValue } from "./UnitValue"
+import { App } from "./App"
 
 export class ArtLayer extends Layer {
+  get id() {
+    return this.$value(z.number())`.id`
+  }
   get fillOpacity() {
     return this.$value(z.number())`.fillOpacity`
   }
@@ -47,6 +51,23 @@ export class ArtLayer extends Layer {
   }
   rasterize(type: RasterizeType) {
     return this.$eval()`.rasterize(${type})`
+  }
+
+  // Utils
+  async openSmartObject() {
+    const isSmartObject = (await this.kind.$get()) === LayerKind.SMARTOBJECT
+
+    if (!isSmartObject) {
+      const layerName = await this.name.$get()
+      throw new Error(`Layer "${layerName}" is not a smart object.`)
+    }
+
+    const app = App.of(this.channel)
+    await app.activeDocument.activeLayer.$set(this)
+
+    await this.$eval({
+      absolute: true
+    })`executeAction(stringIDToTypeID("placedLayerEditContents"), null, DialogModes.NO)`
   }
 }
 

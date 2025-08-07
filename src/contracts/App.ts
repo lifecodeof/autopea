@@ -10,7 +10,7 @@ import { Preferences } from "./Preferences"
 import { SolidColor } from "./SolidColor"
 
 export class App extends Contract {
-  static get(channel: PhotopeaChannel) {
+  static of(channel: PhotopeaChannel) {
     return new App(channel, "app")
   }
 
@@ -166,9 +166,15 @@ export class App extends Contract {
 
     await fileChooser.setFiles(path)
 
-    abortOnTimeout(abort, 10_000, new Error("openFile() timed out"))
+    const cleanup = abortOnTimeout(
+      abort,
+      30_000,
+      new Error("openFile() timed out")
+    )
 
     await blankDonePromise
+
+    cleanup()
   }
 
   uploadFont(font: Buffer, name: string) {

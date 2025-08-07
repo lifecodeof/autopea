@@ -1,6 +1,6 @@
 import type { PhotopeaChannel } from "@/Channel"
 import { type Class, type Constructor } from "type-fest"
-import { z, type ZodType } from "zod"
+import { z, ZodType } from "zod"
 
 type TemplateFn<T> = (strings: TemplateStringsArray, ...values: any[]) => T
 
@@ -84,15 +84,30 @@ export class Contract {
     }
   }
 
-  protected $eval(): TemplateFn<Promise<void>>
-  protected $eval<T>(schema: ZodType<T>): TemplateFn<Promise<T>>
-  protected $eval<T>(schema?: any): TemplateFn<Promise<T>> {
+  protected $eval(options?: Options): TemplateFn<Promise<void>>
+  protected $eval<T>(
+    schema: ZodType<T>,
+    options?: Options
+  ): TemplateFn<Promise<T>>
+  protected $eval(
+    schemaOrOptions?: any,
+    options?: Options
+  ): TemplateFn<Promise<any>> {
+    let schema: ZodType
+    if (schemaOrOptions instanceof ZodType) {
+      schema = schemaOrOptions
+    } else {
+      schema = z.null().optional()
+      options = schemaOrOptions
+    }
+
     return async (template: TemplateStringsArray, ...values: any[]) => {
       const childExpression = this.templateExpression(template, values)
 
-      const fullExpression = `return ${this.expression}${childExpression}`
+      const fullExpression =
+        "return " + this.extendExpression(childExpression, options)
       const value = await this.channel.evaluate(fullExpression)
-      schema ??= z.any()
+
       return schema.parse(value)
     }
   }
@@ -104,7 +119,8 @@ export class Contract {
     return async (template: TemplateStringsArray, ...values: any[]) => {
       const childExpression = this.templateExpression(template, values)
 
-      const fullExpression = `return ${this.expression}${childExpression}`
+      const fullExpression =
+        "return " + this.extendExpression(childExpression, options)
       const handle = await this.channel.evaluateHandle(fullExpression)
 
       const expression = this.channel.getExpressionForHandle(handle)

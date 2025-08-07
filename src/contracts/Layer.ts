@@ -98,7 +98,7 @@ export class Layer extends Contract {
 
   // Utils
   async centerHorizontally() {
-    const doc = App.get(this.channel).activeDocument
+    const doc = App.of(this.channel).activeDocument
     const docCenter = (await doc.width.$get()) / 2
     const layerCenter = await this.bounds.centerX.$get()
     const offset = docCenter - layerCenter
@@ -108,7 +108,7 @@ export class Layer extends Contract {
   }
 
   async centerVertically() {
-    const doc = App.get(this.channel).activeDocument
+    const doc = App.of(this.channel).activeDocument
     const docCenter = (await doc.height.$get()) / 2
     const layerCenter = await this.bounds.centerY.$get()
     const offset = docCenter - layerCenter
@@ -143,15 +143,17 @@ export class Layer extends Contract {
     })
   }
 
-  /** Shrink or grow layer (preserve aspect and center) and transform so it does not overflow document bounds */
+  /** Shrink or grow layer and transform so it does not overflow document bounds */
   async fitToBounds({
     targetBounds,
-    grow = false
+    grow = false,
+    preserveAspect = true
   }: {
     targetBounds?: UnitRectLocal // Default to document bounds
     grow?: boolean // If true, will also grow the layer if needed
+    preserveAspect?: boolean // If true, will preserve aspect ratio (default: true)
   } = {}) {
-    const doc = App.get(this.channel).activeDocument
+    const doc = App.of(this.channel).activeDocument
     targetBounds ??= await doc.makeBounds()
     const bounds = await this.bounds.$fetch()
 
@@ -163,12 +165,25 @@ export class Layer extends Contract {
     const scaleX = docWidth / layerWidth
     const scaleY = docHeight / layerHeight
 
-    // If grow is true, don't limit scale to 1
-    const scale = grow ? Math.min(scaleX, scaleY) : Math.min(scaleX, scaleY, 1)
+    let finalScaleX: number
+    let finalScaleY: number
 
-    // Resize if we need to shrink (scale < 1) or if we need to grow (scale > 1 && grow)
-    if (scale < 1 || (scale > 1 && grow)) {
-      await this.resize(scale * 100, scale * 100)
+    if (preserveAspect) {
+      // Preserve aspect ratio - use the smaller scale for both dimensions
+      const uniformScale = grow
+        ? Math.min(scaleX, scaleY)
+        : Math.min(scaleX, scaleY, 1)
+      finalScaleX = uniformScale
+      finalScaleY = uniformScale
+    } else {
+      // Allow non-uniform scaling - scale each dimension independently
+      finalScaleX = grow ? scaleX : Math.min(scaleX, 1)
+      finalScaleY = grow ? scaleY : Math.min(scaleY, 1)
+    }
+
+    // Resize if we need to shrink or if we need to grow (when grow is enabled)
+    if (finalScaleX !== 1 || finalScaleY !== 1) {
+      await this.resize(finalScaleX * 100, finalScaleY * 100)
     }
 
     // Recalculate bounds and move if needed to fit within doc

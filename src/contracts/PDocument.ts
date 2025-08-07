@@ -9,7 +9,7 @@ import { UnitRectLocal, type UnitRect } from "./UnitRect"
 import type { UnitValue } from "./UnitValue"
 import { Contract, ContractCollection } from "./base/Contract"
 import type { AnchorPosition, ResampleMethod, TrimType } from "./enums"
-import { ColorSamplers } from './ColorSampler'
+import { ColorSamplers } from "./ColorSampler"
 
 export enum SaveFormat {
   PNG = "png",
@@ -109,6 +109,9 @@ export class PDocument extends Contract {
   }
   paste() {
     return this.$eval()`.paste()`
+  }
+  save() {
+    return this.$eval()`.save()`
   }
 
   // Extra Utils

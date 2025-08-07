@@ -20,16 +20,23 @@ export const abortOnTimeout = (
   timeout: number,
   error: Error
 ) => {
-  if (timeout > 0) {
-    const timeoutId = setTimeout(() => {
-      if (!abortController.signal.aborted) {
-        abortController.abort(error)
-      }
-    }, timeout)
+  if (timeout <= 0) timeout = 1 // Ensure at least 1ms timeout
 
-    abortController.signal.addEventListener("abort", () => {
-      clearTimeout(timeoutId)
-    })
+  const timeoutId = setTimeout(() => {
+    if (!abortController.signal.aborted) {
+      abortController.abort(error)
+    }
+  }, timeout)
+
+  const abortListener = () => {
+    clearTimeout(timeoutId)
+  }
+
+  abortController.signal.addEventListener("abort", abortListener)
+
+  return () => {
+    clearTimeout(timeoutId)
+    abortController.signal.removeEventListener("abort", abortListener)
   }
 }
 
@@ -64,8 +71,14 @@ export const waitForEvent = async <
 
     // @ts-expect-error
     const listener: Listener1<Event, EventMap> = (...params) => {
-      // @ts-expect-error
-      if (predicate ? predicate(...params) : true) {
+      let pass = false
+
+      try {
+        // @ts-expect-error
+        pass = predicate ? predicate(...params) : true
+      } catch (error) {}
+
+      if (pass) {
         cleanup()
         // @ts-expect-error
         resolve(selector(...params))
