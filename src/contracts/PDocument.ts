@@ -147,9 +147,14 @@ export class PDocument extends Contract {
     await saveAs()
     const download = await downloadPromise
 
-    const zipBuffer = await buffer(await download.createReadStream())
-    const fileBuffer = extractSingleFileFromZip(zipBuffer)
-    return fileBuffer
+    const downloadStream = await download.createReadStream()
+    try {
+      const zipBuffer = await buffer(downloadStream)
+      const fileBuffer = extractSingleFileFromZip(zipBuffer)
+      return fileBuffer
+    } finally {
+      downloadStream.destroy()
+    }
   }
 
   async makeBounds() {
