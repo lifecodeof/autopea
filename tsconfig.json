@@ -1,9 +1,7 @@
 {
   "compilerOptions": {
-    "baseUrl": "./src",
-
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./src/*"]
     },
 
     "types": ["node"],
@@ -16,7 +14,8 @@
     "module": "Preserve",
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "composite": true
   },
   "include": ["./src/**/*", "./tests/**/*", "tsdown-env.d.ts", "src/repl.ts"],
 }

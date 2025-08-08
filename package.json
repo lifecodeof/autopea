@@ -38,13 +38,7 @@
     "type-fest": "^4.41.0"
   },
   "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "default": "./dist/index.js"
-    },
-    "./contracts/*": {
-      "types": "./src/contracts/*.ts",
-      "default": "./dist/contracts/*.js"
-    }
+    ".": "./dist/index.js",
+    "./contracts/*": "./dist/contracts/*.js"
   }
 }
