@@ -97,21 +97,35 @@ export class Layer extends Contract {
   }
 
   // Utils
-  async centerHorizontally() {
+  async centerHorizontally({
+    targetBounds
+  }: {
+    targetBounds?: UnitRectLocal // Default to document bounds
+  } = {}) {
     const doc = App.of(this.channel).activeDocument
-    const docCenter = (await doc.width.$get()) / 2
+    const targetCenter = targetBounds
+      ? targetBounds.centerX
+      : (await doc.width.$get()) / 2
+
     const layerCenter = await this.bounds.centerX.$get()
-    const offset = docCenter - layerCenter
+    const offset = targetCenter - layerCenter
     if (offset !== 0) {
       await this.translate(offset, 0)
     }
   }
 
-  async centerVertically() {
+  async centerVertically({
+    targetBounds
+  }: {
+    targetBounds?: UnitRectLocal // Default to document bounds
+  } = {}) {
     const doc = App.of(this.channel).activeDocument
-    const docCenter = (await doc.height.$get()) / 2
+    const targetCenter = targetBounds
+      ? targetBounds.centerY
+      : (await doc.height.$get()) / 2
+
     const layerCenter = await this.bounds.centerY.$get()
-    const offset = docCenter - layerCenter
+    const offset = targetCenter - layerCenter
     if (offset !== 0) {
       await this.translate(0, offset)
     }

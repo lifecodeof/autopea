@@ -98,11 +98,35 @@ export class UnitRectLocal {
     return this.bottom - this.top
   }
 
+  /** Keeps center */
+  set width(value: number) {
+    const centerX = this.centerX
+    this.left = centerX - value / 2
+    this.right = centerX + value / 2
+  }
+  /** Keeps center */
+  set height(value: number) {
+    const centerY = this.centerY
+    this.top = centerY - value / 2
+    this.bottom = centerY + value / 2
+  }
+
   get centerX() {
     return this.left + this.width / 2
   }
   get centerY() {
     return this.top + this.height / 2
+  }
+
+  set centerX(value: number) {
+    const halfWidth = this.width / 2
+    this.left = value - halfWidth
+    this.right = value + halfWidth
+  }
+  set centerY(value: number) {
+    const halfHeight = this.height / 2
+    this.top = value - halfHeight
+    this.bottom = value + halfHeight
   }
 
   get [0]() {

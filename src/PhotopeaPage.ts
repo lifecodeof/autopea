@@ -122,7 +122,15 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
     await toBase64Handle.dispose()
 
     // Somehow, #8887 removes ads
-    await page.goto("https://www.photopea.com#8887", { timeout: 30_000 })
+    let startTime = Date.now()
+    try {
+      await page.goto("https://www.photopea.com#8887", { timeout: 30_000 })
+    } catch (error) {
+      if (Date.now() - startTime < 30_000) {
+        await new Promise((resolve) => setTimeout(resolve, 500))
+      }
+      throw error
+    }
 
     // Wait for the first "done" message
     await page.waitForFunction(() => (window as any).isFirstDoneFired, {
