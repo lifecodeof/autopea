@@ -83,6 +83,10 @@ export class TextItem extends Contract {
   get leading() {
     return this.$(UnitValue)`.leading`
   }
+
+  get font() {
+    return this.$value(z.string())`.font`
+  }
 }
 
 export class ArtLayers extends ContractCollection<ArtLayer> {
