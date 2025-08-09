@@ -2,6 +2,7 @@ import type { PhotopeaPage } from "@/PhotopeaPage"
 import invariant from "tiny-invariant"
 import { abortOnTimeout } from "./helpers"
 import { Contract } from "./contracts/base/Contract"
+import { Mutex } from "async-mutex"
 
 export type Handleable = Contract | string
 export type HandleVars = Record<string, Handleable>
@@ -46,6 +47,8 @@ export class PhotopeaChannelError extends Error {
 export class PhotopeaChannel {
   /** Default timeout (ms) for script evaluation. */
   public timeout: number = 5_000
+
+  public readonly dialogMutex = new Mutex()
 
   /** @param page The PhotopeaPage instance to communicate with. */
   constructor(public readonly page: PhotopeaPage) {}

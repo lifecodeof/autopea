@@ -5,6 +5,7 @@ import { Layer } from "./Layer"
 import { SolidColor } from "./SolidColor"
 import { UnitValue } from "./UnitValue"
 import { App } from "./App"
+import { PDocument } from "./PDocument"
 
 export class ArtLayer extends Layer {
   get id() {
@@ -18,6 +19,9 @@ export class ArtLayer extends Layer {
   }
   get textItem() {
     return this.$(TextItem)`.textItem`
+  }
+  get parent() {
+    return this.$(PDocument)`.parent`
   }
 
   applyGaussianBlur(radius: number) {
@@ -62,12 +66,33 @@ export class ArtLayer extends Layer {
       throw new Error(`Layer "${layerName}" is not a smart object.`)
     }
 
-    const app = App.of(this.channel)
-    await app.activeDocument.activeLayer.$set(this)
+    await App.of(this).activeDocument.activeLayer.$set(this)
 
     await this.$eval({
       absolute: true
     })`executeAction(stringIDToTypeID("placedLayerEditContents"), null, DialogModes.NO)`
+  }
+
+  // Utils
+
+  //! BUG: Race condition if used outside of withFocus (focusMutex)
+  //! BUG: Unknown behavior if called when document has no active layer
+  private async withDocumentFocus<T>(
+    callback: (layer: this) => Promise<T>
+  ): Promise<T> {
+    const oldFocus = await this.parent.activeLayer.$ref()
+    try {
+      await this.parent.activeLayer.$set(this)
+      return await callback(this)
+    } finally {
+      await this.parent.activeLayer.$set(oldFocus)
+    }
+  }
+
+  async withFocus<T>(callback: (layer: this) => Promise<T>): Promise<T> {
+    return this.parent.withFocus(async () => {
+      return await this.withDocumentFocus(callback)
+    })
   }
 }
 

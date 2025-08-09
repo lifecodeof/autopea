@@ -3,13 +3,14 @@ import AdmZip from "adm-zip"
 import { buffer } from "stream/consumers"
 import z from "zod"
 import { ArtLayer, ArtLayers } from "./ArtLayer"
-import { Layers } from "./Layer"
+import { ColorSamplers } from "./ColorSampler"
+import { Layer, Layers } from "./Layer"
 import { LayerSets } from "./LayerSet"
 import { UnitRectLocal, type UnitRect } from "./UnitRect"
 import type { UnitValue } from "./UnitValue"
 import { Contract, ContractCollection } from "./base/Contract"
 import type { AnchorPosition, ResampleMethod, TrimType } from "./enums"
-import { ColorSamplers } from "./ColorSampler"
+import { App } from "./App"
 
 export enum SaveFormat {
   PNG = "png",
@@ -34,7 +35,7 @@ export class PDocument extends Contract {
     return this.$(LayerSets)`.layerSets`
   }
   get activeLayer() {
-    return this.$(ArtLayer)`.activeLayer`
+    return this.$(Layer)`.activeLayer`
   }
   get colorSamplers() {
     return this.$(ColorSamplers)`.colorSamplers`
@@ -115,46 +116,61 @@ export class PDocument extends Contract {
   }
 
   // Extra Utils
+  async withFocus<T>(callback: (doc: this) => Promise<T>): Promise<T> {
+    let doc = this
+
+    // If this is a lazy reference, resolve it
+    if (this.expression.includes("app.activeDocument")) {
+      doc = await this.$ref()
+    }
+
+    const app = App.of(this)
+    return await this.mutexes.focusMutex.runExclusive(async () => {
+      const oldFocus = await app.tryGetActiveDocument()
+      try {
+        await app.activeDocument.$set(doc)
+        return await callback(doc)
+      } finally {
+        if (oldFocus) {
+          await app.activeDocument.$set(oldFocus)
+        }
+      }
+    })
+  }
+
   /**
    * Saves the current or specified document to a buffer in the given format.
    * @param format The format to save as (e.g., 'png', 'jpg').
    * @param document Optional PhotopeaHandle for a specific document. If omitted, uses the active document.
    * @returns Promise that resolves to a Buffer containing the saved file data.
    */
-  async saveToBuffer(
-    format: SaveFormat,
-    document?: Handleable
-  ): Promise<Buffer> {
-    const saveAs = async () => {
-      const doc =
-        document ??
-        (await this.channel.evaluateHandle("return app.activeDocument;"))
+  async saveToBuffer(format: SaveFormat): Promise<Buffer> {
+    const saveFormatCode = saveFormatMap[format as SaveFormat]
+    if (!saveFormatCode) {
+      throw new Error(`Unsupported save format: ${format}`)
+    }
 
-      const saveFormatCode = saveFormatMap[format as SaveFormat]
-      if (!saveFormatCode) {
-        throw new Error(`Unsupported save format: ${format}`)
+    const zipBuffer = await this.mutexes.downloadMutex.runExclusive(
+      async () => {
+        const page = this.channel.page.page
+
+        const downloadPromise = page.waitForEvent("download")
+        await this.channel.evaluate<void>(
+          `doc.saveAs(new File(""), ${saveFormatCode})`,
+          { doc: this }
+        )
+        const download = await downloadPromise
+
+        const downloadStream = await download.createReadStream()
+        try {
+          return await buffer(downloadStream)
+        } finally {
+          downloadStream.destroy()
+        }
       }
+    )
 
-      await this.channel.evaluate<void>(
-        `doc.saveAs(new File(""), ${saveFormatCode})`,
-        { doc }
-      )
-    }
-
-    const page = this.channel.page.page
-
-    const downloadPromise = page.waitForEvent("download")
-    await saveAs()
-    const download = await downloadPromise
-
-    const downloadStream = await download.createReadStream()
-    try {
-      const zipBuffer = await buffer(downloadStream)
-      const fileBuffer = extractSingleFileFromZip(zipBuffer)
-      return fileBuffer
-    } finally {
-      downloadStream.destroy()
-    }
+    return extractSingleFileFromZip(zipBuffer)
   }
 
   async makeBounds() {

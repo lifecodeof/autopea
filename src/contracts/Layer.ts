@@ -97,6 +97,7 @@ export class Layer extends Contract {
   }
 
   // Utils
+  // TODO: don't rely on activeDocument
   /**
    * Position the layer relative to a target area.
    * @param options Options for positioning the layer.
@@ -113,7 +114,7 @@ export class Layer extends Contract {
     horizontal?: "center" | "left" | "right" // Horizontal alignment
     vertical?: "center" | "top" | "bottom" // Vertical alignment
   } = {}) {
-    const doc = App.of(this.channel).activeDocument
+    const doc = App.of(this).activeDocument
     bounds ??= await doc.makeBounds()
 
     const layerBounds = await this.bounds.$fetch()
@@ -175,6 +176,7 @@ export class Layer extends Contract {
     })
   }
 
+  // TODO: don't rely on activeDocument and rename targetBounds to bounds
   /** Shrink or grow layer and transform so it does not overflow document bounds */
   async fitToBounds({
     targetBounds,
@@ -185,7 +187,7 @@ export class Layer extends Contract {
     grow?: boolean // If true, will also grow the layer if needed
     preserveAspect?: boolean // If true, will preserve aspect ratio (default: true)
   } = {}) {
-    const doc = App.of(this.channel).activeDocument
+    const doc = App.of(this).activeDocument
     targetBounds ??= await doc.makeBounds()
     const bounds = await this.bounds.$fetch()
 

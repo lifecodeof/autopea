@@ -1,4 +1,5 @@
 import type { PhotopeaChannel } from "@/Channel"
+import { PhotopeaMutexes } from "@/PhotopeaMutexes"
 import { type Class, type Constructor } from "type-fest"
 import { z, ZodType } from "zod"
 
@@ -19,6 +20,14 @@ export class Contract {
 
   public static getExpression(instance: Contract): string {
     return instance.expression
+  }
+
+  public static getChannel(instance: Contract): PhotopeaChannel {
+    return instance.channel
+  }
+
+  protected get mutexes() {
+    return PhotopeaMutexes.of(this.channel.page.page)
   }
 
   private transfer(value: any) {
@@ -167,20 +176,28 @@ export class Contract {
   async $set(value: InferContractValue<this>): Promise<void> {
     await this.channel.evaluate(`${this.expression} = ${this.transfer(value)}`)
   }
+
+  $eq(other: Contract) {
+    // Loose comparison is intended
+    // Photopea always returns false when comparing objects strictly
+    return this.$value(z.boolean(), {
+      wrapParentheses: true
+    })` == ${other.expression}`
+  }
 }
 
 export type InferContractValue<T extends Contract> =
-  T extends BrandedSerializable<infer V> ? V | T : T
+  T extends PhantomSerializable<infer V> ? V | T : T
 
-interface BrandedSerializable<T> {
-  __typeBrand: T
+interface PhantomSerializable<T> {
+  __typeMarker: T
 }
 
 export class SerializableContract<T>
   extends Contract
-  implements BrandedSerializable<T>
+  implements PhantomSerializable<T>
 {
-  __typeBrand!: T
+  __typeMarker!: T
 
   constructor(
     channel: PhotopeaChannel,

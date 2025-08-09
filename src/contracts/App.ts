@@ -1,4 +1,5 @@
-import type { Handleable, PhotopeaChannel } from "@/Channel"
+import { Handleable, PhotopeaChannel } from "@/Channel"
+import { PhotopeaMutexes } from "@/PhotopeaMutexes"
 import type { Dialog } from "playwright"
 import z from "zod"
 import { abortOnTimeout, timeoutAbortSignal } from "../helpers"
@@ -10,8 +11,9 @@ import { Preferences } from "./Preferences"
 import { SolidColor } from "./SolidColor"
 
 export class App extends Contract {
-  static of(channel: PhotopeaChannel) {
-    return new App(channel, "app")
+  static of(obj: PhotopeaChannel | Contract) {
+    if (obj instanceof Contract) obj = Contract.getChannel(obj)
+    return new App(obj, "app")
   }
 
   get activeDocument() {
@@ -125,11 +127,8 @@ export class App extends Contract {
   }
 
   // Extra Utils
-  async saveToBuffer(
-    format: SaveFormat,
-    document?: Handleable
-  ): Promise<Buffer> {
-    return await this.activeDocument.saveToBuffer(format, document)
+  async saveToBuffer(format: SaveFormat): Promise<Buffer> {
+    return await this.activeDocument.saveToBuffer(format)
   }
 
   /**
@@ -139,11 +138,22 @@ export class App extends Contract {
    * @returns Promise that resolves when the image is loaded.
    */
   async openFromUrl(url: string) {
-    const signal = timeoutAbortSignal(10_000)
+    return await this.mutexes.focusMutex.runExclusive(async () => {
+      const oldActiveDocument = await this.tryGetActiveDocument()
+      try {
+        const signal = timeoutAbortSignal(10_000)
 
-    const waiterPromise = this.channel.page.waitForBlankDone(signal)
-    await this.channel.evaluate<void>(`app.open(${JSON.stringify(url)});`)
-    await waiterPromise
+        const waiterPromise = this.channel.page.waitForBlankDone(signal)
+        await this.channel.evaluate<void>(`app.open(${JSON.stringify(url)});`)
+        await waiterPromise
+
+        return this.activeDocument.$ref()
+      } finally {
+        if (oldActiveDocument) {
+          await this.activeDocument.$set(oldActiveDocument)
+        }
+      }
+    })
   }
 
   /**
@@ -153,84 +163,114 @@ export class App extends Contract {
    * @returns Promise that resolves when the image is loaded.
    */
   async openFile(path: string) {
-    const page = this.channel.page.page
+    return await this.mutexes.focusMutex.runExclusive(async () => {
+      const oldActiveDocument = await this.tryGetActiveDocument()
+      try {
+        const page = this.channel.page
+        const pwPage = page.page
 
-    const abort = new AbortController()
+        const abort = new AbortController()
 
-    const blankDonePromise = this.channel.page.waitForBlankDone(abort.signal)
+        const blankDonePromise = page.waitForBlankDone(abort.signal)
 
-    const fileChooserPromise = page.waitForEvent("filechooser")
-    await page.waitForTimeout(500) // Wait for the filechooser listener to be ready
-    await page.keyboard.press("Control+o")
-    const fileChooser = await fileChooserPromise
+        const fileChooserPromise = pwPage.waitForEvent("filechooser")
+        await pwPage.waitForTimeout(500) // Wait for the filechooser listener to be ready
+        await pwPage.keyboard.press("Control+o")
+        const fileChooser = await fileChooserPromise
 
-    await fileChooser.setFiles(path)
+        await fileChooser.setFiles(path)
 
-    const cleanup = abortOnTimeout(
-      abort,
-      60_000,
-      new Error("openFile() timed out")
-    )
+        const cleanup = abortOnTimeout(
+          abort,
+          60_000,
+          new Error("openFile() timed out")
+        )
 
-    await blankDonePromise
-
-    cleanup()
+        try {
+          await blankDonePromise
+          return this.activeDocument.$ref()
+        } finally {
+          cleanup()
+        }
+      } finally {
+        if (oldActiveDocument) {
+          await this.activeDocument.$set(oldActiveDocument)
+        }
+      }
+    })
   }
 
-  uploadFont(font: Buffer, name: string) {
-    return this.uploadFonts({ [name]: font })
+  async uploadFont(font: Buffer, name: string) {
+    return await this.uploadFonts({ [name]: font })
   }
 
   async uploadFonts(fonts: Record<string, Buffer>) {
-    const page = this.channel.page.page
+    const pwPage = this.channel.page.page
     const fontsBase64 = Object.entries(fonts).map(([name, buffer]) => ({
       name,
       base64: buffer.toString("base64")
     }))
 
-    const toArrayBuffer = await makeBase64ToArrayBufferFnHandle(page)
+    const toArrayBuffer = await makeBase64ToArrayBufferFnHandle(pwPage)
 
-    let dialogListener: ((dialog: Dialog) => void) | null = null
-    try {
-      const dataTransfer = await page.evaluateHandle(
-        ([fontsBase64, toArrayBuffer]) => {
-          const dataTransfer = new DataTransfer()
-          for (const { name, base64 } of fontsBase64) {
-            const buffer = toArrayBuffer(base64)
-            dataTransfer.items.add(new File([buffer], name))
-          }
-          return dataTransfer
-        },
-        [fontsBase64, toArrayBuffer] as const
-      )
+    await PhotopeaMutexes.of(pwPage).dialogMutex.runExclusive(async () => {
+      let dialogListener: ((dialog: Dialog) => void) | null = null
+      try {
+        const dataTransfer = await pwPage.evaluateHandle(
+          ([fontsBase64, toArrayBuffer]) => {
+            const dataTransfer = new DataTransfer()
+            for (const { name, base64 } of fontsBase64) {
+              const buffer = toArrayBuffer(base64)
+              dataTransfer.items.add(new File([buffer], name))
+            }
+            return dataTransfer
+          },
+          [fontsBase64, toArrayBuffer] as const
+        )
 
-      dialogListener = (dialog: Dialog) => dialog.dismiss()
-      page.addListener("dialog", dialogListener)
+        dialogListener = (dialog: Dialog) => dialog.dismiss()
+        pwPage.on("dialog", dialogListener)
 
-      // wait for console message: [{_data: Uint8Array}]
-      const consolePromise = page.waitForEvent("console", async (msg) => {
-        const args = msg.args()
-        if (args.length == 0) return false
-        const firstArg = args[0]
+        // wait for console message: [{_data: Uint8Array}]
+        const consolePromise = pwPage.waitForEvent("console", async (msg) => {
+          const args = msg.args()
+          if (args.length == 0) return false
+          const firstArg = args[0]
 
-        return await firstArg.evaluate((arg) => {
-          return arg[0]?._data instanceof Uint8Array
+          return await firstArg.evaluate(
+            (arg) => arg[0]?._data instanceof Uint8Array
+          )
         })
-      })
 
-      await page.dispatchEvent(
-        ".mainblock > .block > .body",
-        "drop",
-        { dataTransfer },
-        { strict: true }
-      )
+        await pwPage.dispatchEvent(
+          ".mainblock > .block > .body",
+          "drop",
+          { dataTransfer },
+          { strict: true }
+        )
 
-      await consolePromise
-    } finally {
-      await toArrayBuffer.dispose()
-      if (dialogListener) page.removeListener("dialog", dialogListener)
-    }
+        await consolePromise
+      } finally {
+        await toArrayBuffer.dispose()
+        if (dialogListener) pwPage.off("dialog", dialogListener)
+      }
+    })
   }
 
-  pause = () => this.channel.page.page.pause()
+  async pause() {
+    return await this.channel.page.page.pause()
+  }
+
+  async hasOpenDocument(): Promise<boolean> {
+    return await this.channel.evaluate<boolean>(
+      "return app.documents.length > 0"
+    )
+  }
+
+  async tryGetActiveDocument() {
+    if (await this.hasOpenDocument()) {
+      return await this.activeDocument.$ref()
+    }
+    return null
+  }
 }
