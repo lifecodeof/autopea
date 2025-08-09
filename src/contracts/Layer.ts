@@ -97,37 +97,55 @@ export class Layer extends Contract {
   }
 
   // Utils
-  async centerHorizontally({
-    targetBounds
+  /**
+   * Position the layer relative to a target area.
+   * @param options Options for positioning the layer.
+   * @param options.targetBounds The target bounds to position relative to (default: document bounds).
+   * @param options.horizontal Horizontal alignment: "center", "left", or "right" (default: undefined).
+   * @param options.vertical Vertical alignment: "center", "top", or "bottom" (default: undefined).
+   */
+  async position({
+    bounds,
+    horizontal,
+    vertical
   }: {
-    targetBounds?: UnitRectLocal // Default to document bounds
+    bounds?: UnitRectLocal // Default to document bounds
+    horizontal?: "center" | "left" | "right" // Horizontal alignment
+    vertical?: "center" | "top" | "bottom" // Vertical alignment
   } = {}) {
     const doc = App.of(this.channel).activeDocument
-    const targetCenter = targetBounds
-      ? targetBounds.centerX
-      : (await doc.width.$get()) / 2
+    bounds ??= await doc.makeBounds()
 
-    const layerCenter = await this.bounds.centerX.$get()
-    const offset = targetCenter - layerCenter
-    if (offset !== 0) {
-      await this.translate(offset, 0)
+    const layerBounds = await this.bounds.$fetch()
+    let deltaX = 0
+    let deltaY = 0
+
+    if (horizontal) {
+      const targetCenterX = bounds.centerX
+      const layerCenterX = layerBounds.centerX
+      if (horizontal === "center") {
+        deltaX = targetCenterX - layerCenterX
+      } else if (horizontal === "left") {
+        deltaX = bounds.left - layerBounds.left
+      } else if (horizontal === "right") {
+        deltaX = bounds.right - layerBounds.right
+      }
     }
-  }
 
-  async centerVertically({
-    targetBounds
-  }: {
-    targetBounds?: UnitRectLocal // Default to document bounds
-  } = {}) {
-    const doc = App.of(this.channel).activeDocument
-    const targetCenter = targetBounds
-      ? targetBounds.centerY
-      : (await doc.height.$get()) / 2
+    if (vertical) {
+      const targetCenterY = bounds.centerY
+      const layerCenterY = layerBounds.centerY
+      if (vertical === "center") {
+        deltaY = targetCenterY - layerCenterY
+      } else if (vertical === "top") {
+        deltaY = bounds.top - layerBounds.top
+      } else if (vertical === "bottom") {
+        deltaY = bounds.bottom - layerBounds.bottom
+      }
+    }
 
-    const layerCenter = await this.bounds.centerY.$get()
-    const offset = targetCenter - layerCenter
-    if (offset !== 0) {
-      await this.translate(0, offset)
+    if (deltaX !== 0 || deltaY !== 0) {
+      await this.translate(deltaX, deltaY)
     }
   }
 
