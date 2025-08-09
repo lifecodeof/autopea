@@ -71,14 +71,14 @@ export const waitForEvent = async <
 
     // @ts-expect-error
     const listener: Listener1<Event, EventMap> = (...params) => {
-      let pass = false
+      let passed = false
 
       try {
         // @ts-expect-error
-        pass = predicate ? predicate(...params) : true
+        passed = predicate ? predicate(...params) : true
       } catch (error) {}
 
-      if (pass) {
+      if (passed) {
         cleanup()
         // @ts-expect-error
         resolve(selector(...params))

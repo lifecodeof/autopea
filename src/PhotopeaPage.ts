@@ -23,6 +23,7 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
    */
   private constructor(public readonly page: Page) {
     super()
+    this.setMaxListeners(0)
   }
 
   /**
@@ -128,8 +129,9 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
     } catch (error) {
       if (Date.now() - startTime < 30_000) {
         await new Promise((resolve) => setTimeout(resolve, 500))
+      } else {
+        throw error
       }
-      throw error
     }
 
     // Wait for the first "done" message

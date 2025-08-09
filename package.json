@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "start": "tsx main.ts",
-    "repl": "tsx repl.ts",
+    "repl": "tsx src/repl.ts",
     "test": "vitest"
   },
   "keywords": [],
