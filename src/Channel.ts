@@ -293,7 +293,7 @@ export class PhotopeaChannel {
    * @param signal Optional AbortSignal to cancel the operation.
    * @returns Promise resolving to a handle for the string.
    */
-  async createChunkedHandle(value: string, signal?: AbortSignal) {
+  async createHandleChunked(value: string, signal?: AbortSignal) {
     const chunkSize = 104_000_000
     const chunks = []
 

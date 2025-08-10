@@ -1,4 +1,4 @@
-import { Handleable, PhotopeaChannel } from "@/Channel"
+import { PhotopeaChannel } from "@/Channel"
 import { PhotopeaMutexes } from "@/PhotopeaMutexes"
 import type { Dialog } from "playwright"
 import z from "zod"
