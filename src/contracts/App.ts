@@ -9,10 +9,13 @@ import { PDocument, PDocuments, type SaveFormat } from "./PDocument"
 import { PFile } from "./PFile"
 import { Preferences } from "./Preferences"
 import { SolidColor } from "./SolidColor"
+import { PhotopeaPage } from "@/PhotopeaPage"
 
 export class App extends Contract {
-  static of(obj: PhotopeaChannel | Contract) {
+  static of(obj: PhotopeaChannel | Contract | PhotopeaPage) {
+    if (obj instanceof PhotopeaPage) obj = new PhotopeaChannel(obj)
     if (obj instanceof Contract) obj = Contract.getChannel(obj)
+
     return new App(obj, "app")
   }
 

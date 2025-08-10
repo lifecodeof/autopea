@@ -185,11 +185,15 @@ export class Layer extends Contract {
   async fitToBounds({
     targetBounds,
     grow = false,
+    growVertical = false,
+    growHorizontal = false,
     preserveAspect = true,
     padding = 0
-  }: {
+  }: { // TODO: indicate mutually exclusive options as types
     targetBounds?: UnitRectLocal // Default to document bounds
     grow?: boolean // If true, will also grow the layer if needed
+    growVertical?: boolean // If true, will also grow the layer vertically if needed
+    growHorizontal?: boolean // If true, will also grow the layer horizontally if needed
     preserveAspect?: boolean // If true, will preserve aspect ratio (default: true)
     padding?: number // Padding to apply (default: 0)
   } = {}) {
@@ -220,6 +224,10 @@ export class Layer extends Contract {
     let finalScaleY: number
 
     if (preserveAspect) {
+      if (growVertical || growHorizontal) {
+        throw new Error("growVertical or growHorizontal is not supported when preserving aspect ratio");
+      }
+
       // Preserve aspect ratio - use the smaller scale for both dimensions
       const uniformScale = grow
         ? Math.min(scaleX, scaleY)
@@ -228,8 +236,8 @@ export class Layer extends Contract {
       finalScaleY = uniformScale
     } else {
       // Allow non-uniform scaling - scale each dimension independently
-      finalScaleX = grow ? scaleX : Math.min(scaleX, 1)
-      finalScaleY = grow ? scaleY : Math.min(scaleY, 1)
+      finalScaleX = (grow || growHorizontal) ? scaleX : Math.min(scaleX, 1)
+      finalScaleY = (grow || growVertical) ? scaleY : Math.min(scaleY, 1)
     }
 
     // Resize if we need to shrink or if we need to grow (when grow is enabled)

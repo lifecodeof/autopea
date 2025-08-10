@@ -141,4 +141,13 @@ export class UnitRectLocal {
   get [3]() {
     return this.bottom
   }
+
+  toJSON() {
+    return {
+      left: this.left,
+      top: this.top,
+      right: this.right,
+      bottom: this.bottom
+    }
+  }
 }

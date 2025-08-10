@@ -11,7 +11,7 @@ export const browserTest = test.extend<{
   browserCtx: [
     async ({}, use) => {
       const browser = await chromium.launch({
-        headless: false
+        // headless: false
       })
 
       const context = await browser.newContext()

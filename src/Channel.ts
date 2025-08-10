@@ -326,4 +326,20 @@ export class PhotopeaChannel {
   public getExpressionForHandle(handle: string): string {
     return `globalThis["${handlePrefix + handle}"]`
   }
+
+  async iterHandle(handle: string): Promise<string[]> {
+    const expression = this.getExpressionForHandle(handle)
+    const result = await this.evaluate<string[]>(`\
+var handles = [];
+for (var i = 0; i < ${expression}.length; i++) {
+  var value = ${expression}[i];
+  var handle = Math.random().toString(36).slice(2);
+  globalThis["${handlePrefix}" + handle] = value;
+  handles.push(handle);
+}
+return handles;\
+`)
+    invariant(Array.isArray(result), "Result should be an array of handles")
+    return result
+  }
 }

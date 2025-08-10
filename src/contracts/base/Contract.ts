@@ -227,6 +227,17 @@ export abstract class ContractCollection<T extends Contract> extends Contract {
   get length() {
     return this.$value(z.number())`.length`
   }
+
+  async toArray(): Promise<T[]> {
+    const thisHandle = await this.channel.evaluateHandle(
+      "return " + this.expression
+    )
+    const handles = await this.channel.iterHandle(thisHandle)
+    return handles.map((h) => {
+      const expression = this.channel.getExpressionForHandle(h)
+      return new (this.itemType())(this.channel, expression)
+    })
+  }
 }
 
 export class Dynamic extends Contract {
