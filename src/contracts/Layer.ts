@@ -4,7 +4,7 @@ import { ContractCollection, Contract, Dynamic } from "./base/Contract"
 import { LayerKind, type AnchorPosition, type ElementPlacement } from "./enums"
 import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
 import { PDocument } from "./PDocument"
-import { UnitRect, type UnitRectLocal } from "./UnitRect"
+import { UnitRect, UnitRectLocal } from "./UnitRect"
 
 export class Layer extends Contract {
   get name() {
@@ -185,14 +185,27 @@ export class Layer extends Contract {
   async fitToBounds({
     targetBounds,
     grow = false,
-    preserveAspect = true
+    preserveAspect = true,
+    padding = 0
   }: {
     targetBounds?: UnitRectLocal // Default to document bounds
     grow?: boolean // If true, will also grow the layer if needed
     preserveAspect?: boolean // If true, will preserve aspect ratio (default: true)
+    padding?: number // Padding to apply (default: 0)
   } = {}) {
     const doc = App.of(this).activeDocument
     targetBounds ??= await doc.makeBounds()
+
+    // Apply padding to target bounds
+    if (padding) {
+      targetBounds = new UnitRectLocal(
+        targetBounds.left + padding,
+        targetBounds.top + padding,
+        targetBounds.right - padding,
+        targetBounds.bottom - padding
+      )
+    }
+
     const bounds = await this.bounds.$fetch()
 
     const layerWidth = bounds.right - bounds.left
