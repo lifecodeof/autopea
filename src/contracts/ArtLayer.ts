@@ -20,9 +20,6 @@ export class ArtLayer extends Layer {
   get textItem() {
     return this.$(TextItem)`.textItem`
   }
-  get parent() {
-    return this.$(PDocument)`.parent`
-  }
 
   applyGaussianBlur(radius: number) {
     return this.$eval()`.applyGaussianBlur(${radius})`
@@ -60,39 +57,50 @@ export class ArtLayer extends Layer {
   // Utils
   async openSmartObject() {
     const isSmartObject = (await this.kind.$get()) === LayerKind.SMARTOBJECT
-
     if (!isSmartObject) {
       const layerName = await this.name.$get()
       throw new Error(`Layer "${layerName}" is not a smart object.`)
     }
 
-    await App.of(this).activeDocument.activeLayer.$set(this)
+    return await this.withActive(async (layer) => {
+      await this.$eval({
+        absolute: true
+      })`executeAction(stringIDToTypeID("placedLayerEditContents"), null, DialogModes.NO)`
 
-    await this.$eval({
-      absolute: true
-    })`executeAction(stringIDToTypeID("placedLayerEditContents"), null, DialogModes.NO)`
+      return await App.of(layer).activeDocument.$ref()
+    })
   }
 
   // Utils
-
-  //! BUG: Race condition if used outside of withFocus (focusMutex)
+  //! BUG: Race condition if used outside of withActive (focusMutex)
   //! BUG: Unknown behavior if called when document has no active layer
-  private async withDocumentFocus<T>(
+  private async withActiveForDocument<T>(
     callback: (layer: this) => Promise<T>
   ): Promise<T> {
-    const oldFocus = await this.parent.activeLayer.$ref()
+    const document = await this.getDocument()
+    const oldFocus = await document.activeLayer.$ref()
     try {
-      await this.parent.activeLayer.$set(this)
+      await document.activeLayer.$set(this)
       return await callback(this)
     } finally {
-      await this.parent.activeLayer.$set(oldFocus)
+      await document.activeLayer.$set(oldFocus)
     }
   }
 
-  async withFocus<T>(callback: (layer: this) => Promise<T>): Promise<T> {
-    return this.parent.withFocus(async () => {
-      return await this.withDocumentFocus(callback)
+  async withActive<T>(callback: (layer: this) => Promise<T>): Promise<T> {
+    const document = await this.getDocument()
+    return document.withActive(async () => {
+      return await this.withActiveForDocument(callback)
     })
+  }
+
+  async getDocument() {
+    let parent = await this.parent.$ref()
+    while ((await parent.typename.$get()) !== "Document") {
+      parent = await parent.getProperty("parent").$ref()
+    }
+
+    return parent.cast(PDocument)
   }
 }
 

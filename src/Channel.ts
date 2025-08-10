@@ -1,7 +1,7 @@
 import type { PhotopeaPage } from "@/PhotopeaPage"
 import invariant from "tiny-invariant"
 import { abortOnTimeout } from "./helpers"
-import { Contract } from "./contracts/base/Contract"
+import { Contract, Dynamic } from "./contracts/base/Contract"
 import { Mutex } from "async-mutex"
 
 export type Handleable = Contract | string
@@ -22,11 +22,13 @@ const handlePrefix = "__ppHandle__"
 /** Error class for wrapping errors from the Photopea channel. */
 export class PhotopeaChannelError extends Error {
   constructor(
-    public error: Error,
+    public error: Error | string,
     public script: string,
     public throwedOnPage = false
   ) {
-    super("Error while executing Photopea script")
+    super("Error while executing Photopea script", {
+      cause: error instanceof Error ? error : new Error(String(error))
+    })
   }
 
   static wrap = (script: string) => (error: any) => {
@@ -38,7 +40,6 @@ export class PhotopeaChannelError extends Error {
     throw PhotopeaChannelError.wrap(script)(error)
   }
 }
-
 
 /**
  * Communication channel for interacting with a PhotopeaPage instance.
@@ -175,13 +176,34 @@ export class PhotopeaChannel {
       await this.page.sendMessage(script)
       const result = await resultPromise
 
-      if (result instanceof PhotopeaChannelError) {
+      if (result instanceof Error) {
         throw result
       }
 
       abort.abort() // Clear other listeners
       return result
     } catch (error) {
+      // for (const [key, value] of Object.entries(handleVars)) {
+      //   const contract =
+      //     value instanceof Contract ? value : new Dynamic(this, value)
+
+      //   console.log(key, ":", await contract.typename.$get().catch(() => "?"))
+      // }
+
+      // // Extract additional handleVars from the script
+      // const handleRegex = /globalThis\["(__ppHandle__\w+)"\]/g
+      // let match
+      // while ((match = handleRegex.exec(script)) !== null) {
+      //   const handle = match[1]
+      //   const dynamicHandle = new Dynamic(this, handle)
+      //   console.log(
+      //     "Extracted handle:",
+      //     handle,
+      //     "Type:",
+      //     await dynamicHandle.typename.$get().catch(() => "?")
+      //   )
+      // }
+
       throw error
     }
   }

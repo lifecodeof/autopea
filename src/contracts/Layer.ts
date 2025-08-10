@@ -1,6 +1,6 @@
 import z from "zod"
 import { App } from "./App"
-import { ContractCollection, Contract } from "./base/Contract"
+import { ContractCollection, Contract, Dynamic } from "./base/Contract"
 import { LayerKind, type AnchorPosition, type ElementPlacement } from "./enums"
 import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
 import { PDocument } from "./PDocument"
@@ -49,6 +49,10 @@ export class Layer extends Contract {
 
   get bounds() {
     return this.$(UnitRect)`.bounds`
+  }
+
+  get parent() {
+    return this.$(Dynamic)`.parent`
   }
 
   duplicate(relativeObject?: Layer, insertionLocation?: ElementPlacement) {

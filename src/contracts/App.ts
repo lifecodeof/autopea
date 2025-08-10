@@ -127,6 +127,19 @@ export class App extends Contract {
   }
 
   // Extra Utils
+  async restoreActiveDocument<T>(callback: () => Promise<T>) {
+    return await this.mutexes.focusMutex.runExclusive(async () => {
+      const oldActiveDocument = await this.tryGetActiveDocument()
+      try {
+        return await callback()
+      } finally {
+        if (oldActiveDocument) {
+          await this.activeDocument.$set(oldActiveDocument)
+        }
+      }
+    })
+  }
+
   async saveToBuffer(format: SaveFormat): Promise<Buffer> {
     return await this.activeDocument.saveToBuffer(format)
   }
@@ -138,21 +151,14 @@ export class App extends Contract {
    * @returns Promise that resolves when the image is loaded.
    */
   async openFromUrl(url: string) {
-    return await this.mutexes.focusMutex.runExclusive(async () => {
-      const oldActiveDocument = await this.tryGetActiveDocument()
-      try {
-        const signal = timeoutAbortSignal(10_000)
+    return await this.restoreActiveDocument(async () => {
+      const signal = timeoutAbortSignal(10_000)
 
-        const waiterPromise = this.channel.page.waitForBlankDone(signal)
-        await this.channel.evaluate<void>(`app.open(${JSON.stringify(url)});`)
-        await waiterPromise
+      const waiterPromise = this.channel.page.waitForBlankDone(signal)
+      await this.channel.evaluate<void>(`app.open(${JSON.stringify(url)});`)
+      await waiterPromise
 
-        return this.activeDocument.$ref()
-      } finally {
-        if (oldActiveDocument) {
-          await this.activeDocument.$set(oldActiveDocument)
-        }
-      }
+      return this.activeDocument.$ref()
     })
   }
 
@@ -163,39 +169,32 @@ export class App extends Contract {
    * @returns Promise that resolves when the image is loaded.
    */
   async openFile(path: string) {
-    return await this.mutexes.focusMutex.runExclusive(async () => {
-      const oldActiveDocument = await this.tryGetActiveDocument()
+    return await this.restoreActiveDocument(async () => {
+      const page = this.channel.page
+      const pwPage = page.page
+
+      const abort = new AbortController()
+
+      const blankDonePromise = page.waitForBlankDone(abort.signal)
+
+      const fileChooserPromise = pwPage.waitForEvent("filechooser")
+      await pwPage.waitForTimeout(500) // Wait for the filechooser listener to be ready
+      await pwPage.keyboard.press("Control+o")
+      const fileChooser = await fileChooserPromise
+
+      await fileChooser.setFiles(path)
+
+      const cleanup = abortOnTimeout(
+        abort,
+        60_000,
+        new Error("openFile() timed out")
+      )
+
       try {
-        const page = this.channel.page
-        const pwPage = page.page
-
-        const abort = new AbortController()
-
-        const blankDonePromise = page.waitForBlankDone(abort.signal)
-
-        const fileChooserPromise = pwPage.waitForEvent("filechooser")
-        await pwPage.waitForTimeout(500) // Wait for the filechooser listener to be ready
-        await pwPage.keyboard.press("Control+o")
-        const fileChooser = await fileChooserPromise
-
-        await fileChooser.setFiles(path)
-
-        const cleanup = abortOnTimeout(
-          abort,
-          60_000,
-          new Error("openFile() timed out")
-        )
-
-        try {
-          await blankDonePromise
-          return this.activeDocument.$ref()
-        } finally {
-          cleanup()
-        }
+        await blankDonePromise
+        return this.activeDocument.$ref()
       } finally {
-        if (oldActiveDocument) {
-          await this.activeDocument.$set(oldActiveDocument)
-        }
+        cleanup()
       }
     })
   }

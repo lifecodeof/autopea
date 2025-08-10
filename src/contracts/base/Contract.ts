@@ -18,6 +18,10 @@ export class Contract {
     protected readonly expression: string
   ) {}
 
+  get typename() {
+    return this.$value(z.string())`.typename`
+  }
+
   public static getExpression(instance: Contract): string {
     return instance.expression
   }
@@ -222,5 +226,15 @@ export abstract class ContractCollection<T extends Contract> extends Contract {
 
   get length() {
     return this.$value(z.number())`.length`
+  }
+}
+
+export class Dynamic extends Contract {
+  getProperty(key: string) {
+    return this.$(Dynamic)`[${key}]`
+  }
+
+  cast<T extends Contract>(constructor: Constructor<T>): T {
+    return new constructor(this.channel, this.expression)
   }
 }

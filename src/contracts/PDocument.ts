@@ -116,7 +116,7 @@ export class PDocument extends Contract {
   }
 
   // Extra Utils
-  async withFocus<T>(callback: (doc: this) => Promise<T>): Promise<T> {
+  async withActive<T>(callback: (doc: this) => Promise<T>): Promise<T> {
     let doc = this
 
     // If this is a lazy reference, resolve it
@@ -125,16 +125,9 @@ export class PDocument extends Contract {
     }
 
     const app = App.of(this)
-    return await this.mutexes.focusMutex.runExclusive(async () => {
-      const oldFocus = await app.tryGetActiveDocument()
-      try {
-        await app.activeDocument.$set(doc)
-        return await callback(doc)
-      } finally {
-        if (oldFocus) {
-          await app.activeDocument.$set(oldFocus)
-        }
-      }
+    return await app.restoreActiveDocument(async () => {
+      await app.activeDocument.$set(doc)
+      return await callback(doc)
     })
   }
 
