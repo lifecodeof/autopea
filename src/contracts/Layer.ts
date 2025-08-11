@@ -181,6 +181,7 @@ export class Layer extends Contract {
   }
 
   // TODO: don't rely on activeDocument and rename targetBounds to bounds
+  // TODO: Refactor this method to use new UnitRectLocal getters/setters or even add new ones
   /** Shrink or grow layer and transform so it does not overflow document bounds */
   async fitToBounds({
     targetBounds,
@@ -189,7 +190,8 @@ export class Layer extends Contract {
     growHorizontal = false,
     preserveAspect = true,
     padding = 0
-  }: { // TODO: indicate mutually exclusive options as types
+  }: {
+    // TODO: indicate mutually exclusive options as types
     targetBounds?: UnitRectLocal // Default to document bounds
     grow?: boolean // If true, will also grow the layer if needed
     growVertical?: boolean // If true, will also grow the layer vertically if needed
@@ -225,7 +227,9 @@ export class Layer extends Contract {
 
     if (preserveAspect) {
       if (growVertical || growHorizontal) {
-        throw new Error("growVertical or growHorizontal is not supported when preserving aspect ratio");
+        throw new Error(
+          "growVertical or growHorizontal is not supported when preserving aspect ratio"
+        )
       }
 
       // Preserve aspect ratio - use the smaller scale for both dimensions
@@ -236,8 +240,8 @@ export class Layer extends Contract {
       finalScaleY = uniformScale
     } else {
       // Allow non-uniform scaling - scale each dimension independently
-      finalScaleX = (grow || growHorizontal) ? scaleX : Math.min(scaleX, 1)
-      finalScaleY = (grow || growVertical) ? scaleY : Math.min(scaleY, 1)
+      finalScaleX = grow || growHorizontal ? scaleX : Math.min(scaleX, 1)
+      finalScaleY = grow || growVertical ? scaleY : Math.min(scaleY, 1)
     }
 
     // Resize if we need to shrink or if we need to grow (when grow is enabled)
