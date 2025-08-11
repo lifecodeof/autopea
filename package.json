@@ -31,9 +31,7 @@
     "@types/node": "^24.1.0",
     "@vitest/ui": "3.2.4",
     "jest-image-snapshot": "^6.5.1",
-    "looks-same": "^9.0.1",
     "prettier": "^3.6.2",
-    "sharp": "^0.34.3",
     "tsdown": "^0.13.0",
     "tsup": "^8.5.0",
     "type-fest": "^4.41.0"
