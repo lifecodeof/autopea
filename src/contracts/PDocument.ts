@@ -115,21 +115,6 @@ export class PDocument extends Contract {
   }
 
   // Extra Utils
-  async withActive<T>(callback: (doc: this) => Promise<T>): Promise<T> {
-    let doc = this
-
-    // If this is a lazy reference, resolve it
-    if (this.expression.includes("app.activeDocument")) {
-      doc = await this.$ref()
-    }
-
-    const app = App.of(this)
-    return await app.restoreActiveDocument(async () => {
-      await app.activeDocument.$set(doc)
-      return await callback(doc)
-    })
-  }
-
   /**
    * Saves the current or specified document to a buffer in the given format.
    * @param format The format to save as (e.g., 'png', 'jpg').

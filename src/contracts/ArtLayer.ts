@@ -62,38 +62,14 @@ export class ArtLayer extends Layer {
       throw new Error(`Layer "${layerName}" is not a smart object.`)
     }
 
-    return await this.withActive(async (layer) => {
-      await this.$eval({
-        absolute: true
-      })`executeAction(stringIDToTypeID("placedLayerEditContents"), null, DialogModes.NO)`
+    await this.$eval({
+      absolute: true
+    })`executeAction(stringIDToTypeID("placedLayerEditContents"), null, DialogModes.NO)`
 
-      return await App.of(layer).activeDocument.$ref()
-    })
+    return await App.of(this).activeDocument.$ref()
   }
 
   // Utils
-  //! BUG: Race condition if used outside of withActive (focusMutex)
-  //! BUG: Unknown behavior if called when document has no active layer
-  private async withActiveForDocument<T>(
-    callback: (layer: this) => Promise<T>
-  ): Promise<T> {
-    const document = await this.getDocument()
-    const oldFocus = await document.activeLayer.$ref()
-    try {
-      await document.activeLayer.$set(this)
-      return await callback(this)
-    } finally {
-      await document.activeLayer.$set(oldFocus)
-    }
-  }
-
-  async withActive<T>(callback: (layer: this) => Promise<T>): Promise<T> {
-    const document = await this.getDocument()
-    return document.withActive(async () => {
-      return await this.withActiveForDocument(callback)
-    })
-  }
-
   async getDocument() {
     let parent = await this.parent.$ref()
     while ((await parent.typename.$get()) !== "Document") {

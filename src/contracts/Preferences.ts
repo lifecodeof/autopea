@@ -65,7 +65,4 @@ export class Preferences extends Contract {
   get windowsThumbnail() {
     return this.$value(z.boolean())`.windowsThumbnail`
   }
-  get typename() {
-    return this.$value(z.string())`.typename`
-  }
 }
