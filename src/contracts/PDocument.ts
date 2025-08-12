@@ -116,6 +116,26 @@ export class PDocument extends Contract {
 
   // Extra Utils
   /**
+   * Saves document and waits for smart object updated message
+   */
+  async saveSmartObject() {
+    const waiter = this.channel.page.page.waitForEvent(
+      "console",
+      async (msg) => {
+        const args = msg.args()
+        if (args.length === 0) return false
+        const firstArg = args[0]
+        return await firstArg.evaluate(
+          (arg) => arg === "Alert: Smart Object updated"
+        )
+      }
+    )
+
+    await this.save()
+    await waiter
+  }
+
+  /**
    * Saves the current or specified document to a buffer in the given format.
    * @param format The format to save as (e.g., 'png', 'jpg').
    * @param document Optional PhotopeaHandle for a specific document. If omitted, uses the active document.
