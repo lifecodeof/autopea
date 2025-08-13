@@ -46,10 +46,8 @@ export const sharedPageTest = browserTest.extend<{
 export const channelTest = pageTest.extend<{
   channel: PhotopeaChannel
 }>({
-  channel: async ({ page, signal }, use) => {
-    const channel = new PhotopeaChannel(page)
-    channel.timeout = 0 // Disable timeout for tests
-    await use(channel)
+  channel: async ({ page }, use) => {
+    await use(new PhotopeaChannel(page))
   }
 })
 
@@ -57,7 +55,7 @@ export const sharedChannelTest = sharedPageTest.extend<{
   sharedChannel: PhotopeaChannel
 }>({
   sharedChannel: [
-    async ({ sharedPage, signal }, use) => {
+    async ({ sharedPage }, use) => {
       await use(new PhotopeaChannel(sharedPage))
     },
     { scope: "worker" }

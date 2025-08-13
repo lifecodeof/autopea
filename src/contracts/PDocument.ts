@@ -176,6 +176,12 @@ export class PDocument extends Contract {
 
     return new UnitRectLocal(0, 0, width, height)
   }
+
+  async duplicate() {
+    const page = this.channel.page.page
+    await page.locator(".topbar").getByText("Image").click()
+    await page.getByText("Duplicate").click()
+  }
 }
 
 export class PDocuments extends ContractCollection<PDocument> {
