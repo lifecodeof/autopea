@@ -188,6 +188,10 @@ export class Contract {
       wrapParentheses: true
     })` == ${other.expression}`
   }
+
+  $cast<T extends Contract>(constructor: Constructor<T>): T {
+    return new constructor(this.channel, this.expression)
+  }
 }
 
 export type InferContractValue<T extends Contract> =
@@ -243,9 +247,5 @@ export abstract class ContractCollection<T extends Contract> extends Contract {
 export class Dynamic extends Contract {
   getProperty(key: string) {
     return this.$(Dynamic)`[${key}]`
-  }
-
-  cast<T extends Contract>(constructor: Constructor<T>): T {
-    return new constructor(this.channel, this.expression)
   }
 }

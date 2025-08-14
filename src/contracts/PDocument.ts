@@ -179,9 +179,9 @@ export class PDocument extends Contract {
 
   async duplicate() {
     const page = this.channel.page.page
-    await page.locator(".topbar").getByText("Image").click()
-    await page.getByText("Duplicate").click()
-    // We won't return document since timing of duplication operation is not guaranteed
+    await page.click(".topbar > span:nth-child(1) > button:nth-child(3)")
+    await page.click(".contextpanel > .enab:nth-child(20)")
+    return await App.of(this).activeDocument.$ref()
   }
 }
 

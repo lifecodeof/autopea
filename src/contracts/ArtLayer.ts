@@ -76,7 +76,7 @@ export class ArtLayer extends Layer {
       parent = await parent.getProperty("parent").$ref()
     }
 
-    return parent.cast(PDocument)
+    return parent.$cast(PDocument)
   }
 }
 

@@ -116,7 +116,11 @@ export class PhotopeaChannel {
       }
     } catch (errorOrString) {
       if (errorOrString instanceof PhotopeaChannelError) {
-        throw errorOrString
+        throw new PhotopeaChannelError(
+          errorOrString.error,
+          errorOrString.script,
+          errorOrString.throwedOnPage
+        )
       }
 
       const error =
