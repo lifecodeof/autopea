@@ -1,6 +1,6 @@
 import { ArtLayers } from "./ArtLayer"
 import { ContractCollection } from "./base/Contract"
-import { Layer } from "./Layer"
+import { Layer, Layers } from "./Layer"
 
 export class LayerSet extends Layer {
   get artLayers() {
@@ -9,6 +9,10 @@ export class LayerSet extends Layer {
 
   get layerSets() {
     return this.$(LayerSets)`.layerSets`
+  }
+
+  get layers() {
+    return this.$(Layers)`.layers`
   }
 
   override duplicate() {
