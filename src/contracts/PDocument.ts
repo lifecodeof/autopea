@@ -181,6 +181,7 @@ export class PDocument extends Contract {
     const page = this.channel.page.page
     await page.locator(".topbar").getByText("Image").click()
     await page.getByText("Duplicate").click()
+    // We won't return document since timing of duplication operation is not guaranteed
   }
 }
 
