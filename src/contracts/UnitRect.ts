@@ -46,8 +46,8 @@ export class UnitRect extends Contract {
   }
 
   get width() {
-    const left = this.left
     const right = this.right
+    const left = this.left
     return this.$value(z.number(), {
       absolute: true,
       wrapParentheses: true

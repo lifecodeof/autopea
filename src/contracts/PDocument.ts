@@ -154,7 +154,8 @@ export class PDocument extends Contract {
         const downloadPromise = page.waitForEvent("download")
         await this.channel.evaluate<void>(
           `doc.saveAs(new File(""), ${saveFormatCode})`,
-          { doc: this }
+          { doc: this },
+          { timeout: 10_000 }
         )
         const download = await downloadPromise
 

@@ -62,6 +62,8 @@ export class ArtLayer extends Layer {
       throw new Error(`Layer "${layerName}" is not a smart object.`)
     }
 
+    await App.of(this).activeDocument.activeLayer.$set(this)
+
     await this.$eval({
       absolute: true
     })`executeAction(stringIDToTypeID("placedLayerEditContents"), null, DialogModes.NO)`
