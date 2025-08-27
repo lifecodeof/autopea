@@ -85,10 +85,10 @@ export class UnitRect extends Contract {
 // client-side version of UnitRect for frequent access
 export class UnitRectLocal {
   constructor(
-    public left: number,
-    public top: number,
-    public right: number,
-    public bottom: number
+    public left: number = 0,
+    public top: number = 0,
+    public right: number = 0,
+    public bottom: number = 0
   ) {}
 
   get width() {
@@ -149,5 +149,12 @@ export class UnitRectLocal {
       right: this.right,
       bottom: this.bottom
     }
+  }
+
+  union(rect: UnitRectLocal) {
+    this.left = Math.min(this.left, rect.left)
+    this.top = Math.min(this.top, rect.top)
+    this.right = Math.max(this.right, rect.right)
+    this.bottom = Math.max(this.bottom, rect.bottom)
   }
 }

@@ -6,6 +6,7 @@ export class PhotopeaMutexes {
 
   public readonly dialogMutex = new Mutex()
   public readonly downloadMutex = new Mutex()
+  public readonly interactionMutex = new Mutex()
 
   static of(page: Page) {
     let instance = this.instanceMap.get(page)

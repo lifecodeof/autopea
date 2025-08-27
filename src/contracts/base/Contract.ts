@@ -30,7 +30,7 @@ export class Contract {
     return instance.channel
   }
 
-  protected get mutexes() {
+  get mutexes() {
     return PhotopeaMutexes.of(this.channel.page.page)
   }
 
@@ -181,12 +181,12 @@ export class Contract {
     await this.channel.evaluate(`${this.expression} = ${this.transfer(value)}`)
   }
 
-  $eq(other: Contract) {
+  $eq(other: InferContractValue<this>) {
     // Loose comparison is intended
     // Photopea always returns false when comparing objects strictly
     return this.$value(z.boolean(), {
       wrapParentheses: true
-    })` == ${other.expression}`
+    })` == ${this.transfer(other)}`
   }
 
   $cast<T extends Contract>(constructor: Constructor<T>): T {
@@ -245,7 +245,7 @@ export abstract class ContractCollection<T extends Contract> extends Contract {
 }
 
 export class Dynamic extends Contract {
-  getProperty(key: string) {
+  $prop(key: string) {
     return this.$(Dynamic)`[${key}]`
   }
 }

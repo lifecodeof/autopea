@@ -5,6 +5,7 @@ import { LayerKind, type AnchorPosition, type ElementPlacement } from "./enums"
 import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
 import { PDocument } from "./PDocument"
 import { UnitRect, UnitRectLocal } from "./UnitRect"
+import { LayerSet } from "./LayerSet"
 
 export class Layer extends Contract {
   get name() {
@@ -100,6 +101,13 @@ export class Layer extends Contract {
     return this.$(Layer)`.merge()`
   }
 
+  /** More reliable than `this.bounds.$fetch()`
+   * Implementors may override this method to provide a more accurate bounding box.
+   */
+  fetchBounds(): Promise<UnitRectLocal> {
+    return this.bounds.$fetch()
+  }
+
   // Utils
   // TODO: don't rely on activeDocument
   /**
@@ -121,7 +129,7 @@ export class Layer extends Contract {
     const doc = App.of(this).activeDocument
     bounds ??= await doc.makeBounds()
 
-    const layerBounds = await this.bounds.$fetch()
+    const layerBounds = await this.fetchBounds()
     let deltaX = 0
     let deltaY = 0
 
@@ -199,8 +207,7 @@ export class Layer extends Contract {
     preserveAspect?: boolean // If true, will preserve aspect ratio (default: true)
     padding?: number // Padding to apply (default: 0)
   } = {}) {
-    const doc = App.of(this).activeDocument
-    targetBounds ??= await doc.makeBounds()
+    targetBounds ??= await App.of(this).activeDocument.makeBounds()
 
     // Apply padding to target bounds
     if (padding) {
@@ -212,7 +219,7 @@ export class Layer extends Contract {
       )
     }
 
-    const bounds = await this.bounds.$fetch()
+    const bounds = await this.fetchBounds()
 
     const layerWidth = bounds.right - bounds.left
     const layerHeight = bounds.bottom - bounds.top
@@ -250,7 +257,7 @@ export class Layer extends Contract {
     }
 
     // Recalculate bounds and move if needed to fit within doc
-    const newBounds = await this.bounds.$fetch()
+    const newBounds = await this.fetchBounds()
     let deltaX = 0
     let deltaY = 0
     if (newBounds.left < targetBounds.left) {
@@ -266,6 +273,41 @@ export class Layer extends Contract {
     if (deltaX !== 0 || deltaY !== 0) {
       await this.translate(deltaX, deltaY)
     }
+  }
+
+  async isVisibleToUser(): Promise<boolean> {
+    if (!await this.visible.$get()) {
+      return false
+    }
+
+    const parentTypeName = await this.parent.typename.$get()
+    if (parentTypeName === "LayerSet") {
+      return this.parent.$cast(LayerSet).isVisibleToUser()
+    } else if (parentTypeName === "Document") {
+      return true
+    } else {
+      throw new Error(`Unknown parent type: ${parentTypeName}`)
+    }
+  }
+
+  /** Make all parent layers visible so user can see this layer
+   * @returns Layers that were made visible
+   */
+  async makeVisibleToUser(): Promise<Layer[]> {
+    const madeVisibleLayers: Layer[] = []
+
+    if (!(await this.visible.$get())) {
+      await this.visible.$set(true)
+      madeVisibleLayers.push(this)
+    }
+
+    const parentTypeName = await this.parent.typename.$get()
+    if (parentTypeName === "LayerSet") {
+      const madeVisible = await this.parent.$cast(LayerSet).makeVisibleToUser()
+      madeVisibleLayers.push(...madeVisible)
+    }
+
+    return madeVisibleLayers
   }
 }
 

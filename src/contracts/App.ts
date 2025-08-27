@@ -101,9 +101,6 @@ export class App extends Contract {
   runMenuItem(menuID: number) {
     return this.$eval()`.runMenuItem(${menuID})`
   }
-  open(file: any, as?: string, options?: any) {
-    return this.$(PDocument)`.open(${file},${as},${options})`
-  }
   openDialog() {
     return this.$(PFile)`.openDialog()`
   }

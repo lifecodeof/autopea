@@ -56,12 +56,6 @@ export class ArtLayer extends Layer {
 
   // Utils
   async openSmartObject() {
-    const isSmartObject = (await this.kind.$get()) === LayerKind.SMARTOBJECT
-    if (!isSmartObject) {
-      const layerName = await this.name.$get()
-      throw new Error(`Layer "${layerName}" is not a smart object.`)
-    }
-
     await App.of(this).activeDocument.activeLayer.$set(this)
 
     await this.$eval({
@@ -75,7 +69,7 @@ export class ArtLayer extends Layer {
   async getDocument() {
     let parent = await this.parent.$ref()
     while ((await parent.typename.$get()) !== "Document") {
-      parent = await parent.getProperty("parent").$ref()
+      parent = await parent.$prop("parent").$ref()
     }
 
     return parent.$cast(PDocument)
