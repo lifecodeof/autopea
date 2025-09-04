@@ -138,13 +138,16 @@ export class App extends Contract {
    * @returns Promise that resolves when the image is loaded.
    */
   async openFromUrl(url: string) {
-    const signal = timeoutAbortSignal(10_000)
+    return await this.mutexes.documentMutex.runExclusive(async () => {
+      const signal = timeoutAbortSignal(10_000)
 
-    const waiterPromise = this.channel.page.waitForBlankDone(signal)
-    await this.channel.evaluate<void>(`app.open(${JSON.stringify(url)});`)
-    await waiterPromise
+      // TODO: Promise.all()
+      const waiterPromise = this.channel.page.waitForBlankDone(signal)
+      await this.channel.evaluate<void>(`app.open(${JSON.stringify(url)});`)
+      await waiterPromise
 
-    return this.activeDocument.$ref()
+      return this.activeDocument.$ref()
+    })
   }
 
   /**
@@ -159,27 +162,33 @@ export class App extends Contract {
 
     const abort = new AbortController()
 
-    const blankDonePromise = page.waitForBlankDone(abort.signal)
+    return await this.mutexes.interactionMutex.runExclusive(async () => {
+      // TODO: Promise.all()
+      const blankDonePromise = page.waitForBlankDone(abort.signal)
 
-    const fileChooserPromise = pwPage.waitForEvent("filechooser")
-    await pwPage.waitForTimeout(500) // Wait for the filechooser listener to be ready
-    await pwPage.keyboard.press("Control+o")
-    const fileChooser = await fileChooserPromise
+      // TODO: Promise.all()
+      const fileChooserPromise = pwPage.waitForEvent("filechooser")
+      await pwPage.waitForTimeout(500) // Wait for the filechooser listener to be ready
+      await pwPage.keyboard.press("Control+o")
+      const fileChooser = await fileChooserPromise
 
-    await fileChooser.setFiles(path)
+      return await this.mutexes.documentMutex.runExclusive(async () => {
+        await fileChooser.setFiles(path)
 
-    const cleanup = abortOnTimeout(
-      abort,
-      60_000,
-      new Error("openFile() timed out")
-    )
+        const cleanup = abortOnTimeout(
+          abort,
+          60_000,
+          new Error("openFile() timed out")
+        )
 
-    try {
-      await blankDonePromise
-      return this.activeDocument.$ref()
-    } finally {
-      cleanup()
-    }
+        try {
+          await blankDonePromise
+          return this.activeDocument.$ref()
+        } finally {
+          cleanup()
+        }
+      })
+    })
   }
 
   async uploadFont(font: Buffer, name: string) {
@@ -213,6 +222,7 @@ export class App extends Contract {
         dialogListener = (dialog: Dialog) => dialog.dismiss()
         pwPage.on("dialog", dialogListener)
 
+        // TODO: Promise.all()
         // wait for console message: [{_data: Uint8Array}]
         const consolePromise = pwPage.waitForEvent("console", async (msg) => {
           const args = msg.args()

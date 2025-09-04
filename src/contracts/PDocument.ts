@@ -96,7 +96,9 @@ export class PDocument extends Contract {
     return this.$eval()`.trim(${trimType},${top},${left},${bottom},${right})`
   }
   close(saveOptions?: string) {
-    return this.$eval()`.close(${saveOptions})`
+    return this.mutexes.documentMutex.runExclusive(
+      () => this.$eval()`.close(${saveOptions})`
+    )
   }
   flatten() {
     return this.$eval()`.flatten()`
@@ -150,7 +152,8 @@ export class PDocument extends Contract {
     const zipBuffer = await this.mutexes.downloadMutex.runExclusive(
       async () => {
         const page = this.channel.page.page
-
+        
+        // TODO: Promise.all()
         const downloadPromise = page.waitForEvent("download")
         await this.channel.evaluate<void>(
           `doc.saveAs(new File(""), ${saveFormatCode})`,
@@ -194,9 +197,12 @@ export class PDocuments extends ContractCollection<PDocument> {
   }
 
   add(width?: number, height?: number, resolution?: number, name?: string) {
-    return this.$evalHandle(
-      PDocument
-    )`.add(${width},${height},${resolution},${name})`
+    return this.mutexes.documentMutex.runExclusive(
+      () =>
+        this.$evalHandle(
+          PDocument
+        )`.add(${width},${height},${resolution},${name})`
+    )
   }
 }
 

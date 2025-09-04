@@ -1,8 +1,15 @@
 import type { PhotopeaPage } from "@/PhotopeaPage"
-import invariant from "tiny-invariant"
-import { abortOnTimeout } from "./helpers"
-import { Contract, Dynamic } from "./contracts/base/Contract"
 import { Mutex } from "async-mutex"
+import invariant from "tiny-invariant"
+import {
+  PhotopeaChannelEvalError,
+  PhotopeaChannelLogicError,
+  PhotopeaChannelPageError,
+  PhotopeaChannelScriptError,
+  PhotopeaChannelTimeoutError
+} from "./channel-errors"
+import { Contract } from "./contracts/base/Contract"
+import { abortOnTimeout } from "./helpers"
 
 export type Handleable = Contract | string
 export type HandleVars = Record<string, Handleable>
@@ -18,28 +25,6 @@ export const randomId = () => Math.random().toString(36).substring(2, 15)
 
 /** Prefix used for global handle variables in Photopea. */
 const handlePrefix = "__ppHandle__"
-
-/** Error class for wrapping errors from the Photopea channel. */
-export class PhotopeaChannelError extends Error {
-  constructor(
-    public error: Error | string,
-    public script: string,
-    public throwedOnPage = false
-  ) {
-    super("Error while executing Photopea script", {
-      cause: error instanceof Error ? error : new Error(String(error))
-    })
-  }
-
-  static wrap = (script: string) => (error: any) => {
-    if (error instanceof Error) return new PhotopeaChannelError(error, script)
-    return new PhotopeaChannelError(new Error(String(error)), script)
-  }
-
-  static rethrow = (script: string) => (error: any) => {
-    throw PhotopeaChannelError.wrap(script)(error)
-  }
-}
 
 /**
  * Communication channel for interacting with a PhotopeaPage instance.
@@ -100,7 +85,7 @@ export class PhotopeaChannel {
     requestId: string,
     signal: AbortSignal,
     script: string
-  ): Promise<any | PhotopeaChannelError> {
+  ): Promise<any> {
     try {
       const result = await this.page.waitForEvent(
         "response",
@@ -112,22 +97,12 @@ export class PhotopeaChannel {
       if (result.reqType === "result") {
         return result.data
       } else {
-        throw new Error(`Unknown response type: ${result.reqType}`)
-      }
-    } catch (errorOrString) {
-      if (errorOrString instanceof PhotopeaChannelError) {
-        throw new PhotopeaChannelError(
-          errorOrString.error,
-          errorOrString.script,
-          errorOrString.throwedOnPage
+        throw new PhotopeaChannelLogicError(
+          `Unknown response type: ${result.reqType}`
         )
       }
-
-      const error =
-        errorOrString instanceof Error
-          ? errorOrString
-          : new Error(String(errorOrString))
-      return new PhotopeaChannelError(error, script)
+    } catch (error) {
+      throw new PhotopeaChannelScriptError(script, { cause: error })
     }
   }
 
@@ -153,18 +128,23 @@ export class PhotopeaChannel {
       options
     )
 
+    // TODO: Promise.all()
+
     // Wait for response
     const resultPromise = this.createResultWaiter(
       requestId,
       abort.signal,
       script
+    ).then(
+      (ok) => ({ type: "ok" as const, ok }),
+      (error) => ({ type: "error" as const, error })
     )
 
     // Wait for console errors
     this.page
       .waitForEvent("pageerror", (v) => v, abort.signal)
       .then((msg) => {
-        abort.abort(new PhotopeaChannelError(msg, script, true))
+        abort.abort(new PhotopeaChannelPageError(msg))
       })
       .catch((_) => {}) // Ignore timeout errors
 
@@ -173,42 +153,26 @@ export class PhotopeaChannel {
     abortOnTimeout(
       abort,
       timeout,
-      new Error(`Script evaluation timed out (${timeout}ms)`)
+      new PhotopeaChannelTimeoutError(
+        `Script evaluation timed out (${timeout}ms)`
+      )
     )
 
     try {
       await this.page.sendMessage(script)
       const result = await resultPromise
 
-      if (result instanceof Error) {
-        throw result
+      if (result.type === "error") {
+        throw result.error
       }
 
-      abort.abort() // Clear other listeners
-      return result
+      return result.ok
     } catch (error) {
-      // for (const [key, value] of Object.entries(handleVars)) {
-      //   const contract =
-      //     value instanceof Contract ? value : new Dynamic(this, value)
-
-      //   console.log(key, ":", await contract.typename.$get().catch(() => "?"))
-      // }
-
-      // // Extract additional handleVars from the script
-      // const handleRegex = /globalThis\["(__ppHandle__\w+)"\]/g
-      // let match
-      // while ((match = handleRegex.exec(script)) !== null) {
-      //   const handle = match[1]
-      //   const dynamicHandle = new Dynamic(this, handle)
-      //   console.log(
-      //     "Extracted handle:",
-      //     handle,
-      //     "Type:",
-      //     await dynamicHandle.typename.$get().catch(() => "?")
-      //   )
-      // }
-
-      throw error
+      throw new PhotopeaChannelEvalError(this, script, handleVars, {
+        cause: error
+      })
+    } finally {
+      abort.abort() // Clear other listeners
     }
   }
 

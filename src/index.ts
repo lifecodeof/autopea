@@ -1,4 +1,5 @@
 export { SaveFormat } from "./contracts/PDocument"
 export { PhotopeaPage } from "./PhotopeaPage"
-export { PhotopeaChannel, PhotopeaChannelError } from "./Channel"
+export { PhotopeaChannel } from "./Channel"
 export { PhotopeaMutexes } from "./PhotopeaMutexes"
+export * from "./channel-errors"

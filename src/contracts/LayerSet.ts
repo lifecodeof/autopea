@@ -23,18 +23,18 @@ export class LayerSet extends Layer {
   override async fetchBounds(): Promise<UnitRectLocal> {
     const bounds = new UnitRectLocal()
 
-    const artLayersBoundsPromise = this.artLayers
-      .toArray()
-      .then((layers) => Promise.all(layers.map((layer) => layer.fetchBounds())))
-
-    const recursiveBoundsPromise = this.layerSets
-      .toArray()
-      .then((sets) => Promise.all(sets.map((set) => set.fetchBounds())))
-
-    const childBounds = await Promise.all([
-      artLayersBoundsPromise,
-      recursiveBoundsPromise
-    ]).then((r) => r.flat(1))
+    const childBounds = (
+      await Promise.all([
+        this.artLayers
+          .toArray()
+          .then((layers) =>
+            Promise.all(layers.map((layer) => layer.fetchBounds()))
+          ),
+        this.layerSets
+          .toArray()
+          .then((sets) => Promise.all(sets.map((set) => set.fetchBounds())))
+      ])
+    ).flat()
 
     for (const element of childBounds) {
       bounds.union(element)
