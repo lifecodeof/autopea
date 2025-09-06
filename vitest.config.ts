@@ -6,7 +6,7 @@ export default defineConfig({
     reporters: ["verbose"],
     printConsoleTrace: true,
     disableConsoleIntercept: true,
-    testTimeout: 15_000 // 15 seconds
+    testTimeout: 60_000 // 60 seconds for Photopea loading
   },
   resolve: {
     alias: {

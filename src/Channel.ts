@@ -32,7 +32,7 @@ const handlePrefix = "__ppHandle__"
  */
 export class PhotopeaChannel {
   /** Default timeout (ms) for script evaluation. */
-  public timeout: number = 5_000
+  public timeout: number = 10_000
 
   public readonly dialogMutex = new Mutex()
 
@@ -52,7 +52,7 @@ export class PhotopeaChannel {
 
     return Object.entries(handleVars)
       .map(([key, value]) => `const ${key} = ` + getExpression(value) + ";")
-      .join()
+      .join("")
   }
 
   private wrapIIFE(functionBody: string): string {

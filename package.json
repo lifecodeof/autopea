@@ -5,7 +5,8 @@
   "scripts": {
     "start": "tsx main.ts",
     "repl": "tsx src/repl.ts",
-    "test": "vitest"
+    "test": "vitest",
+    "build": "tsdown"
   },
   "keywords": [],
   "files": [

@@ -5,7 +5,7 @@ import { LayerKind, type AnchorPosition, type ElementPlacement } from "./enums"
 import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
 import { PDocument } from "./PDocument"
 import { UnitRect, UnitRectLocal } from "./UnitRect"
-import { LayerSet } from "./LayerSet"
+import type { LayerSet } from "./LayerSet"
 
 export class Layer extends Contract {
   get name() {
@@ -282,6 +282,8 @@ export class Layer extends Contract {
 
     const parentTypeName = await this.parent.typename.$get()
     if (parentTypeName === "LayerSet") {
+      // Lazy import to avoid circular dependency
+      const { LayerSet } = await import("./LayerSet")
       return this.parent.$cast(LayerSet).isVisibleToUser()
     } else if (parentTypeName === "Document") {
       return true
@@ -303,6 +305,8 @@ export class Layer extends Contract {
 
     const parentTypeName = await this.parent.typename.$get()
     if (parentTypeName === "LayerSet") {
+      // Lazy import to avoid circular dependency
+      const { LayerSet } = await import("./LayerSet")
       const madeVisible = await this.parent.$cast(LayerSet).makeVisibleToUser()
       madeVisibleLayers.push(...madeVisible)
     }

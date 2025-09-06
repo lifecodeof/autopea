@@ -27,63 +27,17 @@ export class App extends Contract {
     return this.$(PDocuments)`.documents`
   }
 
-  get name() {
-    return this.$value(z.string())`.name`
-  }
   get version() {
     return this.$value(z.string())`.version`
   }
-  get build() {
-    return this.$value(z.string())`.build`
-  }
-  get locale() {
-    return this.$value(z.string())`.locale`
-  }
   get preferences() {
     return this.$(Preferences)`.preferences`
-  }
-  get freeMemory() {
-    return this.$value(z.number())`.freeMemory`
-  }
-  get recentFiles() {
-    return this.$(this.$arrayOf(PFile))`.recentFiles`
-  }
-  get notifiersEnabled() {
-    return this.$value(z.boolean())`.notifiersEnabled`
-  }
-  get scriptingVersion() {
-    return this.$value(z.string())`.scriptingVersion`
-  }
-  get systemInformation() {
-    return this.$value(z.string())`.systemInformation`
   }
   get backgroundColor() {
     return this.$(SolidColor)`.backgroundColor`
   }
   get foregroundColor() {
     return this.$(SolidColor)`.foregroundColor`
-  }
-  get currentTool() {
-    return this.$value(z.string())`.currentTool`
-  }
-  get displayDialogs() {
-    return this.$value(z.string())`.displayDialogs`
-  }
-
-  beep() {
-    return this.$eval()`.beep()`
-  }
-  bringToFront() {
-    return this.$eval()`.bringToFront()`
-  }
-  refresh() {
-    return this.$eval()`.refresh()`
-  }
-  refreshFonts() {
-    return this.$eval()`.refreshFonts()`
-  }
-  togglePalettes() {
-    return this.$eval()`.togglePalettes()`
   }
 
   doAction(action: string, from: string) {

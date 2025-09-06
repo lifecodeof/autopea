@@ -11,7 +11,7 @@ export const browserTest = test.extend<{
   browserCtx: [
     async ({}, use) => {
       const browser = await chromium.launch({
-        headless: false
+        headless: true
       })
 
       const context = await browser.newContext()
@@ -25,7 +25,7 @@ export const browserTest = test.extend<{
 const pageFixture =
   (shared: boolean) =>
   async ({ browserCtx }: any, use: any) => {
-    const page = await PhotopeaPage.openFromBrowser(browserCtx)
+    const page = await PhotopeaPage.openFromBrowser(browserCtx, { timeout: 60_000 })
     if (shared) page.setMaxListeners(0)
     await use(page)
     await page.close()

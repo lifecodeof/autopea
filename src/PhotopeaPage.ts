@@ -29,19 +29,21 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
   /**
    * Opens a new PhotopeaPage from a Playwright Browser or BrowserContext.
    * @param browserOrContext The Playwright Browser or BrowserContext.
+   * @param options Optional configuration options.
    * @returns Promise resolving to a PhotopeaPage instance.
    */
-  static async openFromBrowser(browserOrContext: Browser | BrowserContext) {
-    return await PhotopeaPage.open(await browserOrContext.newPage())
+  static async openFromBrowser(browserOrContext: Browser | BrowserContext, options: { timeout?: number } = {}) {
+    return await PhotopeaPage.open(await browserOrContext.newPage(), options)
   }
 
   /**
    * Opens a new PhotopeaPage from a Playwright Page.
    * @param page The Playwright Page instance.
+   * @param options Optional configuration options.
    * @returns Promise resolving to a PhotopeaPage instance.
    */
-  static async open(page: Page) {
-    await this.openPhotopeaPage(page)
+  static async open(page: Page, options: { timeout?: number } = {}) {
+    await this.openPhotopeaPage(page, options)
     const instance = new PhotopeaPage(page)
     await instance.listenEvents()
     return instance
@@ -59,7 +61,7 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
     }
   }
 
-  private static async openPhotopeaPage(page: Page) {
+  private static async openPhotopeaPage(page: Page, options: { timeout?: number } = {}) {
     // Filter out unwanted scripts
     await page.route("**/*", (route) => {
       const request = route.request()
@@ -124,10 +126,11 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
 
     // Somehow, #8887 removes ads
     let startTime = Date.now()
+    const timeout = options.timeout ?? 30_000
     try {
-      await page.goto("https://www.photopea.com#8887", { timeout: 30_000 })
+      await page.goto("https://www.photopea.com#8887", { timeout })
     } catch (error) {
-      if (Date.now() - startTime < 30_000) {
+      if (Date.now() - startTime < timeout) {
         await new Promise((resolve) => setTimeout(resolve, 500))
       } else {
         throw error

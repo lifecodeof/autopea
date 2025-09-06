@@ -184,9 +184,7 @@ export class Contract {
   $eq(other: InferContractValue<this>) {
     // Loose comparison is intended
     // Photopea always returns false when comparing objects strictly
-    return this.$value(z.boolean(), {
-      wrapParentheses: true
-    })` == ${this.transfer(other)}`
+    return this.$value(z.boolean(), { wrapParentheses: true })` == ${other}`
   }
 
   $cast<T extends Contract>(constructor: Constructor<T>): T {
