@@ -1,0 +1,290 @@
+import { expect, vi } from "vitest"
+import { PhotopeaPage } from "@/PhotopeaPage"
+import { browserTest } from "@/testFixtures"
+
+browserTest(
+  "PhotopeaPage - should open Photopea page successfully",
+  async ({ browserCtx }) => {
+    const page = await PhotopeaPage.openFromBrowser(browserCtx)
+    expect(page).toBeInstanceOf(PhotopeaPage)
+    expect(page.page).toBeDefined()
+    await page.close()
+  }
+)
+
+browserTest(
+  "PhotopeaPage - should send and receive messages",
+  async ({ browserCtx }) => {
+    await using page = await PhotopeaPage.openFromBrowser(browserCtx)
+
+    let receivedMessage: string | undefined
+    page.on("message", (message) => {
+      receivedMessage = message
+    })
+
+    // Photopea does this internally
+    await page.sendMessage(
+      'parent.postMessage("Hello Photopea"); parent.postMessage("done");'
+    )
+
+    await vi.waitUntil(() => receivedMessage !== undefined, {
+      timeout: 5000
+    })
+
+    expect(receivedMessage).toBe("Hello Photopea")
+
+    // We mostly use this
+    await page.sendMessage('app.echoToOE("Hello World");')
+
+    await vi.waitUntil(() => receivedMessage !== undefined, {
+      timeout: 5000
+    })
+
+    expect(receivedMessage).toBe("Hello World")
+  }
+)
+
+browserTest(
+  "PhotopeaPage - should handle buffer messages",
+  async ({ browserCtx }) => {
+    const page = await PhotopeaPage.openFromBrowser(browserCtx)
+
+    let receivedBuffer: Buffer | undefined
+    page.on("bufferMessage", (buffer) => {
+      receivedBuffer = buffer
+    })
+
+    // Send a script that returns a buffer
+    await page.sendMessage(`
+    var buffer = new ArrayBuffer(4);
+    var view = new Uint8Array(buffer);
+    view[0] = 1; view[1] = 2; view[2] = 3; view[3] = 4;
+    parent.postMessage(buffer);
+    parent.postMessage("done");
+  `)
+
+    await vi.waitUntil(() => receivedBuffer !== undefined, {
+      timeout: 5000
+    })
+
+    expect(receivedBuffer).toBeInstanceOf(Buffer)
+    expect(receivedBuffer!.length).toBe(4)
+    await page.close()
+  }
+)
+
+browserTest(
+  "PhotopeaPage - should handle Uint8Array buffer messages",
+  async ({ browserCtx }) => {
+    const page = await PhotopeaPage.openFromBrowser(browserCtx)
+
+    let receivedBuffer: Buffer | undefined
+    page.on("bufferMessage", (buffer) => {
+      receivedBuffer = buffer
+    })
+
+    // Send a script that returns binary data as Uint8Array
+    await page.sendMessage(`
+      var uint8Array = new Uint8Array([72, 101, 108, 108, 111]); // "Hello"
+      parent.postMessage(uint8Array);
+      parent.postMessage("done");
+    `)
+
+    await vi.waitUntil(() => receivedBuffer !== undefined, {
+      timeout: 5000
+    })
+
+    expect(receivedBuffer).toBeInstanceOf(Buffer)
+    expect(receivedBuffer!.toString()).toBe("Hello")
+    await page.close()
+  }
+)
+
+browserTest(
+  "PhotopeaPage - should emit page errors",
+  async ({ browserCtx }) => {
+    const page = await PhotopeaPage.openFromBrowser(browserCtx)
+
+    let receivedError: Error | undefined
+    page.on("pageerror", (error) => {
+      receivedError = error
+    })
+
+    // Trigger a page error
+    await page.page.evaluate(() => {
+      // Playwright captures errors inside page.evaluate() so we need to use setTimeout to throw indirectly
+      setTimeout(() => {
+        throw new Error("Test error")
+      }, 1)
+    })
+
+    await vi.waitUntil(() => receivedError !== undefined, {
+      timeout: 5000
+    })
+
+    expect(receivedError).toBeInstanceOf(Error)
+    expect(receivedError!.message).toContain("Test error")
+    await page.close()
+  }
+)
+
+browserTest(
+  "PhotopeaPage - should wait for blank done message",
+  async ({ browserCtx }) => {
+    const page = await PhotopeaPage.openFromBrowser(browserCtx)
+
+    // Send a script that doesn't produce output
+    await page.sendMessage('app.echoToOE("");')
+
+    await expect(page.waitForBlankDone()).resolves.toBeUndefined()
+    await page.close()
+  }
+)
+
+browserTest(
+  "PhotopeaPage - should handle message buffering",
+  async ({ browserCtx }) => {
+    const page = await PhotopeaPage.openFromBrowser(browserCtx)
+
+    const messages: string[] = []
+    page.on("message", (message) => {
+      messages.push(message)
+    })
+
+    // Send multiple parts that should be buffered
+    await page.sendMessage('app.echoToOE("part1");')
+    await page.sendMessage('app.echoToOE("part2");')
+
+    await vi.waitUntil(() => messages.length >= 2, {
+      timeout: 5000
+    })
+
+    expect(messages).toContain("part1")
+    expect(messages).toContain("part2")
+    await page.close()
+  }
+)
+
+browserTest(
+  "PhotopeaPage - should handle concurrent operations",
+  async ({ browserCtx }) => {
+    const page = await PhotopeaPage.openFromBrowser(browserCtx)
+
+    const results: string[] = []
+    const promises: Promise<void>[] = []
+
+    for (let i = 0; i < 5; i++) {
+      promises.push(
+        new Promise<void>((resolve) => {
+          const listener = (message: string) => {
+            if (message === `response${i}`) {
+              results.push(message)
+              page.off("message", listener)
+              resolve()
+            }
+          }
+          page.on("message", listener)
+          page.sendMessage(`app.echoToOE("response${i}");`)
+        })
+      )
+    }
+
+    await Promise.all(promises)
+    expect(results.sort()).toEqual([
+      "response0",
+      "response1",
+      "response2",
+      "response3",
+      "response4"
+    ])
+    await page.close()
+  }
+)
+
+browserTest(
+  "PhotopeaPage - should handle multiple messages",
+  async ({ browserCtx }) => {
+    const page = await PhotopeaPage.openFromBrowser(browserCtx)
+
+    const receivedMessages: string[] = []
+    page.on("message", (message) => {
+      receivedMessages.push(message)
+    })
+
+    // Send multiple messages
+    await page.sendMessage('app.echoToOE("First");')
+    await page.sendMessage('app.echoToOE("Second");')
+    await page.sendMessage('app.echoToOE("Third");')
+
+    // Wait for all messages
+    await vi.waitUntil(() => receivedMessages.length >= 3, {
+      timeout: 5000
+    })
+
+    expect(receivedMessages).toEqual(["First", "Second", "Third"])
+    await page.close()
+  }
+)
+
+browserTest(
+  "PhotopeaPage - should handle empty messages",
+  async ({ browserCtx }) => {
+    const page = await PhotopeaPage.openFromBrowser(browserCtx)
+
+    let receivedMessage: string | undefined
+    page.on("message", (message) => {
+      receivedMessage = message
+    })
+
+    // Send empty message
+    await page.sendMessage('app.echoToOE("");')
+
+    await vi.waitUntil(() => receivedMessage !== undefined, {
+      timeout: 5000
+    })
+
+    expect(receivedMessage).toBe("")
+    await page.close()
+  }
+)
+
+browserTest(
+  "PhotopeaPage - should handle special characters in messages",
+  async ({ browserCtx }) => {
+    const page = await PhotopeaPage.openFromBrowser(browserCtx)
+
+    let receivedMessage: string | undefined
+    page.on("message", (message) => {
+      receivedMessage = message
+    })
+
+    // Send message with special characters
+    const specialMessage = JSON.stringify(
+      "Hello\n\tWorld\r\n\"quotes\"'single'"
+    )
+    await page.sendMessage(`app.echoToOE(${specialMessage});`)
+
+    await vi.waitUntil(() => receivedMessage !== undefined, {
+      timeout: 5000
+    })
+
+    expect(receivedMessage).toBe(specialMessage)
+    await page.close()
+  }
+)
+
+browserTest(
+  "PhotopeaPage - should close page properly",
+  async ({ browserCtx }) => {
+    const page = await PhotopeaPage.openFromBrowser(browserCtx)
+
+    // Verify page is open
+    expect(page.page.isClosed()).toBe(false)
+
+    // Close the page
+    await page.close()
+
+    // Verify page is closed
+    expect(page.page.isClosed()).toBe(true)
+  }
+)
