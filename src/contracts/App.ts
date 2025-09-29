@@ -131,8 +131,8 @@ export class App extends Contract {
 
         const cleanup = abortOnTimeout(
           abort,
-          60_000,
-          new Error("openFile() timed out")
+          5 * 60 * 1000,
+          new Error("openFile() timed out after 5 minutes")
         )
 
         try {
