@@ -93,12 +93,12 @@ export class App extends Contract {
    */
   async openFromUrl(url: string) {
     return await this.mutexes.documentMutex.runExclusive(async () => {
-      const signal = timeoutAbortSignal(10_000)
+      const signal = timeoutAbortSignal(5 * 60 * 1000) // 5 minutes
 
-      // TODO: Promise.all()
-      const waiterPromise = this.channel.page.waitForBlankDone(signal)
-      await this.channel.evaluate<void>(`app.open(${JSON.stringify(url)});`)
-      await waiterPromise
+      await Promise.all([
+        this.channel.page.waitForBlankDone(signal),
+        this.channel.evaluate<void>(`app.open(${JSON.stringify(url)});`)
+      ])
 
       return this.activeDocument.$ref()
     })
