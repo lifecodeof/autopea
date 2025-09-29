@@ -32,7 +32,7 @@ const handlePrefix = "__ppHandle__"
  */
 export class PhotopeaChannel {
   /** Default timeout (ms) for script evaluation. */
-  public timeout: number = 10_000
+  public timeout: number = 30_000
 
   public readonly dialogMutex = new Mutex()
 
