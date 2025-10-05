@@ -117,16 +117,14 @@ export class App extends Contract {
     const abort = new AbortController()
 
     return await this.mutexes.interactionMutex.runExclusive(async () => {
-      // TODO: Promise.all()
-      const blankDonePromise = page.waitForBlankDone(abort.signal)
-
-      // TODO: Promise.all()
-      const fileChooserPromise = pwPage.waitForEvent("filechooser")
-      await pwPage.waitForTimeout(500) // Wait for the filechooser listener to be ready
-      await pwPage.keyboard.press("Control+o")
-      const fileChooser = await fileChooserPromise
+      const [fileChooser] = await Promise.all([
+        pwPage.waitForEvent("filechooser"),
+        pwPage.keyboard.press("Control+O")
+      ])
 
       return await this.mutexes.documentMutex.runExclusive(async () => {
+        // TODO: Promise.all()
+        const blankDonePromise = page.waitForBlankDone(abort.signal)
         await fileChooser.setFiles(path)
 
         const cleanup = abortOnTimeout(

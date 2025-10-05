@@ -71,7 +71,7 @@ channelTest("PhotopeaChannel - should iterate over array handles", async ({ chan
 })
 
 channelTest("PhotopeaChannel - should handle timeouts", async ({ channel }) => {
-  channel.timeout = 100 // Short timeout
+  channel.timeout = 100 // Short timeout for faster testing
 
   await expect(
     channel.evaluate(`
@@ -84,6 +84,8 @@ channelTest("PhotopeaChannel - should handle timeouts", async ({ channel }) => {
 })
 
 channelTest("PhotopeaChannel - should handle script errors", async ({ channel }) => {
+  channel.timeout = 100 // Short timeout for faster testing
+
   await expect(
     channel.evaluate("invalid code")
   ).rejects.toThrow(PhotopeaChannelEvalError)

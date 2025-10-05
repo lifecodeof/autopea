@@ -32,7 +32,10 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
    * @param options Optional configuration options.
    * @returns Promise resolving to a PhotopeaPage instance.
    */
-  static async openFromBrowser(browserOrContext: Browser | BrowserContext, options: { timeout?: number } = {}) {
+  static async openFromBrowser(
+    browserOrContext: Browser | BrowserContext,
+    options: { timeout?: number } = {}
+  ) {
     return await PhotopeaPage.open(await browserOrContext.newPage(), options)
   }
 
@@ -61,7 +64,10 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
     }
   }
 
-  private static async openPhotopeaPage(page: Page, options: { timeout?: number } = {}) {
+  private static async openPhotopeaPage(
+    page: Page,
+    options: { timeout?: number } = {}
+  ) {
     // Filter out unwanted scripts
     await page.route("**/*", (route) => {
       const request = route.request()

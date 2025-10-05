@@ -10,9 +10,7 @@ export const browserTest = test.extend<{
 }>({
   browserCtx: [
     async ({}, use) => {
-      const browser = await chromium.launch({
-        headless: true
-      })
+      const browser = await chromium.launch({ headless: true })
 
       const context = await browser.newContext()
       await use(context)
@@ -25,7 +23,9 @@ export const browserTest = test.extend<{
 const pageFixture =
   (shared: boolean) =>
   async ({ browserCtx }: any, use: any) => {
-    const page = await PhotopeaPage.openFromBrowser(browserCtx, { timeout: 60_000 })
+    const page = await PhotopeaPage.openFromBrowser(browserCtx, {
+      timeout: 60_000
+    })
     if (shared) page.setMaxListeners(0)
     await use(page)
     await page.close()
@@ -37,29 +37,12 @@ export const pageTest = browserTest.extend<{
   page: pageFixture(false)
 })
 
-export const sharedPageTest = browserTest.extend<{
-  sharedPage: PhotopeaPage
-}>({
-  sharedPage: [pageFixture(true), { scope: "worker" }]
-})
-
 export const channelTest = pageTest.extend<{
   channel: PhotopeaChannel
 }>({
   channel: async ({ page }, use) => {
     await use(new PhotopeaChannel(page))
   }
-})
-
-export const sharedChannelTest = sharedPageTest.extend<{
-  sharedChannel: PhotopeaChannel
-}>({
-  sharedChannel: [
-    async ({ sharedPage }, use) => {
-      await use(new PhotopeaChannel(sharedPage))
-    },
-    { scope: "worker" }
-  ]
 })
 
 expect.extend({ toMatchImageSnapshot })

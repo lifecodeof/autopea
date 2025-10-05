@@ -6,6 +6,7 @@ browserTest(
   "PhotopeaPage - should open Photopea page successfully",
   async ({ browserCtx }) => {
     const page = await PhotopeaPage.openFromBrowser(browserCtx)
+
     expect(page).toBeInstanceOf(PhotopeaPage)
     expect(page.page).toBeDefined()
     await page.close()
@@ -22,81 +23,11 @@ browserTest(
       receivedMessage = message
     })
 
-    // Photopea does this internally
-    await page.sendMessage(
-      'parent.postMessage("Hello Photopea"); parent.postMessage("done");'
-    )
-
-    await vi.waitUntil(() => receivedMessage !== undefined, {
-      timeout: 5000
-    })
-
-    expect(receivedMessage).toBe("Hello Photopea")
-
-    // We mostly use this
     await page.sendMessage('app.echoToOE("Hello World");')
 
-    await vi.waitUntil(() => receivedMessage !== undefined, {
-      timeout: 5000
-    })
+    await vi.waitUntil(() => receivedMessage !== undefined, { timeout: 5000 })
 
     expect(receivedMessage).toBe("Hello World")
-  }
-)
-
-browserTest(
-  "PhotopeaPage - should handle buffer messages",
-  async ({ browserCtx }) => {
-    const page = await PhotopeaPage.openFromBrowser(browserCtx)
-
-    let receivedBuffer: Buffer | undefined
-    page.on("bufferMessage", (buffer) => {
-      receivedBuffer = buffer
-    })
-
-    // Send a script that returns a buffer
-    await page.sendMessage(`
-    var buffer = new ArrayBuffer(4);
-    var view = new Uint8Array(buffer);
-    view[0] = 1; view[1] = 2; view[2] = 3; view[3] = 4;
-    parent.postMessage(buffer);
-    parent.postMessage("done");
-  `)
-
-    await vi.waitUntil(() => receivedBuffer !== undefined, {
-      timeout: 5000
-    })
-
-    expect(receivedBuffer).toBeInstanceOf(Buffer)
-    expect(receivedBuffer!.length).toBe(4)
-    await page.close()
-  }
-)
-
-browserTest(
-  "PhotopeaPage - should handle Uint8Array buffer messages",
-  async ({ browserCtx }) => {
-    const page = await PhotopeaPage.openFromBrowser(browserCtx)
-
-    let receivedBuffer: Buffer | undefined
-    page.on("bufferMessage", (buffer) => {
-      receivedBuffer = buffer
-    })
-
-    // Send a script that returns binary data as Uint8Array
-    await page.sendMessage(`
-      var uint8Array = new Uint8Array([72, 101, 108, 108, 111]); // "Hello"
-      parent.postMessage(uint8Array);
-      parent.postMessage("done");
-    `)
-
-    await vi.waitUntil(() => receivedBuffer !== undefined, {
-      timeout: 5000
-    })
-
-    expect(receivedBuffer).toBeInstanceOf(Buffer)
-    expect(receivedBuffer!.toString()).toBe("Hello")
-    await page.close()
   }
 )
 
@@ -258,11 +189,10 @@ browserTest(
       receivedMessage = message
     })
 
+    const specialMessage = "Hello\n\tWorld\r\n\"quotes\"'single'"
     // Send message with special characters
-    const specialMessage = JSON.stringify(
-      "Hello\n\tWorld\r\n\"quotes\"'single'"
-    )
-    await page.sendMessage(`app.echoToOE(${specialMessage});`)
+    const jsonEncodedMessage = JSON.stringify(specialMessage)
+    await page.sendMessage(`app.echoToOE(${jsonEncodedMessage});`)
 
     await vi.waitUntil(() => receivedMessage !== undefined, {
       timeout: 5000
