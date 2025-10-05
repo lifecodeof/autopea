@@ -1,4 +1,3 @@
-import { toMatchImageSnapshot } from "jest-image-snapshot"
 import { chromium, type BrowserContext } from "playwright"
 import { expect, test } from "vitest"
 import { App } from "./contracts/App"
@@ -10,7 +9,7 @@ export const browserTest = test.extend<{
 }>({
   browserCtx: [
     async ({}, use) => {
-      const browser = await chromium.launch({ headless: true })
+      const browser = await chromium.launch({ headless: !true })
 
       const context = await browser.newContext()
       await use(context)
@@ -44,8 +43,6 @@ export const channelTest = pageTest.extend<{
     await use(new PhotopeaChannel(page))
   }
 })
-
-expect.extend({ toMatchImageSnapshot })
 
 export const appTest = channelTest.extend<{
   app: App

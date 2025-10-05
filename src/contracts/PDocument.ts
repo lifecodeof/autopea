@@ -10,6 +10,7 @@ import { UnitRectLocal, type UnitRect } from "./UnitRect"
 import type { UnitValue } from "./UnitValue"
 import { Contract, ContractCollection } from "./base/Contract"
 import type { AnchorPosition, ResampleMethod, TrimType } from "./enums"
+import { clickToolbarButton } from "@/toolbar"
 
 export enum SaveFormat {
   PNG = "png",
@@ -152,7 +153,7 @@ export class PDocument extends Contract {
     const zipBuffer = await this.mutexes.downloadMutex.runExclusive(
       async () => {
         const page = this.channel.page.page
-        
+
         // TODO: Promise.all()
         const downloadPromise = page.waitForEvent("download")
         await this.channel.evaluate<void>(
@@ -183,8 +184,11 @@ export class PDocument extends Contract {
 
   async duplicate() {
     const page = this.channel.page.page
-    await page.click(".topbar > span:nth-child(1) > button:nth-child(3)")
-    await page.click(".contextpanel > .enab:nth-child(20)")
+    await clickToolbarButton(page, [
+      2, // Image
+      19 // Duplicate
+    ])
+
     return await App.of(this).activeDocument.$ref()
   }
 }

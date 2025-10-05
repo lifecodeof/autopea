@@ -17,5 +17,5 @@
     "isolatedModules": true,
     "composite": true
   },
-  "include": ["./src/**/*", "./tests/**/*", "tsdown-env.d.ts", "src/repl.ts"],
+  "include": ["./src/**/*", "./tests/**/*", "tsdown-env.d.ts", "src/repl.ts"]
 }

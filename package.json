@@ -28,10 +28,8 @@
   },
   "devDependencies": {
     "@types/adm-zip": "^0.5.7",
-    "@types/jest-image-snapshot": "^6.4.0",
     "@types/node": "^24.1.0",
     "@vitest/ui": "3.2.4",
-    "jest-image-snapshot": "^6.5.1",
     "prettier": "^3.6.2",
     "tsdown": "^0.13.0",
     "tsup": "^8.5.0",

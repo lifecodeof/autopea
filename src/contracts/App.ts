@@ -10,6 +10,7 @@ import { PFile } from "./PFile"
 import { Preferences } from "./Preferences"
 import { SolidColor } from "./SolidColor"
 import { PhotopeaPage } from "@/PhotopeaPage"
+import { clickToolbarButton } from "@/toolbar"
 
 export class App extends Contract {
   static of(obj: PhotopeaChannel | Contract | PhotopeaPage) {
@@ -110,7 +111,7 @@ export class App extends Contract {
    * @param mimetype The MIME type of the image (default: application/octet-stream).
    * @returns Promise that resolves when the image is loaded.
    */
-  async openFile(path: string) {
+  async openFile(path: string, timeout = 5 * 60 * 1000) {
     const page = this.channel.page
     const pwPage = page.page
 
@@ -118,8 +119,8 @@ export class App extends Contract {
 
     return await this.mutexes.interactionMutex.runExclusive(async () => {
       const [fileChooser] = await Promise.all([
-        pwPage.waitForEvent("filechooser"),
-        pwPage.keyboard.press("Control+O")
+        pwPage.waitForEvent("filechooser", { timeout }),
+        clickToolbarButton(page.page, [0, 1]) // File > Open
       ])
 
       return await this.mutexes.documentMutex.runExclusive(async () => {
@@ -129,8 +130,8 @@ export class App extends Contract {
 
         const cleanup = abortOnTimeout(
           abort,
-          5 * 60 * 1000,
-          new Error("openFile() timed out after 5 minutes")
+          timeout,
+          new Error(`openFile() timed out after ${timeout}ms`)
         )
 
         try {
