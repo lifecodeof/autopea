@@ -1,5 +1,4 @@
 import type { Locator, Page } from "playwright"
-import { PhotopeaMutexes } from "./PhotopeaMutexes"
 
 export const clickToolbarButton = async (
   page: Page,
@@ -20,7 +19,7 @@ export const clickToolbarButton = async (
     page.locator(".topbar > span:nth-child(1)"),
     "button",
     menu
-  ).click({ timeout: 100 })
+  ).click()
 
   const contextPanel = page.locator(".contextpanel")
   for (const submenu of submenus) {
