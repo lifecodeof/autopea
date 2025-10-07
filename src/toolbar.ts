@@ -24,6 +24,6 @@ export const clickToolbarButton = async (
 
   const contextPanel = page.locator(".contextpanel")
   for (const submenu of submenus) {
-    await locateButton(contextPanel, ".enab", submenu).click({ timeout: 100 })
+    await locateButton(contextPanel, ".enab", submenu).click()
   }
 }
