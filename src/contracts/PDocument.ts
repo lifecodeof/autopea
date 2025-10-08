@@ -185,8 +185,8 @@ export class PDocument extends Contract {
   async duplicate() {
     const page = this.channel.page.page
     await clickToolbarButton(page, [
-      2, // Image
-      19 // Duplicate
+      3, // Image
+      20 // Duplicate
     ])
 
     return await App.of(this).activeDocument.$ref()

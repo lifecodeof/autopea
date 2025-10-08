@@ -12,7 +12,7 @@ export const clickToolbarButton = async (
     segment: string | number
   ) =>
     typeof segment === "number"
-      ? parent.locator(selector).nth(segment)
+      ? parent.locator(`${selector}:nth-child(${segment})`)
       : parent.locator(selector).getByText(segment, { exact: true })
 
   await locateButton(

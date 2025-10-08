@@ -120,7 +120,7 @@ export class App extends Contract {
     return await this.mutexes.interactionMutex.runExclusive(async () => {
       const [fileChooser] = await Promise.all([
         pwPage.waitForEvent("filechooser", { timeout }),
-        clickToolbarButton(page.page, [0, 1]) // File > Open
+        clickToolbarButton(page.page, [1, 2]) // File > Open
       ])
 
       return await this.mutexes.documentMutex.runExclusive(async () => {
