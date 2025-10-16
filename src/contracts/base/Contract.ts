@@ -230,7 +230,7 @@ export abstract class ContractCollection<T extends Contract> extends Contract {
     return this.$value(z.number())`.length`
   }
 
-  async toArray(): Promise<T[]> {
+  async toRefArray(): Promise<T[]> {
     const thisHandle = await this.channel.evaluateHandle(
       "return " + this.expression
     )
@@ -239,6 +239,11 @@ export abstract class ContractCollection<T extends Contract> extends Contract {
       const expression = this.channel.getExpressionForHandle(h)
       return new (this.itemType())(this.channel, expression)
     })
+  }
+
+  async toArray(): Promise<T[]> {
+    const length = await this.length.$get()
+    return Array.from({ length }, (_, i) => this.get(i))
   }
 }
 

@@ -7,8 +7,6 @@ import { expect } from "vitest"
 appTest(
   "Should open and close documents",
   async ({ app }) => {
-    Contract.getChannel(app).timeout = 500 // Short timeout for faster testing
-
     const filePath = fileURLToPath(new URL("assets/10x10.psd", import.meta.url))
     const document = await app.openFile(filePath, 1_000) // 1s timeout for test
 

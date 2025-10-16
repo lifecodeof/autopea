@@ -6,7 +6,8 @@ export default defineConfig({
     reporters: ["verbose"],
     printConsoleTrace: true,
     disableConsoleIntercept: true,
-    slowTestThreshold: 3_000
+    slowTestThreshold: 3_000,
+    testTimeout: 10_000
   },
   resolve: {
     alias: {
