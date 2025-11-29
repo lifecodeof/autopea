@@ -1,6 +1,7 @@
 import { PhotopeaChannel } from "@/Channel"
 import { PhotopeaMutexes } from "@/PhotopeaMutexes"
 import type { Dialog } from "playwright"
+import { errors as pwErrors } from "playwright"
 import z from "zod"
 import { abortOnTimeout, timeoutAbortSignal } from "../helpers"
 import { makeBase64ToArrayBufferFnHandle } from "../playwrightLib"
@@ -175,12 +176,18 @@ export class App extends Contract {
         dialogListener = (dialog: Dialog) => dialog.dismiss()
         pwPage.on("dialog", dialogListener)
 
-        // TODO: Promise.all()
-        // wait for console message: [{_data: Uint8Array}]
+        // Photopea no longer logs array with Uint8Array
         const consolePromise = pwPage.waitForEvent("console", async (msg) => {
           const args = msg.args()
           if (args.length == 0) return false
           const firstArg = args[0]
+
+          const message = await firstArg.jsonValue()
+          if (
+            typeof message === "string" &&
+            /Alert: Font .* loaded/.test(message)
+          )
+            return true
 
           return await firstArg.evaluate(
             (arg) => arg[0]?._data instanceof Uint8Array
@@ -194,7 +201,10 @@ export class App extends Contract {
           { strict: true }
         )
 
-        await consolePromise
+        await consolePromise.catch((err) => {
+          // Timeouts are fine here
+          if (!(err instanceof pwErrors.TimeoutError)) throw err
+        })
       } finally {
         await toArrayBuffer.dispose()
         if (dialogListener) pwPage.off("dialog", dialogListener)
