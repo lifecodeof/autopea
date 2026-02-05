@@ -1,7 +1,15 @@
-import type { Class, Constructor } from "type-fest"
 import { ZodType, z } from "zod"
 import type { PhotopeaChannel } from "@/Channel"
 import { PhotopeaMutexes } from "@/PhotopeaMutexes"
+
+type ContractCtorArgs = [channel: PhotopeaChannel, expression: string]
+
+type ContractClass<T> = {
+  prototype: Pick<T, keyof T>
+  new (...args_: ContractCtorArgs): T
+}
+
+type ContractCtor<T extends Contract> = new (...args_: ContractCtorArgs) => T
 
 /**
  * Represents a template function that can be called with template literal syntax.
@@ -190,7 +198,10 @@ export class Contract {
    * const layers = this.$(Layers)`.layers`
    * const color = this.$(SolidColor)`.backgroundColor`
    */
-  protected $<T extends Contract>(Ctor: Constructor<T>, options?: EvalOptions) {
+  protected $<T extends Contract>(
+    Ctor: ContractCtor<T>,
+    options?: EvalOptions,
+  ) {
     return (template: TemplateStringsArray, ...values: unknown[]) => {
       const childExpression = this.templateExpression(template, values)
       const expression = this.extendExpression(childExpression, options)
@@ -291,7 +302,7 @@ export class Contract {
    * const sampler = await this.$evalHandle(ColorSampler)`.create()`
    */
   protected $evalHandle<T extends Contract>(
-    Ctor: Constructor<T>,
+    Ctor: ContractCtor<T>,
     options?: EvalOptions,
   ): TemplateFn<Promise<T>> {
     return async (template: TemplateStringsArray, ...values: unknown[]) => {
@@ -335,7 +346,7 @@ export class Contract {
     )
     const expression = this.channel.getExpressionForHandle(handle)
 
-    const Ctor = this.constructor as Constructor<this>
+    const Ctor = this.constructor as ContractCtor<this>
     return new Ctor(this.channel, expression)
   }
 
@@ -379,8 +390,8 @@ export class Contract {
    * }
    */
   protected $arrayOf<T extends Contract>(
-    Ctor: Constructor<T>,
-  ): Class<ContractCollection<T>> {
+    Ctor: ContractCtor<T>,
+  ): ContractClass<ContractCollection<T>> {
     return class extends ContractCollection<T> {
       protected itemType = () => Ctor
     }
@@ -435,7 +446,7 @@ export class Contract {
    * // Cast a Dynamic to a specific type
    * const layer = dynamicObject.$cast(Layer)
    */
-  $cast<T extends Contract>(Ctor: Constructor<T>): T {
+  $cast<T extends Contract>(Ctor: ContractCtor<T>): T {
     return new Ctor(this.channel, this.expression)
   }
 }
@@ -538,7 +549,7 @@ export abstract class ContractCollection<T extends Contract> extends Contract {
    * Returns the Contract type constructor for items in this collection.
    * Must be implemented by subclasses.
    */
-  protected abstract itemType(): Constructor<T>
+  protected abstract itemType(): ContractCtor<T>
 
   /**
    * Accesses an element in the collection by index.
