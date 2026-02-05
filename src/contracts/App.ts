@@ -179,7 +179,7 @@ export class App extends Contract {
         // Photopea no longer logs array with Uint8Array
         const consolePromise = pwPage.waitForEvent("console", async (msg) => {
           const args = msg.args()
-          if (args.length == 0) return false
+          if (args.length === 0) return false
           const firstArg = args[0]
 
           const message = await firstArg.jsonValue()

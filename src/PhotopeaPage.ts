@@ -1,4 +1,4 @@
-import EventEmitter from "events"
+import EventEmitter from "node:events"
 import type { Browser, BrowserContext, Page } from "playwright"
 import { waitForEvent } from "./helpers"
 import { makeArrayBufferToBase64FnHandle } from "./playwrightLib"

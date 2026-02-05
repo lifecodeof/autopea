@@ -1,4 +1,4 @@
-import type { EventEmitter } from "events"
+import type { EventEmitter } from "node:events"
 
 export const timeoutAbortSignal = (timeout: number): AbortSignal => {
   const controller = new AbortController()
@@ -76,7 +76,7 @@ export const waitForEvent = async <
       try {
         // @ts-expect-error
         passed = predicate ? predicate(...params) : true
-      } catch (error) {}
+      } catch (_error) {}
 
       if (passed) {
         cleanup()

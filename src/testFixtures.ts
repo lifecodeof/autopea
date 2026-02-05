@@ -1,5 +1,5 @@
 import { chromium, type BrowserContext } from "playwright"
-import { expect, test } from "vitest"
+import { test } from "vitest"
 import { App } from "./contracts/App"
 import { PhotopeaChannel } from "./Channel"
 import { PhotopeaPage } from "./PhotopeaPage"
@@ -8,7 +8,7 @@ export const browserTest = test.extend<{
   browserCtx: BrowserContext
 }>({
   browserCtx: [
-    async ({}, use) => {
+    async (_, use) => {
       const browser = await chromium.launch({ headless: !true })
 
       const context = await browser.newContext()

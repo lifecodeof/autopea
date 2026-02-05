@@ -51,7 +51,7 @@ export class PhotopeaChannel {
     }
 
     return Object.entries(handleVars)
-      .map(([key, value]) => `const ${key} = ` + getExpression(value) + ";")
+      .map(([key, value]) => `const ${key} = ${getExpression(value)};`)
       .join("")
   }
 
@@ -62,14 +62,13 @@ export class PhotopeaChannel {
   private prepareScript(
     requestId: string,
     functionBody: string,
-    handleVars: HandleVars = {},
-    options: EvaluateOptions = {}
+    handleVars: HandleVars = {}
   ) {
     const handleVarsStatement = this.makeHandleVarsStatement(handleVars)
     const resultVarName = `result_${requestId}`
 
     const evalStatement =
-      `const ${resultVarName} = ` + this.wrapIIFE(functionBody)
+      `const ${resultVarName} = ${this.wrapIIFE(functionBody)}`
     const respondStatement = `_pp_sendResponse("${requestId}", "result", ${resultVarName});`
 
     // banner is used to distinguish between blank done events and script output events

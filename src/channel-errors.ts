@@ -37,12 +37,13 @@ export class PhotopeaChannelEvalError extends PhotopeaChannelError {
 
     // Extract additional handleVars from the script
     const handleRegex = /globalThis\["(__ppHandle__\w+)"\]/g
-    let match
-    while ((match = handleRegex.exec(this.functionBody)) !== null) {
+    let match = handleRegex.exec(this.functionBody)
+    while (match !== null) {
       const handle = match[1]
       const dynamicHandle = new Contract(this.#channel, handle)
 
       variables[handle] = dynamicHandle
+      match = handleRegex.exec(this.functionBody)
     }
 
     return variables

@@ -29,19 +29,19 @@ export class UnitRect extends Contract {
     return this[3]
   }
 
-  get [0]() {
+  get 0() {
     return this.$(UnitValue)`[0]`
   }
 
-  get [1]() {
+  get 1() {
     return this.$(UnitValue)`[1]`
   }
 
-  get [2]() {
+  get 2() {
     return this.$(UnitValue)`[2]`
   }
 
-  get [3]() {
+  get 3() {
     return this.$(UnitValue)`[3]`
   }
 
@@ -129,16 +129,16 @@ export class UnitRectLocal {
     this.bottom = value + halfHeight
   }
 
-  get [0]() {
+  get 0() {
     return this.left
   }
-  get [1]() {
+  get 1() {
     return this.top
   }
-  get [2]() {
+  get 2() {
     return this.right
   }
-  get [3]() {
+  get 3() {
     return this.bottom
   }
 

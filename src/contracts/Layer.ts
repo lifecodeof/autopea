@@ -5,7 +5,6 @@ import { LayerKind, type AnchorPosition, type ElementPlacement } from "./enums"
 import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
 import { PDocument } from "./PDocument"
 import { UnitRect, UnitRectLocal } from "./UnitRect"
-import type { LayerSet } from "./LayerSet"
 
 export class Layer extends Contract {
   get name() {

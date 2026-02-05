@@ -1,5 +1,5 @@
 import AdmZip from "adm-zip"
-import { buffer } from "stream/consumers"
+import { buffer } from "node:stream/consumers"
 import z from "zod"
 import { App } from "./App"
 import { ArtLayers } from "./ArtLayer"

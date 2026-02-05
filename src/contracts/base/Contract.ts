@@ -189,14 +189,14 @@ export class Contract {
    * const color = this.$(SolidColor)`.backgroundColor`
    */
   protected $<T extends Contract>(
-    constructor: Constructor<T>,
+    Ctor: Constructor<T>,
     options?: EvalOptions
   ) {
     return (template: TemplateStringsArray, ...values: any[]) => {
       const childExpression = this.templateExpression(template, values)
       const expression = this.extendExpression(childExpression, options)
 
-      return new constructor(this.channel, expression)
+      return new Ctor(this.channel, expression)
     }
   }
 
@@ -293,18 +293,18 @@ export class Contract {
    * const sampler = await this.$evalHandle(ColorSampler)`.create()`
    */
   protected $evalHandle<T extends Contract>(
-    constructor: Constructor<T>,
+    Ctor: Constructor<T>,
     options?: EvalOptions
   ): TemplateFn<Promise<T>> {
     return async (template: TemplateStringsArray, ...values: any[]) => {
       const childExpression = this.templateExpression(template, values)
 
       const fullExpression =
-        "return " + this.extendExpression(childExpression, options)
+        `return ${this.extendExpression(childExpression, options)}`
       const handle = await this.channel.evaluateHandle(fullExpression)
 
       const expression = this.channel.getExpressionForHandle(handle)
-      return new constructor(this.channel, expression)
+      return new Ctor(this.channel, expression)
     }
   }
 
@@ -338,8 +338,8 @@ export class Contract {
     )
     const expression = this.channel.getExpressionForHandle(handle)
 
-    const constructor = this.constructor as Constructor<this>
-    return new constructor(this.channel, expression)
+    const Ctor = this.constructor as Constructor<this>
+    return new Ctor(this.channel, expression)
   }
 
   /**
@@ -382,10 +382,10 @@ export class Contract {
    * }
    */
   protected $arrayOf<T extends Contract>(
-    constructor: Constructor<T>
+    Ctor: Constructor<T>
   ): Class<ContractCollection<T>> {
     return class extends ContractCollection<T> {
-      protected itemType = () => constructor
+      protected itemType = () => Ctor
     }
   }
 
@@ -438,8 +438,8 @@ export class Contract {
    * // Cast a Dynamic to a specific type
    * const layer = dynamicObject.$cast(Layer)
    */
-  $cast<T extends Contract>(constructor: Constructor<T>): T {
-    return new constructor(this.channel, this.expression)
+  $cast<T extends Contract>(Ctor: Constructor<T>): T {
+    return new Ctor(this.channel, this.expression)
   }
 }
 
@@ -510,7 +510,7 @@ export class SerializableContract<T>
    * const width = await layer.width.$get()
    */
   async $get(): Promise<T> {
-    const value = await this.channel.evaluate("return " + this.expression)
+    const value = await this.channel.evaluate(`return ${this.expression}`)
     return this.schema.parse(value)
   }
 }
@@ -584,7 +584,7 @@ export abstract class ContractCollection<T extends Contract> extends Contract {
    */
   async toRefArray(): Promise<T[]> {
     const thisHandle = await this.channel.evaluateHandle(
-      "return " + this.expression
+      `return ${this.expression}`
     )
     const handles = await this.channel.iterHandle(thisHandle)
     return handles.map((h) => {

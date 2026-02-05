@@ -1,7 +1,7 @@
 import { PhotopeaChannel } from "@/Channel"
 import { PhotopeaPage } from "@/PhotopeaPage"
 import { chromium } from "playwright"
-import readline from "readline"
+import readline from "node:readline"
 
 const browser = await chromium.launch({ headless: false })
 const page = await PhotopeaPage.openFromBrowser(await browser.newContext())
@@ -17,7 +17,7 @@ const rl = readline.createInterface({
 
 rl.on("line", async (line) => {
   try {
-    const result = await channel.evaluate("return " + line)
+    const result = await channel.evaluate(`return ${line}`)
     console.log(result)
   } catch (error) {
     console.error(error)
