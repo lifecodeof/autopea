@@ -1,6 +1,6 @@
 import type { PhotopeaChannel } from "@/Channel"
 import { PhotopeaMutexes } from "@/PhotopeaMutexes"
-import { type Class, type Constructor } from "type-fest"
+import type { Class, Constructor } from "type-fest"
 import { z, ZodType } from "zod"
 
 /**

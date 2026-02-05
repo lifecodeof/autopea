@@ -17,10 +17,10 @@ export class PhotopeaMutexes {
   public readonly documentMutex = new Mutex()
 
   static of(page: Page) {
-    let instance = this.instanceMap.get(page)
+    let instance = PhotopeaMutexes.instanceMap.get(page)
     if (!instance) {
       instance = new PhotopeaMutexes()
-      this.instanceMap.set(page, instance)
+      PhotopeaMutexes.instanceMap.set(page, instance)
     }
     return instance
   }

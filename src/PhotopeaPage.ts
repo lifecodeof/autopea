@@ -1,5 +1,5 @@
 import EventEmitter from "events"
-import { type Browser, type BrowserContext, type Page } from "playwright"
+import type { Browser, BrowserContext, Page } from "playwright"
 import { waitForEvent } from "./helpers"
 import { makeArrayBufferToBase64FnHandle } from "./playwrightLib"
 
@@ -46,7 +46,7 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
    * @returns Promise resolving to a PhotopeaPage instance.
    */
   static async open(page: Page, options: { timeout?: number } = {}) {
-    await this.openPhotopeaPage(page, options)
+    await PhotopeaPage.openPhotopeaPage(page, options)
     const instance = new PhotopeaPage(page)
     await instance.listenEvents()
     return instance
@@ -131,7 +131,7 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
     await toBase64Handle.dispose()
 
     // Somehow, #8887 removes ads
-    let startTime = Date.now()
+    const startTime = Date.now()
     const timeout = options.timeout ?? 30_000
     try {
       await page.goto("https://www.photopea.com#8887", { timeout })
