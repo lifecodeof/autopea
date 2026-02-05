@@ -1,7 +1,7 @@
-import { chromium, type BrowserContext } from "playwright"
+import { type BrowserContext, chromium } from "playwright"
 import { test } from "vitest"
-import { App } from "./contracts/App"
 import { PhotopeaChannel } from "./Channel"
+import { App } from "./contracts/App"
 import { PhotopeaPage } from "./PhotopeaPage"
 
 export const browserTest = test.extend<{
@@ -15,18 +15,18 @@ export const browserTest = test.extend<{
       await use(context)
       await browser.close()
     },
-    { scope: "worker" }
-  ]
+    { scope: "worker" },
+  ],
 })
 
 const pageFixture =
   (shared: boolean) =>
   async (
     { browserCtx }: { browserCtx: BrowserContext },
-    use: (page: PhotopeaPage) => Promise<void>
+    use: (page: PhotopeaPage) => Promise<void>,
   ) => {
     const page = await PhotopeaPage.openFromBrowser(browserCtx, {
-      timeout: 60_000
+      timeout: 60_000,
     })
     if (shared) page.setMaxListeners(0)
     await use(page)
@@ -36,7 +36,7 @@ const pageFixture =
 export const pageTest = browserTest.extend<{
   page: PhotopeaPage
 }>({
-  page: pageFixture(false)
+  page: pageFixture(false),
 })
 
 export const channelTest = pageTest.extend<{
@@ -44,7 +44,7 @@ export const channelTest = pageTest.extend<{
 }>({
   channel: async ({ page }, use) => {
     await use(new PhotopeaChannel(page))
-  }
+  },
 })
 
 export const appTest = channelTest.extend<{
@@ -53,5 +53,5 @@ export const appTest = channelTest.extend<{
   app: async ({ channel }, use) => {
     const app = new App(channel, "app")
     await use(app)
-  }
+  },
 })

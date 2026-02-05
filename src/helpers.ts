@@ -4,7 +4,7 @@ export const timeoutAbortSignal = (timeout: number): AbortSignal => {
   const controller = new AbortController()
   setTimeout(
     () => controller.abort(new Error(`Operation timed out after ${timeout}ms`)),
-    timeout
+    timeout,
   )
   return controller.signal
 }
@@ -18,7 +18,7 @@ export class TimeoutError extends Error {
 export const abortOnTimeout = (
   abortController: AbortController,
   timeout: number,
-  error: Error
+  error: Error,
 ) => {
   if (timeout <= 0) timeout = 1 // Ensure at least 1ms timeout
 
@@ -55,13 +55,13 @@ type Listener1<K, T> = Listener<K, T, (...args: unknown[]) => void>
 export const waitForEvent = async <
   T,
   Event,
-  EventMap extends Record<string, unknown[]> | DefaultEventMap
+  EventMap extends Record<string, unknown[]> | DefaultEventMap,
 >(
   emitter: EventEmitter<EventMap>,
   event: Key<Event, EventMap>,
   selector: (...eventArgs: Parameters<Listener1<Event, EventMap>>) => T,
   signal?: AbortSignal,
-  predicate?: (...eventArgs: Parameters<Listener1<Event, EventMap>>) => boolean
+  predicate?: (...eventArgs: Parameters<Listener1<Event, EventMap>>) => boolean,
 ) => {
   return await new Promise<T>((resolve, reject) => {
     const cleanup = () => {

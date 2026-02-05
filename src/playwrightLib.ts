@@ -44,7 +44,7 @@ export const transferBuffer = async (page: Page, buffer: Buffer) => {
   try {
     return await page.evaluateHandle(
       async ([base64, toBuffer]) => toBuffer(base64),
-      [buffer.toString("base64"), toBuffer] as const
+      [buffer.toString("base64"), toBuffer] as const,
     )
   } finally {
     await toBuffer.dispose()

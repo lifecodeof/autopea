@@ -7,7 +7,7 @@ export enum AnchorPosition {
   MIDDLERIGHT = 5,
   BOTTOMLEFT = 6,
   BOTTOMCENTER = 7,
-  BOTTOMRIGHT = 8
+  BOTTOMRIGHT = 8,
 }
 
 export enum ElementPlacement {
@@ -15,7 +15,7 @@ export enum ElementPlacement {
   PLACEATBEGINNING = 1,
   PLACEATEND = 2,
   PLACEBEFORE = 3,
-  PLACEAFTER = 4
+  PLACEAFTER = 4,
 }
 
 export enum LayerKind {
@@ -40,11 +40,10 @@ export enum LayerKind {
   POSTERIZE = 18,
   THRESHOLD = 19,
   GRADIENTMAP = 20,
-  SELECTIVECOLOR = 21
+  SELECTIVECOLOR = 21,
 }
 
-export enum ResampleMethod
-{
+export enum ResampleMethod {
   AUTOMATIC = 0,
   BICUBIC = 1,
   BICUBICAUTOMATIC = 2,
@@ -53,23 +52,20 @@ export enum ResampleMethod
   BILINEAR = 5,
   NEARESTNEIGHBOR = 6,
   NONE = 7,
-  PRESERVEDETAILS = 8
+  PRESERVEDETAILS = 8,
 }
 
-export enum TrimType
-{
+export enum TrimType {
   TOPLEFT = 0,
   BOTTOMRIGHT = 1,
-  TRANSPARENT = 2
+  TRANSPARENT = 2,
 }
 
-export enum RasterizeType
-{
-  ENTIRELAYER= 0,
-  FILLCONTENT= 1,
-  LAYERCLIPPINGPATH= 2,
-  LINKEDLAYERS= 3,
-  SHAPE= 4,
-  TEXTCONTENTS= 5
+export enum RasterizeType {
+  ENTIRELAYER = 0,
+  FILLCONTENT = 1,
+  LAYERCLIPPINGPATH = 2,
+  LINKEDLAYERS = 3,
+  SHAPE = 4,
+  TEXTCONTENTS = 5,
 }
-

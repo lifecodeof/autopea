@@ -46,7 +46,7 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
    */
   static async openFromBrowser(
     browserOrContext: Browser | BrowserContext,
-    options: { timeout?: number } = {}
+    options: { timeout?: number } = {},
   ) {
     return await PhotopeaPage.open(await browserOrContext.newPage(), options)
   }
@@ -78,7 +78,7 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
 
   private static async openPhotopeaPage(
     page: Page,
-    options: { timeout?: number } = {}
+    options: { timeout?: number } = {},
   ) {
     // Filter out unwanted scripts
     await page.route("**/*", (route) => {
@@ -130,10 +130,10 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
           listener(
             new MessageEvent("message", {
               origin: "https://www.photopea.com",
-              data: msg
-            })
+              data: msg,
+            }),
           )
-        }
+        },
       }
       ;(pageWindow as unknown as { parent: typeof mockParent }).parent =
         mockParent
@@ -158,16 +158,19 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
     }
 
     // Wait for the first "done" message
-    await page.waitForFunction(() => (window as PhotopeaWindow).isFirstDoneFired, {
-      timeout: 500
-    })
+    await page.waitForFunction(
+      () => (window as PhotopeaWindow).isFirstDoneFired,
+      {
+        timeout: 500,
+      },
+    )
   }
 
   private async listenEvents() {
     // Expose a function to get sent messages from Photopea
     await this.page.exposeFunction(
       "onPhotopeaMessage",
-      this.handleMessage.bind(this)
+      this.handleMessage.bind(this),
     )
 
     // This function is used in PhotopeaChannel.evaluate()
@@ -177,7 +180,7 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
         if (typeof id !== "string") return
         if (typeof reqType !== "string") return
         this.emit("response", id, reqType, data)
-      }
+      },
     )
 
     this.page.on("console", (msg) => {
@@ -221,7 +224,7 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
       "message",
       (_) => {},
       signal,
-      (message) => message === ""
+      (message) => message === "",
     )
   }
 
@@ -246,7 +249,7 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
     event: keyof EventMap,
     selector: (...args: unknown[]) => T,
     signal?: AbortSignal,
-    predicate?: (...args: unknown[]) => boolean
+    predicate?: (...args: unknown[]) => boolean,
   ): Promise<T> {
     return await waitForEvent(this, event, selector, signal, predicate)
   }

@@ -1,8 +1,10 @@
-import { PhotopeaChannel } from "@/Channel"
-import { PhotopeaMutexes } from "@/PhotopeaMutexes"
 import type { Dialog } from "playwright"
 import { errors as pwErrors } from "playwright"
 import z from "zod"
+import { PhotopeaChannel } from "@/Channel"
+import { PhotopeaMutexes } from "@/PhotopeaMutexes"
+import { PhotopeaPage } from "@/PhotopeaPage"
+import { clickToolbarButton } from "@/toolbar"
 import { abortOnTimeout, timeoutAbortSignal } from "../helpers"
 import { makeBase64ToArrayBufferFnHandle } from "../playwrightLib"
 import { Contract } from "./base/Contract"
@@ -10,8 +12,6 @@ import { PDocument, PDocuments, type SaveFormat } from "./PDocument"
 import { PFile } from "./PFile"
 import { Preferences } from "./Preferences"
 import { SolidColor } from "./SolidColor"
-import { PhotopeaPage } from "@/PhotopeaPage"
-import { clickToolbarButton } from "@/toolbar"
 
 export class App extends Contract {
   static of(obj: PhotopeaChannel | Contract | PhotopeaPage) {
@@ -99,7 +99,7 @@ export class App extends Contract {
 
       await Promise.all([
         this.channel.page.waitForBlankDone(signal),
-        this.channel.evaluate<void>(`app.open(${JSON.stringify(url)});`)
+        this.channel.evaluate<void>(`app.open(${JSON.stringify(url)});`),
       ])
 
       return this.activeDocument.$ref()
@@ -121,7 +121,7 @@ export class App extends Contract {
     return await this.mutexes.interactionMutex.runExclusive(async () => {
       const [fileChooser] = await Promise.all([
         pwPage.waitForEvent("filechooser", { timeout }),
-        clickToolbarButton(page.page, [1, 2]) // File > Open
+        clickToolbarButton(page.page, [1, 2]), // File > Open
       ])
 
       return await this.mutexes.documentMutex.runExclusive(async () => {
@@ -132,7 +132,7 @@ export class App extends Contract {
         const cleanup = abortOnTimeout(
           abort,
           timeout,
-          new Error(`openFile() timed out after ${timeout}ms`)
+          new Error(`openFile() timed out after ${timeout}ms`),
         )
 
         try {
@@ -153,7 +153,7 @@ export class App extends Contract {
     const pwPage = this.channel.page.page
     const fontsBase64 = Object.entries(fonts).map(([name, buffer]) => ({
       name,
-      base64: buffer.toString("base64")
+      base64: buffer.toString("base64"),
     }))
 
     const toArrayBuffer = await makeBase64ToArrayBufferFnHandle(pwPage)
@@ -170,7 +170,7 @@ export class App extends Contract {
             }
             return dataTransfer
           },
-          [fontsBase64, toArrayBuffer] as const
+          [fontsBase64, toArrayBuffer] as const,
         )
 
         dialogListener = (dialog: Dialog) => dialog.dismiss()
@@ -190,7 +190,7 @@ export class App extends Contract {
             return true
 
           return await firstArg.evaluate(
-            (arg) => arg[0]?._data instanceof Uint8Array
+            (arg) => arg[0]?._data instanceof Uint8Array,
           )
         })
 
@@ -198,7 +198,7 @@ export class App extends Contract {
           ".mainblock > .block > .body",
           "drop",
           { dataTransfer },
-          { strict: true }
+          { strict: true },
         )
 
         await consolePromise.catch((err) => {
@@ -218,7 +218,7 @@ export class App extends Contract {
 
   async hasOpenDocument(): Promise<boolean> {
     return await this.channel.evaluate<boolean>(
-      "return app.documents.length > 0"
+      "return app.documents.length > 0",
     )
   }
 

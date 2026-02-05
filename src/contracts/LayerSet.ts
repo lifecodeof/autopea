@@ -28,11 +28,11 @@ export class LayerSet extends Layer {
         this.artLayers
           .toArray()
           .then((layers) =>
-            Promise.all(layers.map((layer) => layer.fetchBounds()))
+            Promise.all(layers.map((layer) => layer.fetchBounds())),
           ),
         this.layerSets
           .toArray()
-          .then((sets) => Promise.all(sets.map((set) => set.fetchBounds())))
+          .then((sets) => Promise.all(sets.map((set) => set.fetchBounds()))),
       ])
     ).flat()
 

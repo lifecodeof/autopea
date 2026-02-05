@@ -2,14 +2,14 @@ import type { Locator, Page } from "playwright"
 
 export const clickToolbarButton = async (
   page: Page,
-  path: (string | number)[]
+  path: (string | number)[],
 ) => {
   const [menu, ...submenus] = path
 
   const locateButton = (
     parent: Locator,
     selector: string,
-    segment: string | number
+    segment: string | number,
   ) =>
     typeof segment === "number"
       ? parent.locator(`${selector}:nth-child(${segment})`)
@@ -18,7 +18,7 @@ export const clickToolbarButton = async (
   await locateButton(
     page.locator(".topbar > span:nth-child(1)"),
     "button",
-    menu
+    menu,
   ).click()
 
   const contextPanel = page.locator(".contextpanel")

@@ -1,7 +1,7 @@
 import z from "zod"
 import { App } from "./App"
-import { ContractCollection, Contract, Dynamic } from "./base/Contract"
-import { LayerKind, type AnchorPosition, type ElementPlacement } from "./enums"
+import { Contract, ContractCollection, Dynamic } from "./base/Contract"
+import { type AnchorPosition, type ElementPlacement, LayerKind } from "./enums"
 import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
 import { PDocument } from "./PDocument"
 import { UnitRect, UnitRectLocal } from "./UnitRect"
@@ -57,7 +57,7 @@ export class Layer extends Contract {
 
   duplicate(relativeObject?: Layer, insertionLocation?: ElementPlacement) {
     return this.$evalHandle(
-      Layer
+      Layer,
     )`.duplicate(${relativeObject}, ${insertionLocation})`
   }
 
@@ -119,7 +119,7 @@ export class Layer extends Contract {
   async position({
     bounds,
     horizontal,
-    vertical
+    vertical,
   }: {
     bounds?: UnitRectLocal // Default to document bounds
     horizontal?: "center" | "left" | "right" // Horizontal alignment
@@ -173,7 +173,7 @@ export class Layer extends Contract {
     return {
       red: (bigint >> 16) & 255,
       green: (bigint >> 8) & 255,
-      blue: bigint & 255
+      blue: bigint & 255,
     }
   }
 
@@ -183,7 +183,7 @@ export class Layer extends Contract {
       layer: this,
       red,
       green,
-      blue
+      blue,
     })
   }
 
@@ -196,7 +196,7 @@ export class Layer extends Contract {
     growVertical = false,
     growHorizontal = false,
     preserveAspect = true,
-    padding = 0
+    padding = 0,
   }: {
     // TODO: indicate mutually exclusive options as types
     targetBounds?: UnitRectLocal // Default to document bounds
@@ -214,7 +214,7 @@ export class Layer extends Contract {
         targetBounds.left + padding,
         targetBounds.top + padding,
         targetBounds.right - padding,
-        targetBounds.bottom - padding
+        targetBounds.bottom - padding,
       )
     }
 
@@ -234,7 +234,7 @@ export class Layer extends Contract {
     if (preserveAspect) {
       if (growVertical || growHorizontal) {
         throw new Error(
-          "growVertical or growHorizontal is not supported when preserving aspect ratio"
+          "growVertical or growHorizontal is not supported when preserving aspect ratio",
         )
       }
 
@@ -275,7 +275,7 @@ export class Layer extends Contract {
   }
 
   async isVisibleToUser(): Promise<boolean> {
-    if (!await this.visible.$get()) {
+    if (!(await this.visible.$get())) {
       return false
     }
 

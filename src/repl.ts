@@ -1,7 +1,7 @@
+import readline from "node:readline"
+import { chromium } from "playwright"
 import { PhotopeaChannel } from "@/Channel"
 import { PhotopeaPage } from "@/PhotopeaPage"
-import { chromium } from "playwright"
-import readline from "node:readline"
 
 const browser = await chromium.launch({ headless: false })
 const page = await PhotopeaPage.openFromBrowser(await browser.newContext())
@@ -11,9 +11,8 @@ channel.timeout = 500
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
-  prompt: "photopea> "
+  prompt: "photopea> ",
 })
-
 
 rl.on("line", async (line) => {
   try {

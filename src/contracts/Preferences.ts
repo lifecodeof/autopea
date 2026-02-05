@@ -1,5 +1,5 @@
-import { Contract } from "./base/Contract"
 import z from "zod"
+import { Contract } from "./base/Contract"
 
 export class Preferences extends Contract {
   get additionalPluginFolder() {

@@ -8,7 +8,7 @@ export class UnitRect extends Contract {
       this.left.value.$get(),
       this.top.value.$get(),
       this.right.value.$get(),
-      this.bottom.value.$get()
+      this.bottom.value.$get(),
     ])
     return new UnitRectLocal(left, top, right, bottom)
   }
@@ -50,7 +50,7 @@ export class UnitRect extends Contract {
     const left = this.left
     return this.$value(z.number(), {
       absolute: true,
-      wrapParentheses: true
+      wrapParentheses: true,
     })`${right} - ${left}`
   }
 
@@ -59,7 +59,7 @@ export class UnitRect extends Contract {
     const bottom = this.bottom
     return this.$value(z.number(), {
       absolute: true,
-      wrapParentheses: true
+      wrapParentheses: true,
     })`${bottom} - ${top}`
   }
 
@@ -68,7 +68,7 @@ export class UnitRect extends Contract {
     const right = this.right
     return this.$value(z.number(), {
       absolute: true,
-      wrapParentheses: true
+      wrapParentheses: true,
     })`${left} + ((${right} - ${left}) / 2)`
   }
 
@@ -77,7 +77,7 @@ export class UnitRect extends Contract {
     const bottom = this.bottom
     return this.$value(z.number(), {
       absolute: true,
-      wrapParentheses: true
+      wrapParentheses: true,
     })`${top} + ((${bottom} - ${top}) / 2)`
   }
 }
@@ -88,7 +88,7 @@ export class UnitRectLocal {
     public left: number = 0,
     public top: number = 0,
     public right: number = 0,
-    public bottom: number = 0
+    public bottom: number = 0,
   ) {}
 
   get width() {
@@ -147,7 +147,7 @@ export class UnitRectLocal {
       left: this.left,
       top: this.top,
       right: this.right,
-      bottom: this.bottom
+      bottom: this.bottom,
     }
   }
 

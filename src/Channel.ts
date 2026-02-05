@@ -1,12 +1,12 @@
-import type { PhotopeaPage } from "@/PhotopeaPage"
 import { Mutex } from "async-mutex"
 import invariant from "tiny-invariant"
+import type { PhotopeaPage } from "@/PhotopeaPage"
 import {
   PhotopeaChannelEvalError,
   PhotopeaChannelLogicError,
   PhotopeaChannelPageError,
   PhotopeaChannelScriptError,
-  PhotopeaChannelTimeoutError
+  PhotopeaChannelTimeoutError,
 } from "./channel-errors"
 import { Contract } from "./contracts/base/Contract"
 import { abortOnTimeout } from "./helpers"
@@ -62,13 +62,12 @@ export class PhotopeaChannel {
   private prepareScript(
     requestId: string,
     functionBody: string,
-    handleVars: HandleVars = {}
+    handleVars: HandleVars = {},
   ) {
     const handleVarsStatement = this.makeHandleVarsStatement(handleVars)
     const resultVarName = `result_${requestId}`
 
-    const evalStatement =
-      `const ${resultVarName} = ${this.wrapIIFE(functionBody)}`
+    const evalStatement = `const ${resultVarName} = ${this.wrapIIFE(functionBody)}`
     const respondStatement = `_pp_sendResponse("${requestId}", "result", ${resultVarName});`
 
     // banner is used to distinguish between blank done events and script output events
@@ -83,21 +82,21 @@ export class PhotopeaChannel {
   async createResultWaiter<T = unknown>(
     requestId: string,
     signal: AbortSignal,
-    script: string
+    script: string,
   ): Promise<T> {
     try {
       const result = await this.page.waitForEvent(
         "response",
         (_rid, reqType, data) => ({ reqType, data }),
         signal,
-        (rid) => rid === requestId
+        (rid) => rid === requestId,
       )
 
       if (result.reqType === "result") {
         return result.data as T
       } else {
         throw new PhotopeaChannelLogicError(
-          `Unknown response type: ${result.reqType}`
+          `Unknown response type: ${result.reqType}`,
         )
       }
     } catch (error) {
@@ -115,16 +114,12 @@ export class PhotopeaChannel {
   async evaluate<T = unknown>(
     functionBody: string,
     handleVars: HandleVars = {},
-    options: EvaluateOptions = {}
+    options: EvaluateOptions = {},
   ): Promise<T> {
     const requestId = randomId()
     const abort = new AbortController()
 
-    const script = this.prepareScript(
-      requestId,
-      functionBody,
-      handleVars
-    )
+    const script = this.prepareScript(requestId, functionBody, handleVars)
 
     // TODO: Promise.all()
 
@@ -132,18 +127,18 @@ export class PhotopeaChannel {
     const resultPromise = this.createResultWaiter<T>(
       requestId,
       abort.signal,
-      script
+      script,
     ).then(
       (ok) => ({ type: "ok" as const, ok }),
-      (error) => ({ type: "error" as const, error })
+      (error) => ({ type: "error" as const, error }),
     )
 
     // Wait for console errors
-        this.page
-          .waitForEvent<Error>("pageerror", (v) => v as Error, abort.signal)
-          .then((msg) => {
-            abort.abort(new PhotopeaChannelPageError(msg.message))
-          })
+    this.page
+      .waitForEvent<Error>("pageerror", (v) => v as Error, abort.signal)
+      .then((msg) => {
+        abort.abort(new PhotopeaChannelPageError(msg.message))
+      })
       .catch((_) => {}) // Ignore timeout errors
 
     // Abort on timeout
@@ -152,8 +147,8 @@ export class PhotopeaChannel {
       abort,
       timeout,
       new PhotopeaChannelTimeoutError(
-        `Script evaluation timed out (${timeout}ms)`
-      )
+        `Script evaluation timed out (${timeout}ms)`,
+      ),
     )
 
     try {
@@ -167,7 +162,7 @@ export class PhotopeaChannel {
       return result.ok
     } catch (error) {
       throw new PhotopeaChannelEvalError(this, script, handleVars, {
-        cause: error
+        cause: error,
       })
     } finally {
       abort.abort() // Clear other listeners
@@ -183,7 +178,7 @@ export class PhotopeaChannel {
   async evaluateHandle(
     functionBody: string,
     handleVars: HandleVars = {},
-    options?: EvaluateOptions
+    options?: EvaluateOptions,
   ) {
     const handle = randomId()
 
@@ -197,7 +192,7 @@ export class PhotopeaChannel {
       return "OK";
       `,
       handleVars,
-      options
+      options,
     )
 
     invariant(result === "OK", "Result should be either OK or an error")
@@ -214,7 +209,7 @@ export class PhotopeaChannel {
     const handle = randomId()
 
     await this.evaluate<void>(
-      `globalThis["${handlePrefix + handle}"] = ${JSON.stringify(value)};`
+      `globalThis["${handlePrefix + handle}"] = ${JSON.stringify(value)};`,
     )
 
     return handle
@@ -227,7 +222,7 @@ export class PhotopeaChannel {
    */
   async getHandleValue<T = unknown>(handle: string) {
     return await this.evaluate<T>("return handleValue;", {
-      handleValue: handle
+      handleValue: handle,
     })
   }
 
@@ -275,12 +270,12 @@ export class PhotopeaChannel {
       for (const i in chunks) {
         signal?.throwIfAborted()
         await this.evaluate<void>(`acc.ref += ${JSON.stringify(chunks[i])};`, {
-          acc: accHandle
+          acc: accHandle,
         })
       }
 
       const stringHandle = await this.evaluateHandle(`return acc.ref;`, {
-        acc: accHandle
+        acc: accHandle,
       })
 
       return stringHandle

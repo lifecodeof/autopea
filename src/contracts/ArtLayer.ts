@@ -1,12 +1,12 @@
+import invariant from "tiny-invariant"
 import z from "zod"
-import { ContractCollection, Contract } from "./base/Contract"
+import { App } from "./App"
+import { Contract, ContractCollection } from "./base/Contract"
 import type { ElementPlacement, RasterizeType } from "./enums"
 import { Layer } from "./Layer"
+import { PDocument } from "./PDocument"
 import { SolidColor } from "./SolidColor"
 import { UnitValue } from "./UnitValue"
-import { App } from "./App"
-import { PDocument } from "./PDocument"
-import invariant from "tiny-invariant"
 
 export class ArtLayer extends Layer {
   get id() {
@@ -42,10 +42,10 @@ export class ArtLayer extends Layer {
   }
   override duplicate(
     relativeObject?: Layer,
-    insertionLocation?: ElementPlacement
+    insertionLocation?: ElementPlacement,
   ) {
     return this.$evalHandle(
-      ArtLayer
+      ArtLayer,
     )`.duplicate(${relativeObject}, ${insertionLocation})`
   }
   invert() {
@@ -66,19 +66,19 @@ export class ArtLayer extends Layer {
       invariant(panelhead, "Cannot find panelhead element")
 
       const documentCountBefore = await panelhead.evaluate(
-        (el) => el.childElementCount
+        (el) => el.childElementCount,
       )
 
       await App.of(this).activeDocument.activeLayer.$set(this)
 
       await this.$eval({
-        absolute: true
+        absolute: true,
       })`executeAction(stringIDToTypeID("placedLayerEditContents"), null, DialogModes.NO)`
 
       // Wait for new document tab to open
       await pwPage.waitForFunction(
         ([panelhead, count]) => panelhead.childElementCount === count + 1,
-        [panelhead, documentCountBefore] as const
+        [panelhead, documentCountBefore] as const,
       )
 
       return await App.of(this).activeDocument.$ref()

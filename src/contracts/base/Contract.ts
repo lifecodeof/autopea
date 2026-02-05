@@ -1,7 +1,7 @@
+import type { Class, Constructor } from "type-fest"
+import { ZodType, z } from "zod"
 import type { PhotopeaChannel } from "@/Channel"
 import { PhotopeaMutexes } from "@/PhotopeaMutexes"
-import type { Class, Constructor } from "type-fest"
-import { z, ZodType } from "zod"
 
 /**
  * Represents a template function that can be called with template literal syntax.
@@ -62,7 +62,7 @@ export class Contract {
    */
   constructor(
     protected readonly channel: PhotopeaChannel,
-    protected readonly expression: string
+    protected readonly expression: string,
   ) {}
 
   /**
@@ -144,7 +144,7 @@ export class Contract {
    */
   private templateExpression(
     template: TemplateStringsArray,
-    values: unknown[]
+    values: unknown[],
   ): string {
     return template.reduce((acc, str, i) => {
       const val = i < values.length ? this.transfer(values[i]) : ""
@@ -161,7 +161,7 @@ export class Contract {
    */
   private extendExpression(
     childExpression: string,
-    options: EvalOptions | undefined
+    options: EvalOptions | undefined,
   ) {
     let expression = childExpression
 
@@ -252,11 +252,11 @@ export class Contract {
    */
   protected $eval<T>(
     schema: ZodType<T>,
-    options?: EvalOptions
+    options?: EvalOptions,
   ): TemplateFn<Promise<T>>
   protected $eval(
     schemaOrOptions?: ZodType | EvalOptions,
-    options?: EvalOptions
+    options?: EvalOptions,
   ) {
     let schema: ZodType
     if (schemaOrOptions instanceof ZodType) {
@@ -292,7 +292,7 @@ export class Contract {
    */
   protected $evalHandle<T extends Contract>(
     Ctor: Constructor<T>,
-    options?: EvalOptions
+    options?: EvalOptions,
   ): TemplateFn<Promise<T>> {
     return async (template: TemplateStringsArray, ...values: unknown[]) => {
       const childExpression = this.templateExpression(template, values)
@@ -318,7 +318,7 @@ export class Contract {
    */
   protected $raw(str: string) {
     return {
-      [rawStringSymbol]: str
+      [rawStringSymbol]: str,
     }
   }
 
@@ -331,7 +331,7 @@ export class Contract {
    */
   public async $ref() {
     const handle = await this.channel.evaluateHandle(
-      `return ${this.expression}`
+      `return ${this.expression}`,
     )
     const expression = this.channel.getExpressionForHandle(handle)
 
@@ -354,7 +354,7 @@ export class Contract {
    */
   protected async $script<T = void>(
     script: string,
-    params: Record<string, unknown> = {}
+    params: Record<string, unknown> = {},
   ) {
     const paramString = Object.entries(params)
       .map(([key, value]) => `var param_${key} = ${this.transfer(value)};`)
@@ -379,7 +379,7 @@ export class Contract {
    * }
    */
   protected $arrayOf<T extends Contract>(
-    Ctor: Constructor<T>
+    Ctor: Constructor<T>,
   ): Class<ContractCollection<T>> {
     return class extends ContractCollection<T> {
       protected itemType = () => Ctor
@@ -493,7 +493,7 @@ export class SerializableContract<T>
   constructor(
     channel: PhotopeaChannel,
     expression: string,
-    private readonly schema: ZodType<T>
+    private readonly schema: ZodType<T>,
   ) {
     super(channel, expression)
   }
@@ -581,7 +581,7 @@ export abstract class ContractCollection<T extends Contract> extends Contract {
    */
   async toRefArray(): Promise<T[]> {
     const thisHandle = await this.channel.evaluateHandle(
-      `return ${this.expression}`
+      `return ${this.expression}`,
     )
     const handles = await this.channel.iterHandle(thisHandle)
     return handles.map((h) => {

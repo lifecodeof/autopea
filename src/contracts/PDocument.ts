@@ -1,27 +1,27 @@
-import AdmZip from "adm-zip"
 import { buffer } from "node:stream/consumers"
+import AdmZip from "adm-zip"
 import z from "zod"
+import { clickToolbarButton } from "@/toolbar"
 import { App } from "./App"
 import { ArtLayers } from "./ArtLayer"
+import { Contract, ContractCollection } from "./base/Contract"
 import { ColorSamplers } from "./ColorSampler"
+import type { AnchorPosition, ResampleMethod, TrimType } from "./enums"
 import { Layer, Layers } from "./Layer"
 import { LayerSets } from "./LayerSet"
-import { UnitRectLocal, type UnitRect } from "./UnitRect"
+import { type UnitRect, UnitRectLocal } from "./UnitRect"
 import type { UnitValue } from "./UnitValue"
-import { Contract, ContractCollection } from "./base/Contract"
-import type { AnchorPosition, ResampleMethod, TrimType } from "./enums"
-import { clickToolbarButton } from "@/toolbar"
 
 export enum SaveFormat {
   PNG = "png",
   JPG = "jpg",
-  PSD = "psd"
+  PSD = "psd",
 }
 
 const saveFormatMap = {
   [SaveFormat.PNG]: "new PNGSaveOptions()",
   [SaveFormat.JPG]: "new JPEGSaveOptions()",
-  [SaveFormat.PSD]: "new PhotoshopSaveOptions()"
+  [SaveFormat.PSD]: "new PhotoshopSaveOptions()",
 }
 
 export class PDocument extends Contract {
@@ -66,7 +66,7 @@ export class PDocument extends Contract {
     bounds: UnitRect,
     angle?: number,
     width?: UnitValue,
-    height?: UnitValue
+    height?: UnitValue,
   ) {
     return this.$eval()`.crop(${bounds},${angle},${width},${height})`
   }
@@ -74,7 +74,7 @@ export class PDocument extends Contract {
     width?: UnitValue,
     height?: UnitValue,
     resolution?: number,
-    resampleMethod?: ResampleMethod
+    resampleMethod?: ResampleMethod,
   ) {
     return this.$eval()`.resizeImage(${width},${height},${resolution},${resampleMethod})`
   }
@@ -92,13 +92,13 @@ export class PDocument extends Contract {
     top?: boolean,
     left?: boolean,
     bottom?: boolean,
-    right?: boolean
+    right?: boolean,
   ) {
     return this.$eval()`.trim(${trimType},${top},${left},${bottom},${right})`
   }
   close(saveOptions?: string) {
     return this.mutexes.documentMutex.runExclusive(
-      () => this.$eval()`.close(${saveOptions})`
+      () => this.$eval()`.close(${saveOptions})`,
     )
   }
   flatten() {
@@ -129,9 +129,9 @@ export class PDocument extends Contract {
         if (args.length === 0) return false
         const firstArg = args[0]
         return await firstArg.evaluate(
-          (arg) => arg === "Alert: Smart Object updated"
+          (arg) => arg === "Alert: Smart Object updated",
         )
-      }
+      },
     )
 
     await this.save()
@@ -159,7 +159,7 @@ export class PDocument extends Contract {
         await this.channel.evaluate<void>(
           `doc.saveAs(new File(""), ${saveFormatCode})`,
           { doc: this },
-          { timeout: 10_000 }
+          { timeout: 10_000 },
         )
         const download = await downloadPromise
 
@@ -169,7 +169,7 @@ export class PDocument extends Contract {
         } finally {
           downloadStream.destroy()
         }
-      }
+      },
     )
 
     return extractSingleFileFromZip(zipBuffer)
@@ -186,7 +186,7 @@ export class PDocument extends Contract {
     const page = this.channel.page.page
     await clickToolbarButton(page, [
       3, // Image
-      20 // Duplicate
+      20, // Duplicate
     ])
 
     return await App.of(this).activeDocument.$ref()
@@ -204,8 +204,8 @@ export class PDocuments extends ContractCollection<PDocument> {
     return this.mutexes.documentMutex.runExclusive(
       () =>
         this.$evalHandle(
-          PDocument
-        )`.add(${width},${height},${resolution},${name})`
+          PDocument,
+        )`.add(${width},${height},${resolution},${name})`,
     )
   }
 }
@@ -216,7 +216,7 @@ function extractSingleFileFromZip(zipBuffer: Buffer): Buffer {
 
   if (entries.length !== 1) {
     throw new Error(
-      `Zip archive must contain exactly one file, found ${entries.length}`
+      `Zip archive must contain exactly one file, found ${entries.length}`,
     )
   }
 

@@ -15,7 +15,7 @@ export class PhotopeaChannelEvalError extends PhotopeaChannelError {
     channel: PhotopeaChannel,
     public functionBody: string,
     public handleVars: HandleVars,
-    options?: ErrorOptions
+    options?: ErrorOptions,
   ) {
     super(`Error evaluating script: ${functionBody}`, options)
     this.#channel = channel
