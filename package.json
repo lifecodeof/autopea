@@ -1,6 +1,5 @@
 {
   "name": "@lifecodeof/autopea",
-  "private": true,
   "version": "1.1.0",
   "description": "Library for automating Photopea",
   "scripts": {
