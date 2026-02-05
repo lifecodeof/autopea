@@ -40,28 +40,12 @@ export const abortOnTimeout = (
   }
 }
 
-// Got from built-in Node.js EventEmitter
-type DefaultEventMap = [never]
-type Listener<K, T, F> = T extends DefaultEventMap
-  ? F
-  : K extends keyof T
-    ? T[K] extends unknown[]
-      ? (...args: T[K]) => void
-      : never
-    : never
-type Key<K, T> = T extends DefaultEventMap ? string | symbol : K | keyof T
-type Listener1<K, T> = Listener<K, T, (...args: unknown[]) => void>
-
-export const waitForEvent = async <
-  T,
-  Event,
-  EventMap extends Record<string, unknown[]> | DefaultEventMap,
->(
-  emitter: EventEmitter<EventMap>,
-  event: Key<Event, EventMap>,
-  selector: (...eventArgs: Parameters<Listener1<Event, EventMap>>) => T,
+export const waitForEvent = async <T, EE extends EventEmitter>(
+  emitter: EE,
+  event: Parameters<EE["on"]>[0],
+  selector: (...args: unknown[]) => T,
   signal?: AbortSignal,
-  predicate?: (...eventArgs: Parameters<Listener1<Event, EventMap>>) => boolean,
+  predicate?: (...args: unknown[]) => boolean,
 ) => {
   return await new Promise<T>((resolve, reject) => {
     const cleanup = () => {
@@ -69,18 +53,15 @@ export const waitForEvent = async <
       signal?.removeEventListener("abort", abortListener)
     }
 
-    // @ts-expect-error
-    const listener: Listener1<Event, EventMap> = (...params) => {
+    const listener = (...params: unknown[]) => {
       let passed = false
 
       try {
-        // @ts-expect-error
         passed = predicate ? predicate(...params) : true
       } catch (_error) {}
 
       if (passed) {
         cleanup()
-        // @ts-expect-error
         resolve(selector(...params))
       }
     }
