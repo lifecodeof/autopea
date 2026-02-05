@@ -5,7 +5,7 @@ import { z, ZodType } from "zod"
 
 type TemplateFn<T> = (strings: TemplateStringsArray, ...values: any[]) => T
 
-type Options = {
+type EvalOptions = {
   wrapParentheses?: boolean
   absolute?: boolean
 }
@@ -61,7 +61,7 @@ export class Contract {
 
   private extendExpression(
     childExpression: string,
-    options: Options | undefined
+    options: EvalOptions | undefined
   ) {
     let expression = childExpression
 
@@ -78,7 +78,7 @@ export class Contract {
 
   protected $<T extends Contract>(
     constructor: Constructor<T>,
-    options?: Options
+    options?: EvalOptions
   ) {
     return (template: TemplateStringsArray, ...values: any[]) => {
       const childExpression = this.templateExpression(template, values)
@@ -88,7 +88,7 @@ export class Contract {
     }
   }
 
-  protected $value<T>(schema: ZodType<T>, options?: Options) {
+  protected $value<T>(schema: ZodType<T>, options?: EvalOptions) {
     return (template: TemplateStringsArray, ...values: any[]) => {
       const childExpression = this.templateExpression(template, values)
       const expression = this.extendExpression(childExpression, options)
@@ -97,14 +97,14 @@ export class Contract {
     }
   }
 
-  protected $eval(options?: Options): TemplateFn<Promise<void>>
+  protected $eval(options?: EvalOptions): TemplateFn<Promise<void>>
   protected $eval<T>(
     schema: ZodType<T>,
-    options?: Options
+    options?: EvalOptions
   ): TemplateFn<Promise<T>>
   protected $eval(
     schemaOrOptions?: any,
-    options?: Options
+    options?: EvalOptions
   ): TemplateFn<Promise<any>> {
     let schema: ZodType
     if (schemaOrOptions instanceof ZodType) {
@@ -127,7 +127,7 @@ export class Contract {
 
   protected $evalHandle<T extends Contract>(
     constructor: Constructor<T>,
-    options?: Options
+    options?: EvalOptions
   ): TemplateFn<Promise<T>> {
     return async (template: TemplateStringsArray, ...values: any[]) => {
       const childExpression = this.templateExpression(template, values)
