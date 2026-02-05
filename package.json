@@ -1,12 +1,16 @@
 {
   "name": "@lifecodeof/autopea",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Library for automating Photopea",
   "scripts": {
     "start": "tsx main.ts",
     "repl": "tsx src/repl.ts",
     "test": "vitest",
     "build": "tsdown"
+  },
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://npm.pkg.github.com"
   },
   "keywords": [],
   "files": [
