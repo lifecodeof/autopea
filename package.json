@@ -27,6 +27,7 @@
     "zod": "^4.0.14"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.3.14",
     "@types/adm-zip": "^0.5.7",
     "@types/node": "^24.1.0",
     "@vitest/ui": "3.2.4",
