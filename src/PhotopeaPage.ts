@@ -7,7 +7,19 @@ type EventMap = {
   message: [string]
   bufferMessage: [Buffer]
   pageerror: [Error]
-  response: [string, string, any]
+  response: [string, string, unknown]
+}
+
+type NamedFn = (...args: unknown[]) => unknown
+
+type PhotopeaWindow = Window & {
+  __name?: (fn: NamedFn) => NamedFn
+  isFirstDoneFired?: boolean
+  onPhotopeaMessage?: (data: string, isBase64: boolean) => void
+  showOpenFilePicker?: undefined
+  parent?: {
+    postMessage: (msg: string, _targetOrigin: string) => void
+  }
 }
 
 /**
@@ -85,8 +97,8 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
     const toBase64Handle = await makeArrayBufferToBase64FnHandle(page)
 
     await page.addInitScript((toBase64) => {
-      const pageWindow = window as any
-      pageWindow.__name = (fn: Function) => fn
+      const pageWindow = window as PhotopeaWindow
+      pageWindow.__name = (fn: NamedFn) => fn
       pageWindow.isFirstDoneFired = false
       pageWindow.showOpenFilePicker = undefined // Disable file access API
 
@@ -113,7 +125,7 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
 
       // Mock parent.postMessage for echoToOE() and saveToOE()
       // Photopea checks window === window.parent
-      pageWindow.parent = {
+      const mockParent = {
         postMessage(msg: string, _targetOrigin: string) {
           listener(
             new MessageEvent("message", {
@@ -123,6 +135,8 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
           )
         }
       }
+      ;(pageWindow as unknown as { parent: typeof mockParent }).parent =
+        mockParent
 
       // Skip landing page
       localStorage.setItem("_ppp", '{"capShown":"false"}')
@@ -144,7 +158,7 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
     }
 
     // Wait for the first "done" message
-    await page.waitForFunction(() => (window as any).isFirstDoneFired, {
+    await page.waitForFunction(() => (window as PhotopeaWindow).isFirstDoneFired, {
       timeout: 500
     })
   }
@@ -159,7 +173,7 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
     // This function is used in PhotopeaChannel.evaluate()
     await this.page.exposeFunction(
       "_pp_sendResponse",
-      (id: string, reqType: string, data: any) => {
+      (id: string, reqType: string, data: unknown) => {
         if (typeof id !== "string") return
         if (typeof reqType !== "string") return
         this.emit("response", id, reqType, data)
@@ -230,9 +244,9 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
    */
   async waitForEvent<T>(
     event: keyof EventMap,
-    selector: (...args: any[]) => T,
+    selector: (...args: unknown[]) => T,
     signal?: AbortSignal,
-    predicate?: (...args: any[]) => boolean
+    predicate?: (...args: unknown[]) => boolean
   ): Promise<T> {
     return await waitForEvent(this, event, selector, signal, predicate)
   }

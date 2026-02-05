@@ -45,13 +45,13 @@ export class App extends Contract {
   doAction(action: string, from: string) {
     return this.$eval()`.doAction(${action},${from})`
   }
-  executeAction(actionID: number, descriptor?: any, display?: string) {
+  executeAction(actionID: number, descriptor?: unknown, display?: string) {
     return this.$eval()`.executeAction(${actionID},${descriptor},${display})`
   }
-  executeActionGet(reference: any) {
+  executeActionGet(reference: unknown) {
     return this.$eval()`.executeActionGet(${reference})`
   }
-  batch(files: any, action: string, from: string, options?: any) {
+  batch(files: unknown, action: string, from: string, options?: unknown) {
     return this.$eval()`.batch(${files},${action},${from},${options})`
   }
   runMenuItem(menuID: number) {
@@ -60,7 +60,7 @@ export class App extends Contract {
   openDialog() {
     return this.$(PFile)`.openDialog()`
   }
-  load(file: any) {
+  load(file: unknown) {
     return this.$eval()`.load(${file})`
   }
   save() {

@@ -1,5 +1,6 @@
 import z from "zod"
 import { ContractCollection, Contract } from "./base/Contract"
+import type { ElementPlacement, RasterizeType } from "./enums"
 import { Layer } from "./Layer"
 import { SolidColor } from "./SolidColor"
 import { UnitValue } from "./UnitValue"

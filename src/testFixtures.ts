@@ -21,7 +21,10 @@ export const browserTest = test.extend<{
 
 const pageFixture =
   (shared: boolean) =>
-  async ({ browserCtx }: any, use: any) => {
+  async (
+    { browserCtx }: { browserCtx: BrowserContext },
+    use: (page: PhotopeaPage) => Promise<void>
+  ) => {
     const page = await PhotopeaPage.openFromBrowser(browserCtx, {
       timeout: 60_000
     })

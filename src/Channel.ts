@@ -80,11 +80,11 @@ export class PhotopeaChannel {
     return script
   }
 
-  async createResultWaiter(
+  async createResultWaiter<T = unknown>(
     requestId: string,
     signal: AbortSignal,
     script: string
-  ): Promise<any> {
+  ): Promise<T> {
     try {
       const result = await this.page.waitForEvent(
         "response",
@@ -94,7 +94,7 @@ export class PhotopeaChannel {
       )
 
       if (result.reqType === "result") {
-        return result.data
+        return result.data as T
       } else {
         throw new PhotopeaChannelLogicError(
           `Unknown response type: ${result.reqType}`
@@ -112,7 +112,7 @@ export class PhotopeaChannel {
    * @param options Optional settings (e.g., hideBanner).
    * @returns Promise resolving to the result of the script.
    */
-  async evaluate<T = any>(
+  async evaluate<T = unknown>(
     functionBody: string,
     handleVars: HandleVars = {},
     options: EvaluateOptions = {}
@@ -123,14 +123,13 @@ export class PhotopeaChannel {
     const script = this.prepareScript(
       requestId,
       functionBody,
-      handleVars,
-      options
+      handleVars
     )
 
     // TODO: Promise.all()
 
     // Wait for response
-    const resultPromise = this.createResultWaiter(
+    const resultPromise = this.createResultWaiter<T>(
       requestId,
       abort.signal,
       script
@@ -140,11 +139,11 @@ export class PhotopeaChannel {
     )
 
     // Wait for console errors
-    this.page
-      .waitForEvent("pageerror", (v) => v, abort.signal)
-      .then((msg) => {
-        abort.abort(new PhotopeaChannelPageError(msg))
-      })
+        this.page
+          .waitForEvent<Error>("pageerror", (v) => v as Error, abort.signal)
+          .then((msg) => {
+            abort.abort(new PhotopeaChannelPageError(msg.message))
+          })
       .catch((_) => {}) // Ignore timeout errors
 
     // Abort on timeout
@@ -211,7 +210,7 @@ export class PhotopeaChannel {
    * @param value The value to send.
    * @returns Promise resolving to the handle ID string.
    */
-  async createHandle(value: any) {
+  async createHandle(value: unknown) {
     const handle = randomId()
 
     await this.evaluate<void>(
@@ -226,7 +225,7 @@ export class PhotopeaChannel {
    * @param handle The handle ID string.
    * @returns Promise resolving to the value of the handle.
    */
-  async getHandleValue<T = any>(handle: string) {
+  async getHandleValue<T = unknown>(handle: string) {
     return await this.evaluate<T>("return handleValue;", {
       handleValue: handle
     })

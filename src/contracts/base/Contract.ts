@@ -10,7 +10,7 @@ import { z, ZodType } from "zod"
  *
  * @template T The return type of the template function
  */
-type TemplateFn<T> = (strings: TemplateStringsArray, ...values: any[]) => T
+type TemplateFn<T> = (strings: TemplateStringsArray, ...values: unknown[]) => T
 
 /**
  * Options for extending expressions in Contract helper methods.
@@ -117,14 +117,16 @@ export class Contract {
    * @param value The value to convert
    * @returns The string representation
    */
-  private transfer(value: any) {
+  private transfer(value: unknown) {
     if (value instanceof Contract) {
       return value.expression
-    } else if (
-      typeof value === "object" &&
-      typeof value[rawStringSymbol] === "string"
-    ) {
-      return value[rawStringSymbol]
+    } else if (value !== null && typeof value === "object") {
+      const rawValue = (value as { [rawStringSymbol]?: unknown })[
+        rawStringSymbol
+      ]
+      if (typeof rawValue === "string") {
+        return rawValue
+      }
     } else if (typeof value === "undefined") {
       return "undefined"
     } else {
@@ -142,7 +144,7 @@ export class Contract {
    */
   private templateExpression(
     template: TemplateStringsArray,
-    values: any[]
+    values: unknown[]
   ): string {
     return template.reduce((acc, str, i) => {
       const val = i < values.length ? this.transfer(values[i]) : ""
@@ -188,11 +190,8 @@ export class Contract {
    * const layers = this.$(Layers)`.layers`
    * const color = this.$(SolidColor)`.backgroundColor`
    */
-  protected $<T extends Contract>(
-    Ctor: Constructor<T>,
-    options?: EvalOptions
-  ) {
-    return (template: TemplateStringsArray, ...values: any[]) => {
+  protected $<T extends Contract>(Ctor: Constructor<T>, options?: EvalOptions) {
+    return (template: TemplateStringsArray, ...values: unknown[]) => {
       const childExpression = this.templateExpression(template, values)
       const expression = this.extendExpression(childExpression, options)
 
@@ -216,7 +215,7 @@ export class Contract {
    * const name = this.$value(z.string())`.name`
    */
   protected $value<T>(schema: ZodType<T>, options?: EvalOptions) {
-    return (template: TemplateStringsArray, ...values: any[]) => {
+    return (template: TemplateStringsArray, ...values: unknown[]) => {
       const childExpression = this.templateExpression(template, values)
       const expression = this.extendExpression(childExpression, options)
 
@@ -267,11 +266,10 @@ export class Contract {
       options = schemaOrOptions
     }
 
-    return async (template: TemplateStringsArray, ...values: any[]) => {
+    return async (template: TemplateStringsArray, ...values: unknown[]) => {
       const childExpression = this.templateExpression(template, values)
 
-      const fullExpression =
-        "return " + this.extendExpression(childExpression, options)
+      const fullExpression = `return ${this.extendExpression(childExpression, options)}`
       const value = await this.channel.evaluate(fullExpression)
 
       return schema.parse(value)
@@ -296,11 +294,10 @@ export class Contract {
     Ctor: Constructor<T>,
     options?: EvalOptions
   ): TemplateFn<Promise<T>> {
-    return async (template: TemplateStringsArray, ...values: any[]) => {
+    return async (template: TemplateStringsArray, ...values: unknown[]) => {
       const childExpression = this.templateExpression(template, values)
 
-      const fullExpression =
-        `return ${this.extendExpression(childExpression, options)}`
+      const fullExpression = `return ${this.extendExpression(childExpression, options)}`
       const handle = await this.channel.evaluateHandle(fullExpression)
 
       const expression = this.channel.getExpressionForHandle(handle)
@@ -357,7 +354,7 @@ export class Contract {
    */
   protected async $script<T = void>(
     script: string,
-    params: Record<string, any> = {}
+    params: Record<string, unknown> = {}
   ) {
     const paramString = Object.entries(params)
       .map(([key, value]) => `var param_${key} = ${this.transfer(value)};`)

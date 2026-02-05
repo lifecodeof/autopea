@@ -50,12 +50,12 @@ type Listener<K, T, F> = T extends DefaultEventMap
       : never
     : never
 type Key<K, T> = T extends DefaultEventMap ? string | symbol : K | keyof T
-type Listener1<K, T> = Listener<K, T, (...args: any[]) => void>
+type Listener1<K, T> = Listener<K, T, (...args: unknown[]) => void>
 
 export const waitForEvent = async <
   T,
   Event,
-  EventMap extends Record<string, any[]> | DefaultEventMap
+  EventMap extends Record<string, unknown[]> | DefaultEventMap
 >(
   emitter: EventEmitter<EventMap>,
   event: Key<Event, EventMap>,

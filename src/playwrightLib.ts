@@ -2,7 +2,7 @@ import type { Page } from "playwright"
 
 export const makePromisifyIndexedDbFnHandle = (page: Page) => {
   return page.evaluateHandle(() => {
-    return <T = any>(request: IDBRequest<T>): Promise<T> => {
+    return <T = unknown>(request: IDBRequest<T>): Promise<T> => {
       return new Promise((resolve, reject) => {
         request.onsuccess = () => resolve(request.result as T)
         request.onerror = () => reject(request.error)
