@@ -1,8 +1,5 @@
-import { buffer } from "node:stream/consumers"
 import { unzipSync } from "fflate"
 import z from "zod"
-import { clickToolbarButton } from "@/toolbar"
-import { App } from "./App"
 import { ArtLayers } from "./ArtLayer"
 import { Contract, ContractCollection } from "./base/Contract"
 import { ColorSamplers } from "./ColorSampler"
@@ -122,20 +119,7 @@ export class PDocument extends Contract {
    * Saves document and waits for smart object updated message
    */
   async saveSmartObject() {
-    const waiter = this.channel.page.page.waitForEvent(
-      "console",
-      async (msg) => {
-        const args = msg.args()
-        if (args.length === 0) return false
-        const firstArg = args[0]
-        return await firstArg.evaluate(
-          (arg) => arg === "Alert: Smart Object updated",
-        )
-      },
-    )
-
-    await this.save()
-    await waiter
+    await this.capabilities.saveSmartObject.call(this)
   }
 
   /**
@@ -150,26 +134,9 @@ export class PDocument extends Contract {
       throw new Error(`Unsupported save format: ${format}`)
     }
 
-    const zipBuffer = await this.mutexes.downloadMutex.runExclusive(
-      async () => {
-        const page = this.channel.page.page
-
-        // TODO: Promise.all()
-        const downloadPromise = page.waitForEvent("download")
-        await this.channel.evaluate<void>(
-          `doc.saveAs(new File(""), ${saveFormatCode})`,
-          { doc: this },
-          { timeout: 10_000 },
-        )
-        const download = await downloadPromise
-
-        const downloadStream = await download.createReadStream()
-        try {
-          return await buffer(downloadStream)
-        } finally {
-          downloadStream.destroy()
-        }
-      },
+    const zipBuffer = await this.capabilities.downloadDocumentZip.call(
+      this,
+      saveFormatCode,
     )
 
     return extractSingleFileFromZip(zipBuffer)
@@ -183,13 +150,7 @@ export class PDocument extends Contract {
   }
 
   async duplicate() {
-    const page = this.channel.page.page
-    await clickToolbarButton(page, [
-      3, // Image
-      20, // Duplicate
-    ])
-
-    return await App.of(this).activeDocument.$ref()
+    return await this.capabilities.duplicateDocument.call(this)
   }
 }
 

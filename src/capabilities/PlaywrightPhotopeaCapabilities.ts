@@ -1,7 +1,14 @@
-import type { Page } from "playwright"
+import { buffer } from "node:stream/consumers"
+import type { ConsoleMessage, Dialog, Page } from "playwright"
+import { errors as pwErrors } from "playwright"
 import { App } from "@/contracts/App"
 import type { ArtLayer } from "@/contracts/ArtLayer"
+import { Contract } from "@/contracts/base/Contract"
 import type { PDocument } from "@/contracts/PDocument"
+import { abortOnTimeout, waitForEvent } from "@/helpers"
+import { PhotopeaMutexes } from "@/PhotopeaMutexes"
+import { makeBase64ToArrayBufferFnHandle } from "@/playwrightLib"
+import { clickToolbarButton } from "@/toolbar"
 import type { PhotopeaCapabilities } from "./PhotopeaCapabilities"
 
 // A local polyfill to make error messages available in production.
@@ -17,6 +24,9 @@ export const createPlaywrightPhotopeaCapabilities = (
   // Use `page` instead of `Contract.channel.page.page`
 
   return {
+    getMutexes() {
+      return PhotopeaMutexes.of(page)
+    },
     openSmartObject(this: ArtLayer): Promise<PDocument> {
       return this.mutexes.documentMutex.runExclusive(async () => {
         const pwPage = page
@@ -44,6 +54,158 @@ export const createPlaywrightPhotopeaCapabilities = (
 
         return await App.of(this).activeDocument.$ref()
       })
+    },
+    openFile(this: App, path: string, timeout = 5 * 60 * 1000) {
+      const channel = Contract.getChannel(this)
+      const transport = channel.page
+      const pwPage = page
+
+      const abort = new AbortController()
+
+      return this.mutexes.interactionMutex.runExclusive(async () => {
+        const [fileChooser] = await Promise.all([
+          pwPage.waitForEvent("filechooser", { timeout }),
+          clickToolbarButton(pwPage, [1, 2]), // File > Open
+        ])
+
+        return await this.mutexes.documentMutex.runExclusive(async () => {
+          const blankDonePromise = waitForEvent(transport.on, {
+            event: "message",
+            predicate: (message) => message === "",
+            signal: abort.signal,
+          })
+
+          await fileChooser.setFiles(path)
+
+          const cleanup = abortOnTimeout(
+            abort,
+            timeout,
+            new Error(`openFile() timed out after ${timeout}ms`),
+          )
+
+          try {
+            await blankDonePromise
+            return this.activeDocument.$ref()
+          } finally {
+            cleanup()
+          }
+        })
+      })
+    },
+    async uploadFonts(this: App, fonts: Record<string, Buffer>) {
+      const pwPage = page
+      const fontsBase64 = Object.entries(fonts).map(([name, buffer]) => ({
+        name,
+        base64: buffer.toString("base64"),
+      }))
+
+      const toArrayBuffer = await makeBase64ToArrayBufferFnHandle(pwPage)
+
+      await this.mutexes.dialogMutex.runExclusive(async () => {
+        let dialogListener: ((dialog: Dialog) => void) | null = null
+        try {
+          const dataTransfer = await pwPage.evaluateHandle(
+            ([fontsBase64, toArrayBuffer]) => {
+              const dataTransfer = new DataTransfer()
+              for (const { name, base64 } of fontsBase64) {
+                const buffer = toArrayBuffer(base64)
+                dataTransfer.items.add(new File([buffer], name))
+              }
+              return dataTransfer
+            },
+            [fontsBase64, toArrayBuffer] as const,
+          )
+
+          dialogListener = (dialog: Dialog) => dialog.dismiss()
+          pwPage.on("dialog", dialogListener)
+
+          // Photopea no longer logs array with Uint8Array
+          const consolePromise = pwPage.waitForEvent(
+            "console",
+            async (msg: ConsoleMessage) => {
+              const args = msg.args()
+              if (args.length === 0) return false
+              const firstArg = args[0]
+
+              const message = await firstArg.jsonValue()
+              if (
+                typeof message === "string" &&
+                /Alert: Font .* loaded/.test(message)
+              )
+                return true
+
+              return await firstArg.evaluate((arg: unknown) => {
+                const payload = arg as { 0?: { _data?: Uint8Array } }
+                return payload[0]?._data instanceof Uint8Array
+              })
+            },
+          )
+
+          await pwPage.dispatchEvent(
+            ".mainblock > .block > .body",
+            "drop",
+            { dataTransfer },
+            { strict: true },
+          )
+
+          await consolePromise.catch((err: unknown) => {
+            // Timeouts are fine here
+            if (!(err instanceof pwErrors.TimeoutError)) throw err
+          })
+        } finally {
+          await toArrayBuffer.dispose()
+          if (dialogListener) pwPage.off("dialog", dialogListener)
+        }
+      })
+    },
+    pause(this: App) {
+      return page.pause()
+    },
+    async saveSmartObject(this: PDocument) {
+      const pwPage = page
+      const waiter = pwPage.waitForEvent(
+        "console",
+        async (msg: ConsoleMessage) => {
+          const args = msg.args()
+          if (args.length === 0) return false
+          const firstArg = args[0]
+          return await firstArg.evaluate(
+            (arg: string) => arg === "Alert: Smart Object updated",
+          )
+        },
+      )
+
+      await this.save()
+      await waiter
+    },
+    async downloadDocumentZip(this: PDocument, saveFormatCode: string) {
+      const channel = Contract.getChannel(this)
+      const pwPage = page
+
+      return this.mutexes.downloadMutex.runExclusive(async () => {
+        const downloadPromise = pwPage.waitForEvent("download")
+        await channel.evaluate<void>(
+          `doc.saveAs(new File(""), ${saveFormatCode})`,
+          { doc: this },
+          { timeout: 10_000 },
+        )
+        const download = await downloadPromise
+
+        const downloadStream = await download.createReadStream()
+        try {
+          return await buffer(downloadStream)
+        } finally {
+          downloadStream.destroy()
+        }
+      })
+    },
+    async duplicateDocument(this: PDocument) {
+      await clickToolbarButton(page, [
+        3, // Image
+        20, // Duplicate
+      ])
+
+      return await App.of(this).activeDocument.$ref()
     },
   }
 }

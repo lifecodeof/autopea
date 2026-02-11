@@ -1,6 +1,5 @@
 import { ZodType, z } from "zod"
 import type { PhotopeaChannel } from "@/Channel"
-import { PhotopeaMutexes } from "@/PhotopeaMutexes"
 
 type ContractCtorArgs = [channel: PhotopeaChannel, expression: string]
 
@@ -114,7 +113,7 @@ export class Contract {
    * @returns PhotopeaMutexes instance for synchronizing access
    */
   get mutexes() {
-    return PhotopeaMutexes.of(this.channel.page.page)
+    return this.capabilities.getMutexes.call(this)
   }
 
   /**

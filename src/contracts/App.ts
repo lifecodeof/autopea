@@ -1,12 +1,7 @@
-import type { Dialog } from "playwright"
-import { errors as pwErrors } from "playwright"
 import z from "zod"
 import { PhotopeaChannel } from "@/Channel"
-import { PhotopeaMutexes } from "@/PhotopeaMutexes"
-import { PhotopeaPage } from "@/PhotopeaPage"
-import { clickToolbarButton } from "@/toolbar"
-import { abortOnTimeout, timeoutAbortSignal, waitForEvent } from "../helpers"
-import { makeBase64ToArrayBufferFnHandle } from "../playwrightLib"
+import type { PhotopeaTransport } from "@/transports/PhotopeaTransport"
+import { timeoutAbortSignal, waitForEvent } from "../helpers"
 import { Contract } from "./base/Contract"
 import { PDocument, PDocuments, type SaveFormat } from "./PDocument"
 import { PFile } from "./PFile"
@@ -14,9 +9,9 @@ import { Preferences } from "./Preferences"
 import { SolidColor } from "./SolidColor"
 
 export class App extends Contract {
-  static of(obj: PhotopeaChannel | Contract | PhotopeaPage) {
-    if (obj instanceof PhotopeaPage) obj = new PhotopeaChannel(obj)
+  static of(obj: PhotopeaChannel | Contract | PhotopeaTransport) {
     if (obj instanceof Contract) obj = Contract.getChannel(obj)
+    if (!(obj instanceof PhotopeaChannel)) obj = new PhotopeaChannel(obj)
 
     return new App(obj, "app")
   }
@@ -117,40 +112,7 @@ export class App extends Contract {
    * @returns Promise that resolves when the image is loaded.
    */
   async openFile(path: string, timeout = 5 * 60 * 1000) {
-    const page = this.channel.page
-    const pwPage = page.page
-
-    const abort = new AbortController()
-
-    return await this.mutexes.interactionMutex.runExclusive(async () => {
-      const [fileChooser] = await Promise.all([
-        pwPage.waitForEvent("filechooser", { timeout }),
-        clickToolbarButton(page.page, [1, 2]), // File > Open
-      ])
-
-      return await this.mutexes.documentMutex.runExclusive(async () => {
-        // TODO: Promise.all()
-        const blankDonePromise = waitForEvent(page.on, {
-          event: "message",
-          predicate: (message) => message === "",
-          signal: abort.signal,
-        })
-        await fileChooser.setFiles(path)
-
-        const cleanup = abortOnTimeout(
-          abort,
-          timeout,
-          new Error(`openFile() timed out after ${timeout}ms`),
-        )
-
-        try {
-          await blankDonePromise
-          return this.activeDocument.$ref()
-        } finally {
-          cleanup()
-        }
-      })
-    })
+    return await this.capabilities.openFile.call(this, path, timeout)
   }
 
   async uploadFont(font: Buffer, name: string) {
@@ -158,70 +120,11 @@ export class App extends Contract {
   }
 
   async uploadFonts(fonts: Record<string, Buffer>) {
-    const pwPage = this.channel.page.page
-    const fontsBase64 = Object.entries(fonts).map(([name, buffer]) => ({
-      name,
-      base64: buffer.toString("base64"),
-    }))
-
-    const toArrayBuffer = await makeBase64ToArrayBufferFnHandle(pwPage)
-
-    await PhotopeaMutexes.of(pwPage).dialogMutex.runExclusive(async () => {
-      let dialogListener: ((dialog: Dialog) => void) | null = null
-      try {
-        const dataTransfer = await pwPage.evaluateHandle(
-          ([fontsBase64, toArrayBuffer]) => {
-            const dataTransfer = new DataTransfer()
-            for (const { name, base64 } of fontsBase64) {
-              const buffer = toArrayBuffer(base64)
-              dataTransfer.items.add(new File([buffer], name))
-            }
-            return dataTransfer
-          },
-          [fontsBase64, toArrayBuffer] as const,
-        )
-
-        dialogListener = (dialog: Dialog) => dialog.dismiss()
-        pwPage.on("dialog", dialogListener)
-
-        // Photopea no longer logs array with Uint8Array
-        const consolePromise = pwPage.waitForEvent("console", async (msg) => {
-          const args = msg.args()
-          if (args.length === 0) return false
-          const firstArg = args[0]
-
-          const message = await firstArg.jsonValue()
-          if (
-            typeof message === "string" &&
-            /Alert: Font .* loaded/.test(message)
-          )
-            return true
-
-          return await firstArg.evaluate(
-            (arg) => arg[0]?._data instanceof Uint8Array,
-          )
-        })
-
-        await pwPage.dispatchEvent(
-          ".mainblock > .block > .body",
-          "drop",
-          { dataTransfer },
-          { strict: true },
-        )
-
-        await consolePromise.catch((err) => {
-          // Timeouts are fine here
-          if (!(err instanceof pwErrors.TimeoutError)) throw err
-        })
-      } finally {
-        await toArrayBuffer.dispose()
-        if (dialogListener) pwPage.off("dialog", dialogListener)
-      }
-    })
+    await this.capabilities.uploadFonts.call(this, fonts)
   }
 
   async pause() {
-    return await this.channel.page.page.pause()
+    return await this.capabilities.pause.call(this)
   }
 
   async hasOpenDocument(): Promise<boolean> {
