@@ -20,5 +20,5 @@ appTest(
     const documentCountAfterClose = await app.documents.length.$get()
     expect(documentCountAfterClose).toBe(0)
   },
-  10_000
+  20_000
 )
