@@ -61,9 +61,8 @@ export const createPlaywrightCapabilities = (
         ])
 
         return await this.mutexes.documentMutex.runExclusive(async () => {
-          const blankDonePromise = waitForEvent(transport.on, {
-            event: "message",
-            predicate: (message) => message === "",
+          const blankMessagePromise = waitForEvent(transport.on, {
+            event: "blankMessage",
             signal: abort.signal,
           })
 
@@ -76,7 +75,7 @@ export const createPlaywrightCapabilities = (
           )
 
           try {
-            await blankDonePromise
+            await blankMessagePromise
             return this.activeDocument.$ref()
           } finally {
             cleanup()

@@ -1,17 +1,16 @@
 import type {
   PhotopeaCapabilities,
   PhotopeaTransport,
+  PhotopeaTransportEventMap,
 } from "@lifecodeof/autopea"
 import { createNanoEvents } from "nanoevents"
 import type { Browser, BrowserContext, Page } from "playwright"
 import { createPlaywrightCapabilities } from "./capabilities/PlaywrightPhotopeaCapabilities"
 import { makeArrayBufferToBase64FnHandle } from "./playwrightLib"
 
-type PPEventMap = {
+type PPEventMap = PhotopeaTransportEventMap & {
   message: (message: string) => void
   bufferMessage: (buffer: Buffer) => void
-  pageerror: (error: Error) => void
-  response: (url: string, method: string, data: unknown) => void
 }
 
 type NamedFn = (...args: unknown[]) => unknown
@@ -84,7 +83,8 @@ export class PhotopeaPage implements PhotopeaTransport {
   private handleMessage(message: string, isBase64: boolean) {
     // Buffer messages until "done" is received
     if (message === "done") {
-      this.emit("message", this.messageBuffer)
+      if (this.messageBuffer.length <= 0) this.emit("blankMessage")
+      else this.emit("message", this.messageBuffer)
       this.messageBuffer = ""
     } else if (isBase64) {
       this.emit("bufferMessage", Buffer.from(message, "base64"))
@@ -220,11 +220,6 @@ export class PhotopeaPage implements PhotopeaTransport {
     return this.page.close()
   }
 
-  /**
-   * Sends a message to the Photopea iframe.
-   * @param message The message string to send.
-   * @returns Promise that resolves when the message is sent.
-   */
   sendMessage(message: string) {
     return this.page.evaluate((msg) => {
       window.postMessage(msg, "https://www.photopea.com")

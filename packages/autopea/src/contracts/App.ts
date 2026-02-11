@@ -95,8 +95,7 @@ export class App extends Contract {
       await Promise.all([
         waitForEvent(this.channel.page.on, {
           signal,
-          event: "message",
-          predicate: (message) => message === "",
+          event: "blankMessage",
         }),
         this.channel.evaluate<void>(`app.open(${JSON.stringify(url)});`),
       ])
