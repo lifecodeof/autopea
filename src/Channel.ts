@@ -85,12 +85,12 @@ export class PhotopeaChannel {
     script: string,
   ): Promise<T> {
     try {
-      const result = await this.page.waitForEvent(
-        "response",
-        (_rid, reqType, data) => ({ reqType, data }),
+      const result = await this.page.waitForEvent({
+        event: "response",
+        selector: (_rid, reqType, data) => ({ reqType, data }),
         signal,
-        (rid) => rid === requestId,
-      )
+        predicate: (rid) => rid === requestId,
+      })
 
       if (result.reqType === "result") {
         return result.data as T
@@ -135,7 +135,11 @@ export class PhotopeaChannel {
 
     // Wait for console errors
     this.page
-      .waitForEvent<Error>("pageerror", (v) => v as Error, abort.signal)
+      .waitForEvent({
+        event: "pageerror",
+        selector: (v) => v,
+        signal: abort.signal,
+      })
       .then((msg) => {
         abort.abort(new PhotopeaChannelPageError(msg.message))
       })

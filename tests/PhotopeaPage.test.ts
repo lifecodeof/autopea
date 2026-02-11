@@ -107,14 +107,13 @@ browserTest(
     for (let i = 0; i < 5; i++) {
       promises.push(
         new Promise<void>((resolve) => {
-          const listener = (message: string) => {
-            if (message === `response${i}`) {
-              results.push(message)
-              page.off("message", listener)
-              resolve()
-            }
-          }
-          page.on("message", listener)
+          const cleanup = page.on("message", ((message: string) => {
+              if (message === `response${i}`) {
+                results.push(message)
+                cleanup()
+                resolve()
+              }
+            }))
           page.sendMessage(`app.echoToOE("response${i}");`)
         })
       )
