@@ -1,9 +1,9 @@
-import { PhotopeaChannel } from "@/Channel"
+import { PhotopeaChannel } from "@lifecodeof/autopea"
 import {
   PhotopeaChannelEvalError,
   PhotopeaChannelScriptError
-} from "@/channel-errors"
-import { pageTest } from "@/testFixtures"
+} from "@lifecodeof/autopea"
+import { pageTest } from "./testFixtures"
 import { describe, test, expect } from "vitest"
 
 describe("Error Handling", () => {

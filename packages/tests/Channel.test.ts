@@ -1,5 +1,5 @@
-import { PhotopeaChannelEvalError, PhotopeaChannelScriptError } from "@/channel-errors"
-import { channelTest } from "@/testFixtures"
+import { PhotopeaChannelEvalError, PhotopeaChannelScriptError } from "@lifecodeof/autopea"
+import { channelTest } from "./testFixtures"
 import { expect } from "vitest"
 
 channelTest("PhotopeaChannel - should evaluate simple expressions", async ({ channel }) => {

@@ -1,7 +1,7 @@
 import { expect } from "vitest"
-import { Contract, SerializableContract } from "@/contracts/base/Contract"
-import { App } from "@/contracts/App"
-import { appTest } from "@/testFixtures"
+import { App } from "@lifecodeof/autopea/contracts/App"
+import { Contract, SerializableContract } from "@lifecodeof/autopea/contracts/base/Contract"
+import { appTest } from "../../testFixtures"
 import z from "zod"
 
 appTest("Contract - should create basic contract", async ({ app }) => {

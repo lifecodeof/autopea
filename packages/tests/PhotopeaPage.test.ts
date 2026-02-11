@@ -1,6 +1,6 @@
 import { expect, vi } from "vitest"
-import { PhotopeaPage } from "@/PhotopeaPage"
-import { browserTest } from "@/testFixtures"
+import { PhotopeaPage } from "@lifecodeof/autopea-pw"
+import { browserTest } from "./testFixtures"
 
 browserTest(
   "PhotopeaPage - should open Photopea page successfully",

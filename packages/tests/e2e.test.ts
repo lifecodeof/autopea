@@ -1,6 +1,6 @@
-import { Contract } from "@/contracts/base/Contract"
-import { PDocument } from "@/contracts/PDocument"
-import { appTest } from "@/testFixtures"
+import { Contract } from "@lifecodeof/autopea/contracts/base/Contract"
+import { PDocument } from "@lifecodeof/autopea/contracts/PDocument"
+import { appTest } from "./testFixtures"
 import { fileURLToPath } from "url"
 import { expect } from "vitest"
 

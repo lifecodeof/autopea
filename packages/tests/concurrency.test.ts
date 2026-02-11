@@ -1,8 +1,6 @@
 import { describe, expect } from "vitest"
-import { PhotopeaChannel } from "@/Channel"
-import { PhotopeaMutexes } from "@/PhotopeaMutexes"
-import { pageTest } from "@/testFixtures"
-import { PhotopeaChannelEvalError } from "@/channel-errors"
+import { PhotopeaChannel, PhotopeaChannelEvalError, PhotopeaMutexes } from "@lifecodeof/autopea"
+import { pageTest } from "./testFixtures"
 
 describe("Concurrency Tests", () => {
   describe("PhotopeaChannel Concurrency", () => {

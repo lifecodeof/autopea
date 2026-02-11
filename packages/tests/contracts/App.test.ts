@@ -1,4 +1,4 @@
-import { appTest } from "@/testFixtures"
+import { appTest } from "../testFixtures"
 import { expect } from "vitest"
 
 appTest("App - should get app properties", async ({ app }) => {

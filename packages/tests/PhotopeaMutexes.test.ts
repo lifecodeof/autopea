@@ -1,6 +1,6 @@
 import { expect } from "vitest"
-import { PhotopeaMutexes } from "@/PhotopeaMutexes"
-import { pageTest } from "@/testFixtures"
+import { PhotopeaMutexes } from "@lifecodeof/autopea"
+import { pageTest } from "./testFixtures"
 
 pageTest("PhotopeaMutexes - should create mutexes for page", async ({ page }) => {
   const mutexes = PhotopeaMutexes.of(page.page)

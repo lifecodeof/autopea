@@ -1,0 +1,25 @@
+{
+  "name": "tests",
+  "private": true,
+  "version": "1.1.4",
+  "description": "Library for automating Photopea",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "keywords": [],
+  "files": [
+    "dist"
+  ],
+  "author": "lifecodeof",
+  "type": "module",
+  "dependencies": {
+    "@lifecodeof/autopea": "workspace:*",
+    "@lifecodeof/autopea-pw": "workspace:*",
+    "playwright": "^1.58.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18",
+    "zod": "^4.3.6"
+  }
+}

@@ -1,8 +1,8 @@
 import { type BrowserContext, chromium } from "playwright"
 import { test } from "vitest"
-import { PhotopeaChannel } from "./Channel"
-import { App } from "./contracts/App"
-import { PhotopeaPage } from "./PhotopeaPage"
+import { PhotopeaChannel } from "@lifecodeof/autopea"
+import { App } from "@lifecodeof/autopea/contracts/App"
+import { PhotopeaPage } from "@lifecodeof/autopea-pw"
 
 export const browserTest = test.extend<{
   browserCtx: BrowserContext
