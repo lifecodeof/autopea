@@ -1,6 +1,6 @@
 import z from "zod"
 import { App } from "./App"
-import { Contract, ContractCollection, Dynamic } from "./base/Contract"
+import { Contract, ContractCollection, Dynamic } from "./Contract"
 import { type AnchorPosition, type ElementPlacement, LayerKind } from "./enums"
 import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
 import { PDocument } from "./PDocument"

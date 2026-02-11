@@ -1,5 +1,5 @@
 import z from "zod"
-import { Contract, ContractCollection } from "./base/Contract"
+import { Contract, ContractCollection } from "./Contract"
 import { PDocument } from "./PDocument"
 import { SolidColor } from "./SolidColor"
 

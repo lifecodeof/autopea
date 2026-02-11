@@ -1,5 +1,5 @@
 import z from "zod"
-import { Contract, ContractCollection } from "./base/Contract"
+import { Contract, ContractCollection } from "./Contract"
 import type { ElementPlacement, RasterizeType } from "./enums"
 import { Layer } from "./Layer"
 import { PDocument } from "./PDocument"

@@ -1,6 +1,6 @@
 import type { App } from "@/contracts/App"
 import type { ArtLayer } from "@/contracts/ArtLayer"
-import type { Contract } from "@/contracts/base/Contract"
+import type { Contract } from "@/contracts/Contract"
 import type { PDocument } from "@/contracts/PDocument"
 import type { PhotopeaMutexes } from "@/PhotopeaMutexes"
 

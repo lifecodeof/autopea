@@ -1,5 +1,5 @@
 import type { HandleVars, PhotopeaChannel } from "./Channel"
-import { Contract } from "./contracts/base/Contract"
+import { Contract } from "./contracts/Contract"
 
 export class PhotopeaChannelError extends Error {}
 export class PhotopeaChannelLogicError extends PhotopeaChannelError {}

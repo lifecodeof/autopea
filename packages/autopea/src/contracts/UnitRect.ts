@@ -1,5 +1,5 @@
 import z from "zod"
-import { Contract } from "./base/Contract"
+import { Contract } from "./Contract"
 import { UnitValue } from "./UnitValue"
 
 export class UnitRect extends Contract {

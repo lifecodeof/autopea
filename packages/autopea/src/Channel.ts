@@ -6,7 +6,7 @@ import {
   PhotopeaChannelScriptError,
   PhotopeaChannelTimeoutError,
 } from "./channel-errors"
-import { Contract } from "./contracts/base/Contract"
+import { Contract } from "./contracts/Contract"
 import { abortOnTimeout, invariant, waitForEvent } from "./helpers"
 import type { PhotopeaTransport } from "./transports/PhotopeaTransport"
 

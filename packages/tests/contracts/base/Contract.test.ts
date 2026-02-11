@@ -1,6 +1,6 @@
 import { expect } from "vitest"
 import { App } from "@lifecodeof/autopea/contracts/App"
-import { Contract, SerializableContract } from "@lifecodeof/autopea/contracts/base/Contract"
+import { Contract, SerializableContract } from "@lifecodeof/autopea/contracts/Contract"
 import { appTest } from "../../testFixtures"
 import z from "zod"
 

@@ -1,7 +1,7 @@
 import z from "zod"
 import { ArtLayers } from "./ArtLayer"
-import { Contract, ContractCollection } from "./base/Contract"
 import { ColorSamplers } from "./ColorSampler"
+import { Contract, ContractCollection } from "./Contract"
 import type { AnchorPosition, ResampleMethod, TrimType } from "./enums"
 import { Layer, Layers } from "./Layer"
 import { LayerSets } from "./LayerSet"

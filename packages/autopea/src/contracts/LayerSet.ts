@@ -1,5 +1,5 @@
 import { ArtLayers } from "./ArtLayer"
-import { ContractCollection } from "./base/Contract"
+import { ContractCollection } from "./Contract"
 import { Layer, Layers } from "./Layer"
 import { UnitRectLocal } from "./UnitRect"
 
