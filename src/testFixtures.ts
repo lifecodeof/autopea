@@ -10,7 +10,7 @@ export const browserTest = test.extend<{
   browserCtx: [
     // biome-ignore lint/correctness/noEmptyPattern: vitest requires destruction
     async ({}, use) => {
-      const browser = await chromium.launch({ headless: !true })
+      const browser = await chromium.launch({ headless: !process.env.PW_SHOW })
 
       const context = await browser.newContext()
       await use(context)
