@@ -1,7 +1,7 @@
 import { createNanoEvents } from "nanoevents"
 import type { Browser, BrowserContext, Page } from "playwright"
 import type { PhotopeaCapabilities } from "./capabilities/PhotopeaCapabilities"
-import { createPlaywrightPhotopeaCapabilities } from "./capabilities/PlaywrightPhotopeaCapabilities"
+import { createPlaywrightCapabilities } from "./capabilities/PlaywrightPhotopeaCapabilities"
 import { makeArrayBufferToBase64FnHandle } from "./playwrightLib"
 import type { PhotopeaTransport } from "./transports/PhotopeaTransport"
 
@@ -74,10 +74,7 @@ export class PhotopeaPage implements PhotopeaTransport {
    */
   static async open(page: Page, options: { timeout?: number } = {}) {
     await PhotopeaPage.openPhotopeaPage(page, options)
-    const instance = new PhotopeaPage(
-      page,
-      createPlaywrightPhotopeaCapabilities(page),
-    )
+    const instance = new PhotopeaPage(page, createPlaywrightCapabilities(page))
     await instance.listenEvents()
     return instance
   }
