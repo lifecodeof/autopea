@@ -19,18 +19,18 @@
   "type": "module",
   "dependencies": {
     "@lifecodeof/autopea": "workspace:*",
-    "async-mutex": "^0.5.0",
+    "async-mutex": "catalog:",
     "fflate": "^0.8.2",
-    "nanoevents": "^9.1.0",
-    "zod": "^4.3.6"
+    "nanoevents": "catalog:",
+    "zod": "catalog:"
   },
   "peerDependencies": {
-    "playwright": "^1.58.1"
+    "playwright": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^25.2.3",
-    "tsdown": "^0.20.3",
-    "typescript": "^5.9.3"
+    "@types/node": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:"
   },
   "exports": {
     ".": {
