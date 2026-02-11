@@ -1,6 +1,9 @@
 {
   "name": "autopea",
   "private": true,
+  "scripts": {
+    "publish": "pnpm publish -r --filter !tests"
+  },
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
