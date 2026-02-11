@@ -58,7 +58,7 @@ export const waitForEvent = async <T, EE extends EventEmitter>(
 
       try {
         passed = predicate ? predicate(...params) : true
-      } catch (_error) {}
+      } catch {}
 
       if (passed) {
         cleanup()
