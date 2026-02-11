@@ -5,7 +5,8 @@ export default defineConfig({
   alias: {
     "@": "./src"
   },
-  unbundle: true,
+  skipNodeModulesBundle: true,
   dts: { sourcemap: true },
-  sourcemap: true
+  sourcemap: true,
+  target: false,
 })

@@ -2,7 +2,8 @@
   "name": "autopea",
   "private": true,
   "scripts": {
-    "publish": "pnpm run --filter !tests -r build && pnpm publish --filter !tests -r --no-git-checks"
+    "build": "pnpm run --filter !tests -r build",
+    "publish": "pnpm run build && pnpm publish --filter !tests -r --no-git-checks"
   },
   "version": "1.0.0",
   "description": "",

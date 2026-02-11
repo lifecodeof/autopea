@@ -150,7 +150,7 @@ export const createPlaywrightCapabilities = (
         }
       })
     },
-    pause(this: App) {
+    pause() {
       return page.pause()
     },
     async saveSmartObject(this: PDocument) {
@@ -171,12 +171,11 @@ export const createPlaywrightCapabilities = (
       await waiter
     },
     async downloadDocument(this: PDocument, saveFormatCode: string) {
-      const channel = Contract.getChannel(this)
       const pwPage = page
 
       return this.mutexes.downloadMutex.runExclusive(async () => {
         const downloadPromise = pwPage.waitForEvent("download")
-        await channel.evaluate<void>(
+        await this.channel.evaluate<void>(
           `doc.saveAs(new File(""), ${saveFormatCode})`,
           { doc: this },
           { timeout: 10_000 },
