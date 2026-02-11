@@ -1,6 +1,5 @@
 import EventEmitter from "node:events"
 import type { Browser, BrowserContext, Page } from "playwright"
-import { waitForEvent } from "./helpers"
 import { makeArrayBufferToBase64FnHandle } from "./playwrightLib"
 
 type EventMap = {
@@ -251,7 +250,32 @@ export class PhotopeaPage extends EventEmitter<EventMap> {
     signal?: AbortSignal,
     predicate?: (...args: unknown[]) => boolean,
   ): Promise<T> {
-    return await waitForEvent(this, event, selector, signal, predicate)
+    return new Promise((resolve, reject) => {
+      const handler = (...args: unknown[]) => {
+        if (predicate && !predicate(...args)) {
+          return
+        }
+        cleanup()
+        resolve(selector(...args))
+      }
+
+      const cleanup = () => {
+        this.removeListener(event, handler)
+        if (signal) {
+          signal.removeEventListener("abort", abortHandler)
+        }
+      }
+
+      const abortHandler = () => {
+        cleanup()
+        reject(new Error("Aborted"))
+      }
+
+      this.on(event, handler)
+      if (signal) {
+        signal.addEventListener("abort", abortHandler)
+      }
+    })
   }
 
   [Symbol.asyncDispose]() {

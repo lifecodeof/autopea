@@ -1,5 +1,3 @@
-import type { EventEmitter } from "node:events"
-
 export const timeoutAbortSignal = (timeout: number): AbortSignal => {
   const controller = new AbortController()
   setTimeout(
@@ -38,40 +36,4 @@ export const abortOnTimeout = (
     clearTimeout(timeoutId)
     abortController.signal.removeEventListener("abort", abortListener)
   }
-}
-
-export const waitForEvent = async <T, EE extends EventEmitter>(
-  emitter: EE,
-  event: Parameters<EE["on"]>[0],
-  selector: (...args: unknown[]) => T,
-  signal?: AbortSignal,
-  predicate?: (...args: unknown[]) => boolean,
-) => {
-  return await new Promise<T>((resolve, reject) => {
-    const cleanup = () => {
-      emitter.off(event, listener)
-      signal?.removeEventListener("abort", abortListener)
-    }
-
-    const listener = (...params: unknown[]) => {
-      let passed = false
-
-      try {
-        passed = predicate ? predicate(...params) : true
-      } catch {}
-
-      if (passed) {
-        cleanup()
-        resolve(selector(...params))
-      }
-    }
-
-    const abortListener = () => {
-      cleanup()
-      reject(signal?.reason)
-    }
-
-    emitter.on(event, listener)
-    signal?.addEventListener("abort", abortListener)
-  })
 }
