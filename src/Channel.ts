@@ -9,7 +9,7 @@ import {
 } from "./channel-errors"
 import { Contract } from "./contracts/base/Contract"
 import { abortOnTimeout, waitForEvent } from "./helpers"
-import type { PhotopeaTransport } from "./PhotopeaTransport"
+import type { PhotopeaTransport } from "./transports/PhotopeaTransport"
 
 export type Handleable = Contract | string
 export type HandleVars = Record<string, Handleable>

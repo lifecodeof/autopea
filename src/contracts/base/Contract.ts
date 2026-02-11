@@ -73,6 +73,10 @@ export class Contract {
     protected readonly expression: string,
   ) {}
 
+  protected get capabilities() {
+    return this.channel.page.capabilities
+  }
+
   /**
    * Gets the typename of the remote object (e.g., "Document", "Layer").
    * This is a SerializableContract that can be awaited to get the actual string value.

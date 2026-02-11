@@ -36,7 +36,7 @@ export class PhotopeaPage {
    */
   private constructor(public readonly page: Page) {}
 
-  on<K extends keyof PPEventMap>(event: K, handler: PPEventMap[K]) {
+  on = <K extends keyof PPEventMap>(event: K, handler: PPEventMap[K]) => {
     return this.events.on(event, handler)
   }
 

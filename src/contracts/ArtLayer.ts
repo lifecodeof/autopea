@@ -57,32 +57,7 @@ export class ArtLayer extends Layer {
 
   // Utils
   async openSmartObject() {
-    return this.mutexes.documentMutex.runExclusive(async () => {
-      const pwPage = this.channel.page.page
-
-      const panelhead = await pwPage
-        .locator(".mainblock > .block > .panelhead")
-        .elementHandle()
-      invariant(panelhead, "Cannot find panelhead element")
-
-      const documentCountBefore = await panelhead.evaluate(
-        (el) => el.childElementCount,
-      )
-
-      await App.of(this).activeDocument.activeLayer.$set(this)
-
-      await this.$eval({
-        absolute: true,
-      })`executeAction(stringIDToTypeID("placedLayerEditContents"), null, DialogModes.NO)`
-
-      // Wait for new document tab to open
-      await pwPage.waitForFunction(
-        ([panelhead, count]) => panelhead.childElementCount === count + 1,
-        [panelhead, documentCountBefore] as const,
-      )
-
-      return await App.of(this).activeDocument.$ref()
-    })
+    return await this.capabilities.openSmartObject.call(this)
   }
 
   // Utils
