@@ -4,8 +4,6 @@
   "description": "Library for automating Photopea",
   "scripts": {
     "start": "tsx main.ts",
-    "repl": "tsx src/repl.ts",
-    "test": "vitest",
     "build": "tsdown"
   },
   "publishConfig": {
