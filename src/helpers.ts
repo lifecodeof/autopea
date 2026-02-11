@@ -88,3 +88,12 @@ export async function waitForEvent<
     }
   })
 }
+
+export function invariant(
+  condition: unknown,
+  message: string,
+): asserts condition {
+  if (!condition) {
+    throw new Error(message)
+  }
+}

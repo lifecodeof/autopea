@@ -5,24 +5,15 @@ import { App } from "@/contracts/App"
 import type { ArtLayer } from "@/contracts/ArtLayer"
 import { Contract } from "@/contracts/base/Contract"
 import type { PDocument } from "@/contracts/PDocument"
-import { abortOnTimeout, waitForEvent } from "@/helpers"
+import { abortOnTimeout, invariant, waitForEvent } from "@/helpers"
 import { PhotopeaMutexes } from "@/PhotopeaMutexes"
 import { makeBase64ToArrayBufferFnHandle } from "@/playwrightLib"
 import { clickToolbarButton } from "@/toolbar"
 import type { PhotopeaCapabilities } from "./PhotopeaCapabilities"
 
-// A local polyfill to make error messages available in production.
-function invariant(condition: unknown, message: string): asserts condition {
-  if (!condition) {
-    throw new Error(message)
-  }
-}
-
-export const createPlaywrightPhotopeaCapabilities = (
+export const createPlaywrightCapabilities = (
   page: Page,
 ): PhotopeaCapabilities => {
-  // Use `page` instead of `Contract.channel.page.page`
-
   return {
     getMutexes() {
       return PhotopeaMutexes.of(page)

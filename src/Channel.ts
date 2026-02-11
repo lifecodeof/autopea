@@ -1,5 +1,4 @@
 import { Mutex } from "async-mutex"
-import invariant from "tiny-invariant"
 import {
   PhotopeaChannelEvalError,
   PhotopeaChannelLogicError,
@@ -8,7 +7,7 @@ import {
   PhotopeaChannelTimeoutError,
 } from "./channel-errors"
 import { Contract } from "./contracts/base/Contract"
-import { abortOnTimeout, waitForEvent } from "./helpers"
+import { abortOnTimeout, invariant, waitForEvent } from "./helpers"
 import type { PhotopeaTransport } from "./transports/PhotopeaTransport"
 
 export type Handleable = Contract | string
