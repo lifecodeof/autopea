@@ -1,5 +1,5 @@
 import { buffer } from "node:stream/consumers"
-import AdmZip from "adm-zip"
+import { unzipSync } from "fflate"
 import z from "zod"
 import { clickToolbarButton } from "@/toolbar"
 import { App } from "./App"
@@ -211,8 +211,8 @@ export class PDocuments extends ContractCollection<PDocument> {
 }
 
 function extractSingleFileFromZip(zipBuffer: Buffer): Buffer {
-  const zip = new AdmZip(zipBuffer)
-  const entries = zip.getEntries()
+  const decompressed = unzipSync(new Uint8Array(zipBuffer))
+  const entries = Object.keys(decompressed)
 
   if (entries.length !== 1) {
     throw new Error(
@@ -220,5 +220,5 @@ function extractSingleFileFromZip(zipBuffer: Buffer): Buffer {
     )
   }
 
-  return entries[0].getData()
+  return Buffer.from(decompressed[entries[0]])
 }
