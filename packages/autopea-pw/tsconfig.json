@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "target": "esnext",
+    "moduleDetection": "force",
+    "module": "Preserve",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "composite": true
+  },
+  "include": ["./src/**/*", "./tests/**/*", "tsdown-env.d.ts", "src/repl.ts"]
+}

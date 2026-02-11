@@ -1,15 +1,16 @@
 import { buffer } from "node:stream/consumers"
+import type { PhotopeaCapabilities } from "@lifecodeof/autopea"
+import { PhotopeaMutexes } from "@lifecodeof/autopea"
+import { App } from "@lifecodeof/autopea/contracts/App"
+import type { ArtLayer } from "@lifecodeof/autopea/contracts/ArtLayer"
+import { Contract } from "@lifecodeof/autopea/contracts/base/Contract"
+import type { PDocument } from "@lifecodeof/autopea/contracts/PDocument"
+import { unzipSync } from "fflate/node"
 import type { ConsoleMessage, Dialog, Page } from "playwright"
 import { errors as pwErrors } from "playwright"
-import { App } from "@/contracts/App"
-import type { ArtLayer } from "@/contracts/ArtLayer"
-import { Contract } from "@/contracts/base/Contract"
-import type { PDocument } from "@/contracts/PDocument"
-import { abortOnTimeout, invariant, waitForEvent } from "@/helpers"
-import { PhotopeaMutexes } from "@/PhotopeaMutexes"
-import { makeBase64ToArrayBufferFnHandle } from "@/playwrightLib"
-import { clickToolbarButton } from "@/toolbar"
-import type { PhotopeaCapabilities } from "./PhotopeaCapabilities"
+import { abortOnTimeout, invariant, waitForEvent } from "../helpers"
+import { makeBase64ToArrayBufferFnHandle } from "../playwrightLib"
+import { clickToolbarButton } from "../toolbar"
 
 export const createPlaywrightCapabilities = (
   page: Page,
@@ -169,7 +170,7 @@ export const createPlaywrightCapabilities = (
       await this.save()
       await waiter
     },
-    async downloadDocumentZip(this: PDocument, saveFormatCode: string) {
+    async downloadDocument(this: PDocument, saveFormatCode: string) {
       const channel = Contract.getChannel(this)
       const pwPage = page
 
@@ -184,7 +185,8 @@ export const createPlaywrightCapabilities = (
 
         const downloadStream = await download.createReadStream()
         try {
-          return await buffer(downloadStream)
+          const zip = await buffer(downloadStream)
+          return extractSingleFileFromZip(zip)
         } finally {
           downloadStream.destroy()
         }
@@ -199,4 +201,17 @@ export const createPlaywrightCapabilities = (
       return await App.of(this).activeDocument.$ref()
     },
   }
+}
+
+function extractSingleFileFromZip(zipBuffer: Buffer): Uint8Array {
+  const decompressed = unzipSync(zipBuffer)
+  const entries = Object.keys(decompressed)
+
+  if (entries.length !== 1) {
+    throw new Error(
+      `Zip archive must contain exactly one file, found ${entries.length}`,
+    )
+  }
+
+  return decompressed[entries[0]]
 }

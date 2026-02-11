@@ -11,6 +11,6 @@ export interface PhotopeaCapabilities {
   uploadFonts(this: App, fonts: Record<string, Buffer>): Promise<void>
   pause(this: App): Promise<void>
   saveSmartObject(this: PDocument): Promise<void>
-  downloadDocumentZip(this: PDocument, saveFormatCode: string): Promise<Buffer>
+  downloadDocument(this: PDocument, saveFormatCode: string): Promise<Uint8Array>
   duplicateDocument(this: PDocument): Promise<PDocument>
 }

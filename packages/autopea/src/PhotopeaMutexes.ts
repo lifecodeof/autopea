@@ -1,8 +1,7 @@
 import { Mutex } from "async-mutex"
-import type { Page } from "playwright"
 
 export class PhotopeaMutexes {
-  private static readonly instanceMap = new WeakMap<Page, PhotopeaMutexes>()
+  private static readonly instanceMap = new WeakMap<object, PhotopeaMutexes>()
 
   /** For opening chrome native dialogs such as window.confirm() */
   public readonly dialogMutex = new Mutex()
@@ -16,7 +15,7 @@ export class PhotopeaMutexes {
   /** For opening docuements (required for timing issues) */
   public readonly documentMutex = new Mutex()
 
-  static of(page: Page) {
+  static of(page: object) {
     let instance = PhotopeaMutexes.instanceMap.get(page)
     if (!instance) {
       instance = new PhotopeaMutexes()

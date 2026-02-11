@@ -78,7 +78,7 @@ export class App extends Contract {
   }
 
   // Extra Utils
-  async saveToBuffer(format: SaveFormat): Promise<Buffer> {
+  async saveToBuffer(format: SaveFormat): Promise<Uint8Array> {
     return await this.activeDocument.saveToBuffer(format)
   }
 

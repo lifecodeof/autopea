@@ -1,11 +1,13 @@
+import type {
+  PhotopeaCapabilities,
+  PhotopeaTransport,
+} from "@lifecodeof/autopea"
 import { createNanoEvents } from "nanoevents"
 import type { Browser, BrowserContext, Page } from "playwright"
-import type { PhotopeaCapabilities } from "./capabilities/PhotopeaCapabilities"
 import { createPlaywrightCapabilities } from "./capabilities/PlaywrightPhotopeaCapabilities"
 import { makeArrayBufferToBase64FnHandle } from "./playwrightLib"
-import type { PhotopeaTransport } from "./transports/PhotopeaTransport"
 
-export type PPEventMap = {
+type PPEventMap = {
   message: (message: string) => void
   bufferMessage: (buffer: Buffer) => void
   pageerror: (error: Error) => void

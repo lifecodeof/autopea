@@ -1,4 +1,3 @@
-import { unzipSync } from "fflate"
 import z from "zod"
 import { ArtLayers } from "./ArtLayer"
 import { Contract, ContractCollection } from "./base/Contract"
@@ -126,20 +125,15 @@ export class PDocument extends Contract {
    * Saves the current or specified document to a buffer in the given format.
    * @param format The format to save as (e.g., 'png', 'jpg').
    * @param document Optional PhotopeaHandle for a specific document. If omitted, uses the active document.
-   * @returns Promise that resolves to a Buffer containing the saved file data.
+   * @returns Promise that resolves to a Uint8Array containing the saved file data.
    */
-  async saveToBuffer(format: SaveFormat): Promise<Buffer> {
+  async saveToBuffer(format: SaveFormat): Promise<Uint8Array> {
     const saveFormatCode = saveFormatMap[format as SaveFormat]
     if (!saveFormatCode) {
       throw new Error(`Unsupported save format: ${format}`)
     }
 
-    const zipBuffer = await this.capabilities.downloadDocumentZip.call(
-      this,
-      saveFormatCode,
-    )
-
-    return extractSingleFileFromZip(zipBuffer)
+    return await this.capabilities.downloadDocument.call(this, saveFormatCode)
   }
 
   async makeBounds() {
@@ -169,17 +163,4 @@ export class PDocuments extends ContractCollection<PDocument> {
         )`.add(${width},${height},${resolution},${name})`,
     )
   }
-}
-
-function extractSingleFileFromZip(zipBuffer: Buffer): Buffer {
-  const decompressed = unzipSync(new Uint8Array(zipBuffer))
-  const entries = Object.keys(decompressed)
-
-  if (entries.length !== 1) {
-    throw new Error(
-      `Zip archive must contain exactly one file, found ${entries.length}`,
-    )
-  }
-
-  return Buffer.from(decompressed[entries[0]])
 }
