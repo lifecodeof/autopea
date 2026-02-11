@@ -67,7 +67,14 @@ browserTest(
     // Send a script that doesn't produce output
     await page.sendMessage('app.echoToOE("");')
 
-    await expect(page.waitForBlankDone()).resolves.toBeUndefined()
+
+    // Wait for the blank done message
+    await new Promise<void>((resolve) => page.on("message", (message) => {
+      if (message === "") {
+        resolve()
+      }
+    }))
+
     await page.close()
   }
 )

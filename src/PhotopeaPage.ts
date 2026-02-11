@@ -2,7 +2,7 @@ import { createNanoEvents } from "nanoevents"
 import type { Browser, BrowserContext, Page } from "playwright"
 import { makeArrayBufferToBase64FnHandle } from "./playwrightLib"
 
-type EventMap = {
+export type PPEventMap = {
   message: (message: string) => void
   bufferMessage: (buffer: Buffer) => void
   pageerror: (error: Error) => void
@@ -28,7 +28,7 @@ type PhotopeaWindow = Window & {
 export class PhotopeaPage {
   private messageBuffer: string = ""
 
-  private readonly events = createNanoEvents<EventMap>()
+  private readonly events = createNanoEvents<PPEventMap>()
 
   /**
    * @param page The Playwright Page instance.
@@ -36,13 +36,13 @@ export class PhotopeaPage {
    */
   private constructor(public readonly page: Page) {}
 
-  on<K extends keyof EventMap>(event: K, handler: EventMap[K]) {
+  on<K extends keyof PPEventMap>(event: K, handler: PPEventMap[K]) {
     return this.events.on(event, handler)
   }
 
-  private emit<K extends keyof EventMap>(
+  private emit<K extends keyof PPEventMap>(
     event: K,
-    ...args: Parameters<EventMap[K]>
+    ...args: Parameters<PPEventMap[K]>
   ) {
     this.events.emit(event, ...args)
   }
@@ -221,81 +221,6 @@ export class PhotopeaPage {
     return this.page.evaluate((msg) => {
       window.postMessage(msg, "https://www.photopea.com")
     }, message)
-  }
-
-  /**
-   * Waits for a blank "done" message from Photopea, with optional abort signal.
-   * @param signal Optional AbortSignal to cancel waiting.
-   * @returns Promise that resolves when the blank message is received.
-   */
-  waitForBlankDone(signal?: AbortSignal) {
-    return this.waitForEvent({
-      event: "message",
-      selector: (_) => {},
-      signal,
-      predicate: (message) => message === "",
-    })
-  }
-
-  /**
-   * Waits for a buffer message from Photopea, with optional abort signal.
-   * @param signal Optional AbortSignal to cancel waiting.
-   * @returns Promise that resolves to the received Buffer.
-   */
-  waitForBufferMessage(signal?: AbortSignal) {
-    return this.waitForEvent({
-      event: "bufferMessage",
-      selector: (buffer) => buffer,
-      signal,
-    })
-  }
-
-  async waitForEvent<
-    K extends keyof EventMap = keyof EventMap,
-    T = Parameters<EventMap[K]>,
-  >({
-    event,
-    selector,
-    signal,
-    predicate,
-  }: {
-    event: K
-    selector?: (...args: Parameters<EventMap[K]>) => T
-    signal?: AbortSignal
-    predicate?: (...args: Parameters<EventMap[K]>) => boolean
-  }): Promise<T> {
-    return new Promise((resolve, reject) => {
-      const abortHandler = () => {
-        cleanup()
-        signal?.removeEventListener("abort", abortHandler)
-        reject(new Error("Aborted"))
-      }
-
-      // @ts-expect-error - Parameters<EventMap[K]> is not inferred correctly
-      const cleanup = this.on(event, (...args: Parameters<EventMap[K]>) => {
-        // Check predicate if provided
-        if (predicate && !predicate(...args)) {
-          return
-        }
-
-        // Cleanup listeners
-        cleanup()
-        signal?.removeEventListener("abort", abortHandler)
-
-        // Resolve with selector result OR the raw arguments if no selector exists
-        if (selector) {
-          resolve(selector(...args))
-        } else {
-          // Type cast is necessary here because T defaults to Parameters<EventMap[K]>
-          resolve(args as unknown as T)
-        }
-      })
-
-      if (signal) {
-        if (signal.aborted) return abortHandler()
-        signal.addEventListener("abort", abortHandler)
-      }
-    })
   }
 
   [Symbol.asyncDispose]() {

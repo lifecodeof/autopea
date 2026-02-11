@@ -1,6 +1,5 @@
 import { Mutex } from "async-mutex"
 import invariant from "tiny-invariant"
-import type { PhotopeaPage } from "@/PhotopeaPage"
 import {
   PhotopeaChannelEvalError,
   PhotopeaChannelLogicError,
@@ -9,7 +8,8 @@ import {
   PhotopeaChannelTimeoutError,
 } from "./channel-errors"
 import { Contract } from "./contracts/base/Contract"
-import { abortOnTimeout } from "./helpers"
+import { abortOnTimeout, waitForEvent } from "./helpers"
+import type { PhotopeaTransport } from "./PhotopeaTransport"
 
 export type Handleable = Contract | string
 export type HandleVars = Record<string, Handleable>
@@ -37,7 +37,7 @@ export class PhotopeaChannel {
   public readonly dialogMutex = new Mutex()
 
   /** @param page The PhotopeaPage instance to communicate with. */
-  constructor(public readonly page: PhotopeaPage) {}
+  constructor(public readonly page: PhotopeaTransport) {}
 
   private makeHandleVarsStatement(handleVars: Record<string, Handleable>) {
     const getExpression = (handleable: Handleable) => {
@@ -85,7 +85,7 @@ export class PhotopeaChannel {
     script: string,
   ): Promise<T> {
     try {
-      const result = await this.page.waitForEvent({
+      const result = await waitForEvent(this.page.on, {
         event: "response",
         selector: (_rid, reqType, data) => ({ reqType, data }),
         signal,
@@ -134,12 +134,11 @@ export class PhotopeaChannel {
     )
 
     // Wait for console errors
-    this.page
-      .waitForEvent({
-        event: "pageerror",
-        selector: (v) => v,
-        signal: abort.signal,
-      })
+    waitForEvent(this.page.on, {
+      event: "pageerror",
+      selector: (v) => v as Error,
+      signal: abort.signal,
+    })
       .then((msg) => {
         abort.abort(new PhotopeaChannelPageError(msg.message))
       })

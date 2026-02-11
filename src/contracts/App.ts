@@ -5,7 +5,7 @@ import { PhotopeaChannel } from "@/Channel"
 import { PhotopeaMutexes } from "@/PhotopeaMutexes"
 import { PhotopeaPage } from "@/PhotopeaPage"
 import { clickToolbarButton } from "@/toolbar"
-import { abortOnTimeout, timeoutAbortSignal } from "../helpers"
+import { abortOnTimeout, timeoutAbortSignal, waitForEvent } from "../helpers"
 import { makeBase64ToArrayBufferFnHandle } from "../playwrightLib"
 import { Contract } from "./base/Contract"
 import { PDocument, PDocuments, type SaveFormat } from "./PDocument"
@@ -98,7 +98,11 @@ export class App extends Contract {
       const signal = timeoutAbortSignal(5 * 60 * 1000) // 5 minutes
 
       await Promise.all([
-        this.channel.page.waitForBlankDone(signal),
+        waitForEvent(this.channel.page.on, {
+          signal,
+          event: "message",
+          predicate: (message) => message === "",
+        }),
         this.channel.evaluate<void>(`app.open(${JSON.stringify(url)});`),
       ])
 
@@ -126,7 +130,11 @@ export class App extends Contract {
 
       return await this.mutexes.documentMutex.runExclusive(async () => {
         // TODO: Promise.all()
-        const blankDonePromise = page.waitForBlankDone(abort.signal)
+        const blankDonePromise = waitForEvent(page.on, {
+          event: "message",
+          predicate: (message) => message === "",
+          signal: abort.signal,
+        })
         await fileChooser.setFiles(path)
 
         const cleanup = abortOnTimeout(

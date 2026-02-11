@@ -37,3 +37,54 @@ export const abortOnTimeout = (
     abortController.signal.removeEventListener("abort", abortListener)
   }
 }
+
+export async function waitForEvent<
+  TReturn,
+  TEvent extends string,
+  TEventArgs extends unknown[],
+>(
+  onFn: (event: TEvent, handler: (...args: TEventArgs) => void) => () => void,
+  {
+    event,
+    selector = (...args) => args as unknown as TReturn,
+    signal,
+    predicate,
+  }: {
+    event: TEvent
+    selector?: (...args: TEventArgs) => TReturn
+    signal?: AbortSignal
+    predicate?: (...args: TEventArgs) => boolean
+  },
+): Promise<TReturn> {
+  return new Promise((resolve, reject) => {
+    const abortHandler = () => {
+      cleanup()
+      signal?.removeEventListener("abort", abortHandler)
+      reject(new Error("Aborted"))
+    }
+
+    const cleanup = onFn(event, (...args: TEventArgs) => {
+      // Check predicate if provided
+      if (predicate && !predicate(...args)) {
+        return
+      }
+
+      // Cleanup listeners
+      cleanup()
+      signal?.removeEventListener("abort", abortHandler)
+
+      // Resolve with selector result OR the raw arguments if no selector exists
+      if (selector) {
+        resolve(selector(...args))
+      } else {
+        // Type cast is necessary here because T defaults to Parameters<F>
+        resolve(args as unknown as TReturn)
+      }
+    })
+
+    if (signal) {
+      if (signal.aborted) return abortHandler()
+      signal.addEventListener("abort", abortHandler)
+    }
+  })
+}
