@@ -32,8 +32,8 @@ export interface PhotopeaTransport {
   /**
    * Sends a message to the Photopea iframe.
    * @param message The message string to send.
-   *    It's usually ActionScript code to be executed in Photopea.
-   * @returns Promise that resolves when the message is sent.
+   *
+   * Does not wait for acknowledgment from Photopea.
    */
   sendMessage(message: string): Promise<void>
 

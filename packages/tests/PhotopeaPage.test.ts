@@ -1,5 +1,5 @@
 import { expect, vi } from "vitest"
-import { PhotopeaPage } from "@lifecodeof/autopea-pw"
+import { PhotopeaPage, waitForEvent } from "@lifecodeof/autopea-pw"
 import { browserTest } from "./testFixtures"
 
 browserTest(
@@ -63,17 +63,16 @@ browserTest(
   "PhotopeaPage - should wait for blank done message",
   async ({ browserCtx }) => {
     const page = await PhotopeaPage.openFromBrowser(browserCtx)
+    const blankDonePromise = waitForEvent(page.on, {
+      event: "blankMessage",
+      signal: AbortSignal.timeout(5000)
+    })
 
     // Send a script that doesn't produce output
     await page.sendMessage('app.echoToOE("");')
 
-
     // Wait for the blank done message
-    await new Promise<void>((resolve) => page.on("message", (message) => {
-      if (message === "") {
-        resolve()
-      }
-    }))
+    await blankDonePromise
 
     await page.close()
   }

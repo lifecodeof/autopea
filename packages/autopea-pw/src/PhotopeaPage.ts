@@ -84,7 +84,7 @@ export class PhotopeaPage implements PhotopeaTransport {
     // Buffer messages until "done" is received
     if (message === "done") {
       if (this.messageBuffer.length <= 0) this.emit("blankMessage")
-      else this.emit("message", this.messageBuffer)
+      this.emit("message", this.messageBuffer)
       this.messageBuffer = ""
     } else if (isBase64) {
       this.emit("bufferMessage", Buffer.from(message, "base64"))
@@ -220,8 +220,8 @@ export class PhotopeaPage implements PhotopeaTransport {
     return this.page.close()
   }
 
-  sendMessage(message: string) {
-    return this.page.evaluate((msg) => {
+  async sendMessage(message: string) {
+    return await this.page.evaluate((msg) => {
       window.postMessage(msg, "https://www.photopea.com")
     }, message)
   }
