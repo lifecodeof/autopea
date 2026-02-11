@@ -1,7 +1,7 @@
 {
   "name": "@lifecodeof/autopea-pw",
-  "version": "1.1.4",
-  "description": "Library for automating Photopea",
+  "version": "1.1.6",
+  "description": "Playwright transport for autopea",
   "scripts": {
     "build": "tsdown"
   },
