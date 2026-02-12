@@ -1,9 +1,7 @@
 import z from "zod"
-import { App } from "./App"
 import { Contract, ContractCollection, Dynamic } from "./Contract"
 import { type AnchorPosition, type ElementPlacement, LayerKind } from "./enums"
 import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
-import { PDocument } from "./PDocument"
 import { UnitRect, UnitRectLocal } from "./UnitRect"
 
 export class Layer extends Contract {
@@ -125,6 +123,8 @@ export class Layer extends Contract {
     horizontal?: "center" | "left" | "right" // Horizontal alignment
     vertical?: "center" | "top" | "bottom" // Vertical alignment
   } = {}) {
+    const { App } = await import("./App") // Lazy import to avoid circular dependency
+
     const doc = App.of(this).activeDocument
     bounds ??= await doc.makeBounds()
 
@@ -206,6 +206,8 @@ export class Layer extends Contract {
     preserveAspect?: boolean // If true, will preserve aspect ratio (default: true)
     padding?: number // Padding to apply (default: 0)
   } = {}) {
+    const { App } = await import("./App") // Lazy import to avoid circular dependency
+
     targetBounds ??= await App.of(this).activeDocument.makeBounds()
 
     // Apply padding to target bounds
@@ -316,10 +318,6 @@ export class Layer extends Contract {
 
 export class Layers extends ContractCollection<Layer> {
   protected itemType = () => Layer
-
-  get parent() {
-    return this.$(PDocument)`.parent`
-  }
 
   getByName(name: string) {
     return this.$(Layer)`.getByName(${name})`

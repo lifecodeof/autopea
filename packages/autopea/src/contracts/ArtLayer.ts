@@ -2,7 +2,6 @@ import z from "zod"
 import { Contract, ContractCollection } from "./Contract"
 import type { ElementPlacement, RasterizeType } from "./enums"
 import { Layer } from "./Layer"
-import { PDocument } from "./PDocument"
 import { SolidColor } from "./SolidColor"
 import { UnitValue } from "./UnitValue"
 
@@ -60,6 +59,8 @@ export class ArtLayer extends Layer {
 
   // Utils
   async getDocument() {
+    const { PDocument } = await import("./PDocument") // Lazy import to avoid circular dependency
+
     let parent = await this.parent.$ref()
     while ((await parent.typename.$get()) !== "Document") {
       parent = await parent.$prop("parent").$ref()

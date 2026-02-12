@@ -1,4 +1,3 @@
-import { Contract } from "@lifecodeof/autopea/contracts/Contract"
 import { PDocument } from "@lifecodeof/autopea/contracts/PDocument"
 import { appTest } from "./testFixtures"
 import { fileURLToPath } from "url"

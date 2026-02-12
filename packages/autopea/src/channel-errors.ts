@@ -1,5 +1,4 @@
 import type { HandleVars, PhotopeaChannel } from "./Channel"
-import { Contract } from "./contracts/Contract"
 
 export class PhotopeaChannelError extends Error {}
 export class PhotopeaChannelLogicError extends PhotopeaChannelError {}
@@ -26,6 +25,8 @@ export class PhotopeaChannelEvalError extends PhotopeaChannelError {
   }
 
   async getVariables() {
+    const { Contract } = await import("./contracts/Contract") // Lazy import to avoid circular dependency
+
     const variables: Record<string, Contract> = {}
 
     for (const [key, value] of Object.entries(this.handleVars)) {

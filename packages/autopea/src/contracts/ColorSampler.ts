@@ -1,6 +1,5 @@
 import z from "zod"
 import { Contract, ContractCollection } from "./Contract"
-import { PDocument } from "./PDocument"
 import { SolidColor } from "./SolidColor"
 
 export class ColorSampler extends Contract {
@@ -10,10 +9,6 @@ export class ColorSampler extends Contract {
 
   get position() {
     return this.$value(z.tuple([z.number(), z.number()] as const))`.position`
-  }
-
-  get parent() {
-    return this.$(PDocument)`.parent`
   }
 
   move(position: [number, number]) {
@@ -27,10 +22,6 @@ export class ColorSampler extends Contract {
 
 export class ColorSamplers extends ContractCollection<ColorSampler> {
   protected itemType = () => ColorSampler
-
-  get parent() {
-    return this.$(PDocument)`.parent`
-  }
 
   add(x: number, y: number) {
     return this.$evalHandle(ColorSampler)`.add(${[x, y]})`
