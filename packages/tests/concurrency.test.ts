@@ -1,5 +1,9 @@
+import {
+  PhotopeaChannel,
+  PhotopeaChannelEvalError,
+  PhotopeaMutexes,
+} from "@lifecodeof/autopea"
 import { describe, expect } from "vitest"
-import { PhotopeaChannel, PhotopeaChannelEvalError, PhotopeaMutexes } from "@lifecodeof/autopea"
 import { pageTest } from "./testFixtures"
 
 describe("Concurrency Tests", () => {
@@ -10,12 +14,12 @@ describe("Concurrency Tests", () => {
         const channel = new PhotopeaChannel(page)
 
         const promises = Array.from({ length: 10 }, (_, i) =>
-          channel.evaluate(`return ${i} * 2`)
+          channel.evaluate(`return ${i} * 2`),
         )
 
         const results = await Promise.all(promises)
         expect(results).toEqual([0, 2, 4, 6, 8, 10, 12, 14, 16, 18])
-      }
+      },
     )
 
     pageTest("should handle concurrent handle operations", async ({ page }) => {
@@ -23,7 +27,7 @@ describe("Concurrency Tests", () => {
 
       // Create multiple handles concurrently
       const handlePromises = Array.from({ length: 5 }, (_, i) =>
-        channel.createHandle(`value-${i}`)
+        channel.createHandle(`value-${i}`),
       )
 
       const handles = await Promise.all(handlePromises)
@@ -32,7 +36,7 @@ describe("Concurrency Tests", () => {
 
       // Get values concurrently
       const valuePromises = handles.map((handle) =>
-        channel.getHandleValue(handle)
+        channel.getHandleValue(handle),
       )
 
       const values = await Promise.all(valuePromises)
@@ -41,7 +45,7 @@ describe("Concurrency Tests", () => {
         "value-1",
         "value-2",
         "value-3",
-        "value-4"
+        "value-4",
       ])
     })
 
@@ -53,7 +57,7 @@ describe("Concurrency Tests", () => {
         channel.createHandle({ test: "object" }),
         channel.evaluate("return Date.now()"),
         channel.createHandle([1, 2, 3]),
-        channel.evaluate("return 'string result'")
+        channel.evaluate("return 'string result'"),
       ]
 
       const results = await Promise.all(operations)
@@ -82,12 +86,12 @@ describe("Concurrency Tests", () => {
 
         const [result1, result2] = await Promise.all([
           channel.evaluate(script1),
-          channel.evaluate(script2)
+          channel.evaluate(script2),
         ])
 
         expect(result1).toBe("script1")
         expect(result2).toBe("script2")
-      }
+      },
     )
   })
 
@@ -163,7 +167,7 @@ describe("Concurrency Tests", () => {
         "task1-acquired",
         "task1-releasing",
         "task2-acquired",
-        "task2-releasing"
+        "task2-releasing",
       ])
     })
   })
@@ -174,14 +178,14 @@ describe("Concurrency Tests", () => {
 
       const numOperations = 20
       const promises = Array.from({ length: numOperations }, (_, i) =>
-        channel.evaluate(`return ${i}`)
+        channel.evaluate(`return ${i}`),
       )
 
       const results = await Promise.all(promises)
 
       expect(results).toHaveLength(numOperations)
       expect(results).toEqual(
-        Array.from({ length: numOperations }, (_, i) => i)
+        Array.from({ length: numOperations }, (_, i) => i),
       )
     })
 
@@ -200,11 +204,11 @@ describe("Concurrency Tests", () => {
 
         // Dispose handles rapidly
         const disposeResults = await Promise.all(
-          handles.map((handle) => channel.disposeHandle(handle))
+          handles.map((handle) => channel.disposeHandle(handle)),
         )
 
         expect(disposeResults.every((result) => result === true)).toBe(true)
-      }
+      },
     )
 
     pageTest("should handle mixed operations under load", async ({ page }) => {
@@ -218,7 +222,7 @@ describe("Concurrency Tests", () => {
         // Mixed scripts
         channel.evaluate("return Math.PI"),
         channel.evaluate("return 'string'"),
-        channel.evaluate("return [1,2,3]")
+        channel.evaluate("return [1,2,3]"),
       ]
 
       const results = await Promise.all(operations)
@@ -236,30 +240,33 @@ describe("Concurrency Tests", () => {
     pageTest(
       "should handle timeouts in concurrent operations",
       async ({ page }) => {
+        function typedExpectToBe<T>(
+          value: unknown,
+          expected: T,
+        ): asserts value is T {
+          expect(value).toBe(expected)
+        }
+
         const channel = new PhotopeaChannel(page)
         channel.timeout = 100
 
         const operations = [
-          channel.evaluate("return 42"), // Quick operation
-          channel.evaluate("invalid code"), // Will throw
-          channel.evaluate('return "success"'), // Another quick operation
-        ]
+          channel.evaluate<number>("return 42"), // Quick operation
+          channel.evaluate<never>("invalid code"), // Will throw
+          channel.evaluate<string>('return "success"'), // Another quick operation
+        ] as const
 
         const results = await Promise.allSettled(operations)
 
-        expect(results[0].status).toBe("fulfilled")
-        expect((results[0] as PromiseFulfilledResult<any>).value).toBe(42)
+        typedExpectToBe(results[0].status, "fulfilled")
+        expect(results[0].value).toBe(42)
 
-        expect(results[1].status).toBe("rejected")
-        expect((results[1] as PromiseRejectedResult).reason).toBeInstanceOf(
-          PhotopeaChannelEvalError
-        )
+        typedExpectToBe(results[1].status, "rejected")
+        expect(results[1].reason).toBeInstanceOf(PhotopeaChannelEvalError)
 
-        expect(results[2].status).toBe("fulfilled")
-        expect((results[2] as PromiseFulfilledResult<any>).value).toBe(
-          "success"
-        )
-      }
+        typedExpectToBe(results[2].status, "fulfilled")
+        expect(results[2].value).toBe("success")
+      },
     )
   })
 })

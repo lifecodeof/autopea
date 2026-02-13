@@ -1,5 +1,5 @@
-import { appTest } from "../testFixtures"
 import { expect } from "vitest"
+import { appTest } from "../testFixtures"
 
 appTest("App - should get app properties", async ({ app }) => {
   // Test the documents collection which should definitely work

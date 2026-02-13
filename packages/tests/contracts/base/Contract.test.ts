@@ -1,8 +1,11 @@
-import { expect } from "vitest"
 import { App } from "@lifecodeof/autopea/contracts/App"
-import { Contract, SerializableContract } from "@lifecodeof/autopea/contracts/Contract"
-import { appTest } from "../../testFixtures"
+import {
+  Contract,
+  SerializableContract,
+} from "@lifecodeof/autopea/contracts/Contract"
+import { expect } from "vitest"
 import z from "zod"
+import { appTest } from "../../testFixtures"
 
 appTest("Contract - should create basic contract", async ({ app }) => {
   expect(app).toBeInstanceOf(Contract)
@@ -27,7 +30,7 @@ appTest("Contract - should handle $eq comparison", async ({ app }) => {
   const stringContract = new SerializableContract(
     channel,
     '"test string"',
-    z.string()
+    z.string(),
   )
 
   // Test that $eq returns a SerializableContract<boolean>
@@ -51,5 +54,5 @@ appTest(
     // Test with a property that can be set (if any exist in App)
     // For now, just test that the method exists
     expect(typeof app.$set).toBe("function")
-  }
+  },
 )

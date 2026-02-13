@@ -6,11 +6,11 @@ export default defineConfig({
     printConsoleTrace: true,
     disableConsoleIntercept: true,
     slowTestThreshold: 3_000,
-    testTimeout: 10_000
+    testTimeout: 10_000,
   },
   resolve: {
     alias: {
-      "@": "/src"
-    }
-  }
+      "@": "/src",
+    },
+  },
 })

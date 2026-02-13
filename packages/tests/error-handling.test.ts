@@ -1,10 +1,10 @@
-import { PhotopeaChannel } from "@lifecodeof/autopea"
 import {
+  PhotopeaChannel,
   PhotopeaChannelEvalError,
-  PhotopeaChannelScriptError
+  PhotopeaChannelScriptError,
 } from "@lifecodeof/autopea"
+import { describe, expect, test } from "vitest"
 import { pageTest } from "./testFixtures"
-import { describe, test, expect } from "vitest"
 
 describe("Error Handling", () => {
   describe("Timeout Errors", () => {
@@ -15,9 +15,9 @@ describe("Error Handling", () => {
         channel.timeout = 100 // Short timeout for faster testing
 
         await expect(
-          channel.evaluate("while(true) {}") // Infinite loop
+          channel.evaluate("while(true) {}"), // Infinite loop
         ).rejects.toThrow(PhotopeaChannelEvalError)
-      }
+      },
     )
 
     pageTest("should respect custom timeout option", async ({ page }) => {
@@ -25,7 +25,7 @@ describe("Error Handling", () => {
       channel.timeout = 100 // Short timeout for faster testing
 
       await expect(
-        channel.evaluate("while(true) {}", {}, { timeout: 50 })
+        channel.evaluate("while(true) {}", {}, { timeout: 50 }),
       ).rejects.toThrow(PhotopeaChannelEvalError)
     })
 
@@ -46,9 +46,9 @@ describe("Error Handling", () => {
         channel.timeout = 100 // Short timeout for faster testing
 
         await expect(channel.evaluate("invalid syntax")).rejects.toThrow(
-          PhotopeaChannelEvalError
+          PhotopeaChannelEvalError,
         )
-      }
+      },
     )
 
     pageTest("should include function body in eval error", async ({ page }) => {
@@ -58,10 +58,10 @@ describe("Error Handling", () => {
       const script = "nonexistentVariable.property"
 
       await expect(channel.evaluate(script)).rejects.toThrow(
-        PhotopeaChannelEvalError
+        PhotopeaChannelEvalError,
       )
       await expect(channel.evaluate(script)).rejects.toMatchObject({
-        functionBody: expect.stringContaining(script)
+        functionBody: expect.stringContaining(script),
       })
     })
 
@@ -74,12 +74,12 @@ describe("Error Handling", () => {
 
         await expect(
           channel.evaluate("return invalidVar.invalidOp(testVar)", {
-            testVar: handle
-          })
+            testVar: handle,
+          }),
         ).rejects.toMatchObject({
-          handleVars: expect.objectContaining({ testVar: handle })
+          handleVars: expect.objectContaining({ testVar: handle }),
         })
-      }
+      },
     )
   })
 
@@ -120,7 +120,7 @@ describe("Error Handling", () => {
       // Test the error wrapping structure
       const originalError = new Error("Original error")
       const scriptError = new PhotopeaChannelScriptError("test script", {
-        cause: originalError
+        cause: originalError,
       })
 
       expect(scriptError).toBeInstanceOf(PhotopeaChannelScriptError)
@@ -136,7 +136,7 @@ describe("Error Handling", () => {
       // First operation fails
       try {
         await channel.evaluate("throw new Error('First error')")
-      } catch (error) {
+      } catch {
         // Expected error
       }
 
@@ -159,7 +159,7 @@ describe("Error Handling", () => {
       const channel = new PhotopeaChannel(page)
       channel.timeout = 100 // Short timeout for faster testing
 
-      const largeScript = 'return "' + "1".repeat(10000) + '";'
+      const largeScript = `return "${"1".repeat(10000)}";`
       const result = await channel.evaluate(largeScript)
       expect(result).toBe("1".repeat(10000))
     })
@@ -172,7 +172,7 @@ describe("Error Handling", () => {
 
         const result = await channel.evaluate("return 'hello\\nworld\\t\\r'")
         expect(result).toBe("hello\nworld\t\r")
-      }
+      },
     )
   })
 })

@@ -1,5 +1,5 @@
-import { expect, vi } from "vitest"
 import { PhotopeaPage, waitForEvent } from "@lifecodeof/autopea-pw"
+import { expect, vi } from "vitest"
 import { browserTest } from "./testFixtures"
 
 browserTest(
@@ -10,7 +10,7 @@ browserTest(
     expect(page).toBeInstanceOf(PhotopeaPage)
     expect(page.page).toBeDefined()
     await page.close()
-  }
+  },
 )
 
 browserTest(
@@ -28,7 +28,7 @@ browserTest(
     await vi.waitUntil(() => receivedMessage !== undefined, { timeout: 5000 })
 
     expect(receivedMessage).toBe("Hello World")
-  }
+  },
 )
 
 browserTest(
@@ -50,13 +50,13 @@ browserTest(
     })
 
     await vi.waitUntil(() => receivedError !== undefined, {
-      timeout: 5000
+      timeout: 5000,
     })
 
     expect(receivedError).toBeInstanceOf(Error)
-    expect(receivedError!.message).toContain("Test error")
+    expect(receivedError?.message).toContain("Test error")
     await page.close()
-  }
+  },
 )
 
 browserTest(
@@ -65,7 +65,7 @@ browserTest(
     const page = await PhotopeaPage.openFromBrowser(browserCtx)
     const blankDonePromise = waitForEvent(page.on, {
       event: "blankMessage",
-      signal: AbortSignal.timeout(5000)
+      signal: AbortSignal.timeout(5000),
     })
 
     // Send a script that doesn't produce output
@@ -75,7 +75,7 @@ browserTest(
     await blankDonePromise
 
     await page.close()
-  }
+  },
 )
 
 browserTest(
@@ -93,13 +93,13 @@ browserTest(
     await page.sendMessage('app.echoToOE("part2");')
 
     await vi.waitUntil(() => messages.length >= 2, {
-      timeout: 5000
+      timeout: 5000,
     })
 
     expect(messages).toContain("part1")
     expect(messages).toContain("part2")
     await page.close()
-  }
+  },
 )
 
 browserTest(
@@ -113,15 +113,15 @@ browserTest(
     for (let i = 0; i < 5; i++) {
       promises.push(
         new Promise<void>((resolve) => {
-          const cleanup = page.on("message", ((message: string) => {
-              if (message === `response${i}`) {
-                results.push(message)
-                cleanup()
-                resolve()
-              }
-            }))
+          const cleanup = page.on("message", (message: string) => {
+            if (message === `response${i}`) {
+              results.push(message)
+              cleanup()
+              resolve()
+            }
+          })
           page.sendMessage(`app.echoToOE("response${i}");`)
-        })
+        }),
       )
     }
 
@@ -131,10 +131,10 @@ browserTest(
       "response1",
       "response2",
       "response3",
-      "response4"
+      "response4",
     ])
     await page.close()
-  }
+  },
 )
 
 browserTest(
@@ -154,12 +154,12 @@ browserTest(
 
     // Wait for all messages
     await vi.waitUntil(() => receivedMessages.length >= 3, {
-      timeout: 5000
+      timeout: 5000,
     })
 
     expect(receivedMessages).toEqual(["First", "Second", "Third"])
     await page.close()
-  }
+  },
 )
 
 browserTest(
@@ -176,12 +176,12 @@ browserTest(
     await page.sendMessage('app.echoToOE("");')
 
     await vi.waitUntil(() => receivedMessage !== undefined, {
-      timeout: 5000
+      timeout: 5000,
     })
 
     expect(receivedMessage).toBe("")
     await page.close()
-  }
+  },
 )
 
 browserTest(
@@ -200,12 +200,12 @@ browserTest(
     await page.sendMessage(`app.echoToOE(${jsonEncodedMessage});`)
 
     await vi.waitUntil(() => receivedMessage !== undefined, {
-      timeout: 5000
+      timeout: 5000,
     })
 
     expect(receivedMessage).toBe(specialMessage)
     await page.close()
-  }
+  },
 )
 
 browserTest(
@@ -221,5 +221,5 @@ browserTest(
 
     // Verify page is closed
     expect(page.page.isClosed()).toBe(true)
-  }
+  },
 )

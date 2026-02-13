@@ -1,7 +1,7 @@
+import { fileURLToPath } from "node:url"
 import { PDocument } from "@lifecodeof/autopea/contracts/PDocument"
-import { appTest } from "./testFixtures"
-import { fileURLToPath } from "url"
 import { expect } from "vitest"
+import { appTest } from "./testFixtures"
 
 appTest(
   "Should open and close documents",
@@ -19,5 +19,5 @@ appTest(
     const documentCountAfterClose = await app.documents.length.$get()
     expect(documentCountAfterClose).toBe(0)
   },
-  20_000
+  20_000,
 )
