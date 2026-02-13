@@ -1,23 +1,25 @@
-import { buffer } from "node:stream/consumers"
 import type { PhotopeaCapabilities } from "@lifecodeof/autopea"
-import { PhotopeaMutexes } from "@lifecodeof/autopea"
+import { Helpers, PhotopeaMutexes } from "@lifecodeof/autopea"
 import { App } from "@lifecodeof/autopea/contracts/App"
 import type { ArtLayer } from "@lifecodeof/autopea/contracts/ArtLayer"
-import { Contract } from "@lifecodeof/autopea/contracts/Contract"
 import type { PDocument } from "@lifecodeof/autopea/contracts/PDocument"
 import { unzipSync } from "fflate/node"
-import type { ConsoleMessage, Dialog, Page } from "playwright"
+import { buffer } from "node:stream/consumers"
+import type { ConsoleMessage, Dialog } from "playwright"
 import { errors as pwErrors } from "playwright"
 import { abortOnTimeout, invariant, waitForEvent } from "../helpers"
+import type { PhotopeaPage } from "../PhotopeaPage"
 import { makeBase64ToArrayBufferFnHandle } from "../playwrightLib"
 import { clickToolbarButton } from "../toolbar"
 
 export const createPlaywrightCapabilities = (
-  page: Page,
+  pPage: PhotopeaPage,
 ): PhotopeaCapabilities => {
+  const page = pPage.page
+
   return {
     getMutexes() {
-      return PhotopeaMutexes.of(page)
+      return PhotopeaMutexes.of(pPage.page)
     },
     openSmartObject(this: ArtLayer): Promise<PDocument> {
       return this.mutexes.documentMutex.runExclusive(async () => {
@@ -48,20 +50,16 @@ export const createPlaywrightCapabilities = (
       })
     },
     openFile(this: App, path: string, timeout = 5 * 60 * 1000) {
-      const channel = Contract.getChannel(this)
-      const transport = channel.page
-      const pwPage = page
-
       const abort = new AbortController()
 
       return this.mutexes.interactionMutex.runExclusive(async () => {
         const [fileChooser] = await Promise.all([
-          pwPage.waitForEvent("filechooser", { timeout }),
-          clickToolbarButton(pwPage, [1, 2]), // File > Open
+          page.waitForEvent("filechooser", { timeout }),
+          clickToolbarButton(page, [1, 2]), // File > Open
         ])
 
         return await this.mutexes.documentMutex.runExclusive(async () => {
-          const blankMessagePromise = waitForEvent(transport.on, {
+          const blankMessagePromise = waitForEvent(pPage.on, {
             event: "blankMessage",
             signal: abort.signal,
           })

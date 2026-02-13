@@ -168,62 +168,6 @@ describe("Concurrency Tests", () => {
     })
   })
 
-  describe("Channel Dialog Mutex", () => {
-    pageTest(
-      "should use dialog mutex for concurrent operations",
-      async ({ page }) => {
-        const channel = new PhotopeaChannel(page)
-
-        const results: string[] = []
-
-        const operation1 = async () => {
-          await channel.dialogMutex.acquire()
-          results.push("op1-start")
-          await new Promise((resolve) => setTimeout(resolve, 20))
-          results.push("op1-end")
-          channel.dialogMutex.release()
-        }
-
-        const operation2 = async () => {
-          await channel.dialogMutex.acquire()
-          results.push("op2-start")
-          await new Promise((resolve) => setTimeout(resolve, 20))
-          results.push("op2-end")
-          channel.dialogMutex.release()
-        }
-
-        await Promise.all([operation1(), operation2()])
-
-        expect(results).toEqual([
-          "op1-start",
-          "op1-end",
-          "op2-start",
-          "op2-end"
-        ])
-      }
-    )
-
-    pageTest("should handle dialog mutex with errors", async ({ page }) => {
-      const channel = new PhotopeaChannel(page)
-
-      const operation = async () => {
-        await channel.dialogMutex.acquire()
-        try {
-          throw new Error("Test error")
-        } finally {
-          channel.dialogMutex.release()
-        }
-      }
-
-      await expect(operation()).rejects.toThrow("Test error")
-
-      // Mutex should still be releasable after error
-      const release = await channel.dialogMutex.acquire()
-      expect(typeof release).toBe("function")
-      release()
-    })
-  })
-
   describe("Stress Testing", () => {
     pageTest("should handle high concurrency load", async ({ page }) => {
       const channel = new PhotopeaChannel(page)

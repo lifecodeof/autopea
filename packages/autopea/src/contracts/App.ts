@@ -93,7 +93,7 @@ export class App extends Contract {
       const signal = timeoutAbortSignal(5 * 60 * 1000) // 5 minutes
 
       await Promise.all([
-        waitForEvent(this.channel.page.on, {
+        waitForEvent(this.channel.transport.on, {
           signal,
           event: "blankMessage",
         }),

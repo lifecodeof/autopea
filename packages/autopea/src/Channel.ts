@@ -1,4 +1,3 @@
-import { Mutex } from "async-mutex"
 import {
   PhotopeaChannelEvalError,
   PhotopeaChannelLogicError,
@@ -33,10 +32,8 @@ export class PhotopeaChannel {
   /** Default timeout (ms) for script evaluation. */
   public timeout: number = 30_000
 
-  public readonly dialogMutex = new Mutex()
-
-  /** @param page The PhotopeaPage instance to communicate with. */
-  constructor(public readonly page: PhotopeaTransport) {}
+  /** @param transport The PhotopeaTransport instance to communicate with. */
+  constructor(public readonly transport: PhotopeaTransport) {}
 
   private makeHandleVarsStatement(handleVars: Record<string, Handleable>) {
     const getExpression = (handleable: Handleable) => {
@@ -84,7 +81,7 @@ export class PhotopeaChannel {
     script: string,
   ): Promise<T> {
     try {
-      const result = await waitForEvent(this.page.on, {
+      const result = await waitForEvent(this.transport.on, {
         event: "response",
         selector: (_rid, reqType, data) => ({ reqType, data }),
         signal,
@@ -133,7 +130,7 @@ export class PhotopeaChannel {
     )
 
     // Wait for console errors
-    waitForEvent(this.page.on, {
+    waitForEvent(this.transport.on, {
       event: "pageerror",
       selector: (v) => v as Error,
       signal: abort.signal,
@@ -154,7 +151,7 @@ export class PhotopeaChannel {
     )
 
     try {
-      await this.page.sendMessage(script)
+      await this.transport.sendMessage(script)
       const result = await resultPromise
 
       if (result.type === "error") {

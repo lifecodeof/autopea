@@ -15,11 +15,11 @@ export class PhotopeaMutexes {
   /** For opening docuements (required for timing issues) */
   public readonly documentMutex = new Mutex()
 
-  static of(page: object) {
-    let instance = PhotopeaMutexes.instanceMap.get(page)
+  static of(referenceObject: object) {
+    let instance = PhotopeaMutexes.instanceMap.get(referenceObject)
     if (!instance) {
       instance = new PhotopeaMutexes()
-      PhotopeaMutexes.instanceMap.set(page, instance)
+      PhotopeaMutexes.instanceMap.set(referenceObject, instance)
     }
     return instance
   }

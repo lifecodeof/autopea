@@ -30,6 +30,8 @@ type PhotopeaWindow = Window & {
  * Extends EventEmitter to emit Photopea-specific events.
  */
 export class PhotopeaPage implements PhotopeaTransport {
+  public readonly capabilities: PhotopeaCapabilities
+
   private messageBuffer: string = ""
 
   private readonly events = createNanoEvents<PPEventMap>()
@@ -38,10 +40,9 @@ export class PhotopeaPage implements PhotopeaTransport {
    * @param page The Playwright Page instance.
    * @param iframeHandle The JSHandle for the Photopea iframe.
    */
-  private constructor(
-    public readonly page: Page,
-    public readonly capabilities: PhotopeaCapabilities,
-  ) {}
+  private constructor(public readonly page: Page) {
+    this.capabilities = createPlaywrightCapabilities(this)
+  }
 
   on = <K extends keyof PPEventMap>(event: K, handler: PPEventMap[K]) => {
     return this.events.on(event, handler)
@@ -75,7 +76,7 @@ export class PhotopeaPage implements PhotopeaTransport {
    */
   static async open(page: Page, options: { timeout?: number } = {}) {
     await PhotopeaPage.openPhotopeaPage(page, options)
-    const instance = new PhotopeaPage(page, createPlaywrightCapabilities(page))
+    const instance = new PhotopeaPage(page)
     await instance.listenEvents()
     return instance
   }

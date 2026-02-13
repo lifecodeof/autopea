@@ -4,7 +4,9 @@
   "scripts": {
     "build": "pnpm run --filter !tests -r build",
     "publish": "pnpm run build && pnpm publish --filter !tests -r --no-git-checks",
-    "typecheck": "pnpm run build && pnpm --parallel -r exec tsc --noEmit"
+    "typecheck": "pnpm run build && pnpm --parallel -r exec tsc --noEmit",
+    "fix": "pnpm exec --filter !tests -r biome check --fix",
+    "lint": "pnpm exec --filter !tests -r biome lint"
   },
   "version": "1.0.0",
   "description": "",
