@@ -195,8 +195,8 @@ export class PhotopeaPage implements PhotopeaTransport {
     await this.page.exposeFunction(
       "_pp_sendResponse",
       (id: string, reqType: string, data: unknown) => {
-        if (typeof id !== "string") return
-        if (typeof reqType !== "string") return
+        if (typeof id !== "string") throw new Error("Invalid requestId type")
+        if (typeof reqType !== "string") throw new Error("Invalid reqType type")
         this.emit("response", id, reqType, data)
       },
     )
