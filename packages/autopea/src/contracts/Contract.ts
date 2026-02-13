@@ -452,6 +452,22 @@ export class Contract {
   $cast<T extends Contract>(Ctor: ContractCtor<T>): T {
     return new Ctor(this.channel, this.expression)
   }
+
+  /**
+   * Casts this Contract to a SerializableContract with the specified schema.
+   * This allows you to treat the Contract as a serializable value that can be validated and retrieved.
+   *
+   * @template T The type of value to serialize to
+   * @param schema The Zod schema for validating the value when retrieved
+   * @returns A SerializableContract for this Contract with the specified schema
+   *
+   * @example
+   * // Cast a Contract to a SerializableContract for a specific property
+   * const widthValue = await layer.width.$castSerializable(z.number()).$get()
+   */
+  $castSerializable<T>(schema: ZodType<T>): SerializableContract<T> {
+    return new SerializableContract<T>(this.channel, this.expression, schema)
+  }
 }
 
 /**
