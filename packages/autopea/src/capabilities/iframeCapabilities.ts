@@ -2,10 +2,13 @@ import type { App } from "@/contracts/App"
 import type { ArtLayer } from "@/contracts/ArtLayer"
 import type { Contract } from "@/contracts/Contract"
 import type { PDocument } from "@/contracts/PDocument"
-import type { PhotopeaMutexes } from "@/PhotopeaMutexes"
+import { PhotopeaMutexes } from "@/PhotopeaMutexes"
+import type { IframePhotopeaTransport } from "@/transports/IframePhotopeaTransport"
 import type { PhotopeaCapabilities } from "./PhotopeaCapabilities"
 
-export const createIframeCapabilities = (): PhotopeaCapabilities => {
+export const createIframeCapabilities = (
+  transport: IframePhotopeaTransport,
+): PhotopeaCapabilities => {
   const capabilityError = new Error(
     "autopea does not capable of this action inside web environment. " +
       "See `@lifecodeof/autopea-pw` package for playwright-based capabilities.",
@@ -13,7 +16,7 @@ export const createIframeCapabilities = (): PhotopeaCapabilities => {
 
   return {
     getMutexes(this: Contract): PhotopeaMutexes {
-      throw capabilityError
+      return PhotopeaMutexes.of(transport.contentWindow)
     },
     openSmartObject(this: ArtLayer): Promise<PDocument> {
       throw capabilityError

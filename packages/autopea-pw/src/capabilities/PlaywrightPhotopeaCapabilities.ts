@@ -23,9 +23,7 @@ export const createPlaywrightCapabilities = (
     },
     openSmartObject(this: ArtLayer): Promise<PDocument> {
       return this.mutexes.documentMutex.runExclusive(async () => {
-        const pwPage = page
-
-        const panelhead = await pwPage
+        const panelhead = await page
           .locator(".mainblock > .block > .panelhead")
           .elementHandle()
         invariant(panelhead, "Cannot find panelhead element")
@@ -41,7 +39,7 @@ export const createPlaywrightCapabilities = (
         })`executeAction(stringIDToTypeID("placedLayerEditContents"), null, DialogModes.NO)`
 
         // Wait for new document tab to open
-        await pwPage.waitForFunction(
+        await page.waitForFunction(
           ([panelhead, count]) => panelhead.childElementCount === count + 1,
           [panelhead, documentCountBefore] as const,
         )
@@ -82,18 +80,17 @@ export const createPlaywrightCapabilities = (
       })
     },
     async uploadFonts(this: App, fonts: Record<string, Buffer>) {
-      const pwPage = page
       const fontsBase64 = Object.entries(fonts).map(([name, buffer]) => ({
         name,
         base64: buffer.toString("base64"),
       }))
 
-      const toArrayBuffer = await makeBase64ToArrayBufferFnHandle(pwPage)
+      const toArrayBuffer = await makeBase64ToArrayBufferFnHandle(page)
 
       await this.mutexes.dialogMutex.runExclusive(async () => {
         let dialogListener: ((dialog: Dialog) => void) | null = null
         try {
-          const dataTransfer = await pwPage.evaluateHandle(
+          const dataTransfer = await page.evaluateHandle(
             ([fontsBase64, toArrayBuffer]) => {
               const dataTransfer = new DataTransfer()
               for (const { name, base64 } of fontsBase64) {
@@ -106,10 +103,10 @@ export const createPlaywrightCapabilities = (
           )
 
           dialogListener = (dialog: Dialog) => dialog.dismiss()
-          pwPage.on("dialog", dialogListener)
+          page.on("dialog", dialogListener)
 
           // Photopea no longer logs array with Uint8Array
-          const consolePromise = pwPage.waitForEvent(
+          const consolePromise = page.waitForEvent(
             "console",
             async (msg: ConsoleMessage) => {
               const args = msg.args()
@@ -130,7 +127,7 @@ export const createPlaywrightCapabilities = (
             },
           )
 
-          await pwPage.dispatchEvent(
+          await page.dispatchEvent(
             ".mainblock > .block > .body",
             "drop",
             { dataTransfer },
@@ -143,7 +140,7 @@ export const createPlaywrightCapabilities = (
           })
         } finally {
           await toArrayBuffer.dispose()
-          if (dialogListener) pwPage.off("dialog", dialogListener)
+          if (dialogListener) page.off("dialog", dialogListener)
         }
       })
     },
@@ -151,8 +148,7 @@ export const createPlaywrightCapabilities = (
       return page.pause()
     },
     async saveSmartObject(this: PDocument) {
-      const pwPage = page
-      const waiter = pwPage.waitForEvent(
+      const waiter = page.waitForEvent(
         "console",
         async (msg: ConsoleMessage) => {
           const args = msg.args()
@@ -168,10 +164,8 @@ export const createPlaywrightCapabilities = (
       await waiter
     },
     async downloadDocument(this: PDocument, saveFormatCode: string) {
-      const pwPage = page
-
       return this.mutexes.downloadMutex.runExclusive(async () => {
-        const downloadPromise = pwPage.waitForEvent("download")
+        const downloadPromise = page.waitForEvent("download")
         await this.channel.evaluate<void>(
           `doc.saveAs(new File(""), ${saveFormatCode})`,
           { doc: this },

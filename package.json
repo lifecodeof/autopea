@@ -3,10 +3,10 @@
   "private": true,
   "scripts": {
     "build": "pnpm run --filter !tests -r build",
-    "publish": "pnpm run build && pnpm publish --filter !tests -r --no-git-checks",
+    "publish": "pnpm run typecheck && pnpm publish --filter !tests -r --no-git-checks",
     "typecheck": "pnpm run build && pnpm --parallel -r exec tsc --noEmit",
-    "fix": "pnpm -r exec biome check --fix",
-    "lint": "pnpm -r exec biome lint"
+    "fix": "biome check --fix",
+    "lint": "biome lint"
   },
   "version": "1.0.0",
   "description": "",

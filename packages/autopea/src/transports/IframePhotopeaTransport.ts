@@ -1,5 +1,6 @@
 import { createNanoEvents } from "nanoevents"
 import { createIframeCapabilities } from "@/capabilities/iframeCapabilities"
+import type { PhotopeaCapabilities } from "@/capabilities/PhotopeaCapabilities"
 import type {
   PhotopeaTransport,
   PhotopeaTransportEventMap,
@@ -10,11 +11,12 @@ type EventMap = PhotopeaTransportEventMap & {
 }
 
 export class IframePhotopeaTransport implements PhotopeaTransport {
-  public readonly capabilities = createIframeCapabilities()
+  public readonly capabilities: PhotopeaCapabilities
   private readonly events = createNanoEvents<EventMap>()
 
   constructor(public contentWindow: Window) {
     this.setupListeners()
+    this.capabilities = createIframeCapabilities(this)
   }
 
   on<K extends keyof EventMap>(event: K, handler: EventMap[K]): () => void {
