@@ -19,7 +19,7 @@ export class IframePhotopeaTransport implements PhotopeaTransport {
     this.capabilities = createIframeCapabilities(this)
   }
 
-  on<K extends keyof EventMap>(event: K, handler: EventMap[K]): () => void {
+  on = <K extends keyof EventMap>(event: K, handler: EventMap[K]) => {
     return this.events.on(event, handler)
   }
 

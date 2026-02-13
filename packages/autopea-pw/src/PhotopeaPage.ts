@@ -8,7 +8,7 @@ import type { Browser, BrowserContext, Page } from "playwright"
 import { createPlaywrightCapabilities } from "./capabilities/PlaywrightPhotopeaCapabilities"
 import { makeArrayBufferToBase64FnHandle } from "./playwrightLib"
 
-type PPEventMap = PhotopeaTransportEventMap & {
+type EventMap = PhotopeaTransportEventMap & {
   message: (message: string) => void
   bufferMessage: (buffer: Buffer) => void
 }
@@ -34,7 +34,7 @@ export class PhotopeaPage implements PhotopeaTransport {
 
   private messageBuffer: string = ""
 
-  private readonly events = createNanoEvents<PPEventMap>()
+  private readonly events = createNanoEvents<EventMap>()
 
   /**
    * @param page The Playwright Page instance.
@@ -44,13 +44,13 @@ export class PhotopeaPage implements PhotopeaTransport {
     this.capabilities = createPlaywrightCapabilities(this)
   }
 
-  on = <K extends keyof PPEventMap>(event: K, handler: PPEventMap[K]) => {
+  on = <K extends keyof EventMap>(event: K, handler: EventMap[K]) => {
     return this.events.on(event, handler)
   }
 
-  private emit<K extends keyof PPEventMap>(
+  private emit<K extends keyof EventMap>(
     event: K,
-    ...args: Parameters<PPEventMap[K]>
+    ...args: Parameters<EventMap[K]>
   ) {
     this.events.emit(event, ...args)
   }
