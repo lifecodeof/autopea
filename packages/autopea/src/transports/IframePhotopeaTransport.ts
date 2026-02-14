@@ -16,10 +16,9 @@ export class IframePhotopeaTransport implements PhotopeaTransport {
 
   private _contentWindow: Window | null = null
 
-  constructor(contentWindow: Window | null = null) {
+  constructor() {
     this.setupListeners()
     this.capabilities = createIframeCapabilities(this)
-    this.contentWindow = contentWindow
   }
 
   on = <K extends keyof EventMap>(event: K, handler: EventMap[K]) => {
@@ -40,12 +39,45 @@ export class IframePhotopeaTransport implements PhotopeaTransport {
     return this._contentWindow
   }
 
-  set contentWindow(newWindow: Window | null) {
+  async setContentWindow(newWindow: Window | null) {
     this._contentWindow = newWindow
-    if (newWindow) this.setupForeignRealm()
+    if (!newWindow) return
+    await this.waitForPhotopea()
+    await this.setupForeignRealm()
   }
 
-  private setupForeignRealm() {
+  private async waitForPhotopea() {
+    for (let tries = 0; tries < 50; tries++) {
+      const abort = new AbortController()
+      const pingPongPromise = new Promise<boolean>((resolve) => {
+        const cleanup = this.on("message", (message) => {
+          if (message !== "ping-pong") return
+          cleanup()
+          resolve(true)
+        })
+
+        abort.signal.addEventListener("abort", () => {
+          cleanup()
+          resolve(false)
+        })
+      })
+
+      await this.sendMessage('app.echoToOE("ping-pong")')
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      abort.abort()
+
+      const success = await pingPongPromise
+      if (success) return
+    }
+
+    throw new Error(
+      "Failed to set up communication with " +
+        "Photopea iframe after multiple attempts.",
+    )
+  }
+
+  private async setupForeignRealm() {
     // Expose a function to the Photopea iframe's realm
     // for sending responses back to this transport.
     const setupScript = `
@@ -64,10 +96,10 @@ export class IframePhotopeaTransport implements PhotopeaTransport {
 
     const wrappedScript = `
 console.log("[IframePhotopeaTransport] Setting up foreign realm...");
-window._init_yo = Object.getPrototypeOf(window).constructor.constructor('${setupScript}');
-window._init_yo();
+window._init_ift = Object.getPrototypeOf(window).constructor.constructor('${setupScript}');
+window._init_ift();
 console.log("[IframePhotopeaTransport] Foreign realm setup complete.");`
-    this.sendMessage(wrappedScript)
+    await this.sendMessage(wrappedScript)
   }
 
   private setupListeners() {
