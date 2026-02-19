@@ -16,7 +16,10 @@ export const createIframeCapabilities = (
 
   return {
     getMutexes(this: Contract): PhotopeaMutexes {
-      return PhotopeaMutexes.of(transport.contentWindow)
+      // contentWindow should allways be defined when we can use the app but
+      // passing transport itself as reference won't hurt since it is also
+      // same reference for null cases which is technically true
+      return PhotopeaMutexes.of(transport.contentWindow ?? transport)
     },
     openSmartObject(this: ArtLayer): Promise<PDocument> {
       throw capabilityError

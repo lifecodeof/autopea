@@ -6,9 +6,6 @@ import { SolidColor } from "./SolidColor"
 import { UnitValue } from "./UnitValue"
 
 export class ArtLayer extends Layer {
-  get id() {
-    return this.$value(z.number())`.id`
-  }
   get fillOpacity() {
     return this.$value(z.number())`.fillOpacity`
   }
