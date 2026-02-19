@@ -46,39 +46,31 @@ export class UnitRect extends Contract {
   }
 
   get width() {
-    const right = this.right
-    const left = this.left
     return this.$value(z.number(), {
       absolute: true,
       wrapParentheses: true,
-    })`${right} - ${left}`
+    })`${this.right} - ${this.left}`
   }
 
   get height() {
-    const top = this.top
-    const bottom = this.bottom
     return this.$value(z.number(), {
       absolute: true,
       wrapParentheses: true,
-    })`${bottom} - ${top}`
+    })`${this.bottom} - ${this.top}`
   }
 
   get centerX() {
-    const left = this.left
-    const right = this.right
     return this.$value(z.number(), {
       absolute: true,
       wrapParentheses: true,
-    })`${left} + ((${right} - ${left}) / 2)`
+    })`${this.left} + ((${this.right} - ${this.left}) / 2)`
   }
 
   get centerY() {
-    const top = this.top
-    const bottom = this.bottom
     return this.$value(z.number(), {
       absolute: true,
       wrapParentheses: true,
-    })`${top} + ((${bottom} - ${top}) / 2)`
+    })`${this.top} + ((${this.bottom} - ${this.top}) / 2)`
   }
 }
 

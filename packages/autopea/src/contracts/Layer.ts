@@ -5,6 +5,10 @@ import changeLayerSolidFill from "./extendscripts/changeLayerSolidFill.txt"
 import { UnitRect, UnitRectLocal } from "./UnitRect"
 
 export class Layer extends Contract {
+  get id() {
+    return this.$value(z.number())`.id`
+  }
+
   get name() {
     return this.$value(z.string())`.name`
   }

@@ -420,7 +420,8 @@ export class Contract {
   /**
    * Compares this contract's value with another using loose equality (==).
    * Returns a SerializableContract<boolean> that can be awaited.
-   * Note: Loose comparison is intentionally used because Photopea returns false
+   * 
+   * Loose comparison is intentionally used because Photopea returns false
    * when comparing objects with strict equality (===).
    *
    * @param other The value to compare against
@@ -467,6 +468,13 @@ export class Contract {
    */
   $castSerializable<T>(schema: ZodType<T>): SerializableContract<T> {
     return new SerializableContract<T>(this.channel, this.expression, schema)
+  }
+
+  async [Symbol.asyncDispose]() {
+    const thisHandle = this.channel.getHandleForExpression(this.expression)
+    if (thisHandle) {
+      return this.channel.disposeHandle(thisHandle)
+    }
   }
 }
 

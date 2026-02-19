@@ -287,6 +287,12 @@ export class PhotopeaChannel {
     return `globalThis["${handlePrefix + handle}"]`
   }
 
+  private handleRegex = /^globalThis\["__ppHandle__(.+)"\]$/
+  public getHandleForExpression(expression: string): string | null {
+    const match = expression.match(this.handleRegex)
+    return match ? match[1] : null
+  }
+
   async iterHandle(handle: string): Promise<string[]> {
     const expression = this.getExpressionForHandle(handle)
     const result = await this.evaluate<string[]>(`\
