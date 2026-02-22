@@ -476,6 +476,12 @@ export class Contract {
       return this.channel.disposeHandle(thisHandle)
     }
   }
+
+  async $getHandle() {
+    const handle = this.channel.getHandleForExpression(this.expression)
+    if (handle) return handle
+    return await this.channel.evaluateHandle(`return ${this.expression}`)
+  }
 }
 
 /**
@@ -618,9 +624,7 @@ export abstract class ContractCollection<T extends Contract> extends Contract {
    * const allLayers = await layers.toRefArray()
    */
   async toRefArray(): Promise<T[]> {
-    const thisHandle = await this.channel.evaluateHandle(
-      `return ${this.expression}`,
-    )
+    const thisHandle = await this.$getHandle()
     const handles = await this.channel.iterHandle(thisHandle)
     return handles.map((h) => {
       const expression = this.channel.getExpressionForHandle(h)
