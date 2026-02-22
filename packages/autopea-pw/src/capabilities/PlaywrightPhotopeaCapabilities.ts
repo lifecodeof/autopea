@@ -3,7 +3,7 @@ import type { PhotopeaCapabilities } from "@lifecodeof/autopea"
 import { PhotopeaMutexes } from "@lifecodeof/autopea"
 import { App } from "@lifecodeof/autopea/contracts/App"
 import type { ArtLayer } from "@lifecodeof/autopea/contracts/ArtLayer"
-import type { PDocument } from "@lifecodeof/autopea/contracts/PDocument"
+import { type PDocument, SaveFormat } from "@lifecodeof/autopea/contracts/PDocument"
 import { unzipSync } from "fflate/node"
 import type { ConsoleMessage, Dialog } from "playwright"
 import { errors as pwErrors } from "playwright"
@@ -11,6 +11,12 @@ import { abortOnTimeout, invariant, waitForEvent } from "../helpers"
 import type { PhotopeaPage } from "../PhotopeaPage"
 import { makeBase64ToArrayBufferFnHandle } from "../playwrightLib"
 import { clickToolbarButton } from "../toolbar"
+
+const saveFormatMap = {
+  [SaveFormat.PNG]: "new PNGSaveOptions()",
+  [SaveFormat.JPG]: "new JPEGSaveOptions()",
+  [SaveFormat.PSD]: "new PhotoshopSaveOptions()",
+} as const
 
 export const createPlaywrightCapabilities = (
   pPage: PhotopeaPage,
@@ -163,11 +169,11 @@ export const createPlaywrightCapabilities = (
       await this.save()
       await waiter
     },
-    async downloadDocument(this: PDocument, saveFormatCode: string) {
+    async downloadDocument(this: PDocument, format: SaveFormat) {
       return this.mutexes.downloadMutex.runExclusive(async () => {
         const downloadPromise = page.waitForEvent("download")
         await this.channel.evaluate<void>(
-          `doc.saveAs(new File(""), ${saveFormatCode})`,
+          `doc.saveAs(new File(""), ${saveFormatMap[format]})`,
           { doc: this },
           { timeout: 10_000 },
         )

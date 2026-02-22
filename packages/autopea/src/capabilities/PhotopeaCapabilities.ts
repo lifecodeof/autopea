@@ -1,7 +1,7 @@
 import type { App } from "@/contracts/App"
 import type { ArtLayer } from "@/contracts/ArtLayer"
 import type { Contract } from "@/contracts/Contract"
-import type { PDocument } from "@/contracts/PDocument"
+import type { PDocument, SaveFormat } from "@/contracts/PDocument"
 import type { PhotopeaMutexes } from "@/PhotopeaMutexes"
 
 export interface PhotopeaCapabilities {
@@ -11,6 +11,6 @@ export interface PhotopeaCapabilities {
   uploadFonts(this: App, fonts: Record<string, Buffer>): Promise<void>
   pause(): Promise<void>
   saveSmartObject(this: PDocument): Promise<void>
-  downloadDocument(this: PDocument, saveFormatCode: string): Promise<Uint8Array>
+  downloadDocument(this: PDocument, format: SaveFormat): Promise<Uint8Array>
   duplicateDocument(this: PDocument): Promise<PDocument>
 }

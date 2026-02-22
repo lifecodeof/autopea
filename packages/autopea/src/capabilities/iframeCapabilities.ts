@@ -1,10 +1,11 @@
 import type { App } from "@/contracts/App"
 import type { ArtLayer } from "@/contracts/ArtLayer"
 import type { Contract } from "@/contracts/Contract"
-import type { PDocument } from "@/contracts/PDocument"
+import type { PDocument, SaveFormat } from "@/contracts/PDocument"
 import { PhotopeaMutexes } from "@/PhotopeaMutexes"
 import type { IframePhotopeaTransport } from "@/transports/IframePhotopeaTransport"
 import type { PhotopeaCapabilities } from "./PhotopeaCapabilities"
+import { waitForEvent } from "@/helpers"
 
 export const createIframeCapabilities = (
   transport: IframePhotopeaTransport,
@@ -36,11 +37,19 @@ export const createIframeCapabilities = (
     saveSmartObject(this: PDocument): Promise<void> {
       throw capabilityError
     },
-    downloadDocument(
+    async downloadDocument(
       this: PDocument,
-      _saveFormatCode: string,
+      format: SaveFormat,
     ): Promise<Uint8Array> {
-      throw capabilityError
+      const bufferPromise = waitForEvent(transport.on, {
+        event: "buffer",
+        signal: AbortSignal.timeout(60_000), // 1 minute
+        selector: (buffer: Uint8Array) => buffer,
+      })
+
+      await this.saveToOE(format)
+
+      return await bufferPromise
     },
     duplicateDocument(this: PDocument): Promise<PDocument> {
       throw capabilityError

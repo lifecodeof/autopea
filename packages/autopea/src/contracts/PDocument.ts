@@ -8,16 +8,10 @@ import { LayerSets } from "./LayerSet"
 import { type UnitRect, UnitRectLocal } from "./UnitRect"
 import type { UnitValue } from "./UnitValue"
 
-export enum SaveFormat {
+export  enum SaveFormat {
   PNG = "png",
   JPG = "jpg",
   PSD = "psd",
-}
-
-const saveFormatMap = {
-  [SaveFormat.PNG]: "new PNGSaveOptions()",
-  [SaveFormat.JPG]: "new JPEGSaveOptions()",
-  [SaveFormat.PSD]: "new PhotoshopSaveOptions()",
 }
 
 export class PDocument extends Contract {
@@ -113,6 +107,11 @@ export class PDocument extends Contract {
     return this.$eval()`.save()`
   }
 
+  /** @see https://www.photopea.com/learn/scripts for parameter format */
+  saveToOE(param: string) {
+    return this.$eval()`.saveToOE(${param})`
+  }
+
   // Extra Utils
   /**
    * Saves document and waits for smart object updated message
@@ -128,12 +127,7 @@ export class PDocument extends Contract {
    * @returns Promise that resolves to a Uint8Array containing the saved file data.
    */
   async saveToBuffer(format: SaveFormat): Promise<Uint8Array> {
-    const saveFormatCode = saveFormatMap[format as SaveFormat]
-    if (!saveFormatCode) {
-      throw new Error(`Unsupported save format: ${format}`)
-    }
-
-    return await this.capabilities.downloadDocument.call(this, saveFormatCode)
+    return await this.capabilities.downloadDocument.call(this, format)
   }
 
   async makeBounds() {
