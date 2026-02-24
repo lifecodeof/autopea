@@ -35,7 +35,7 @@ export interface PhotopeaTransport {
    *
    * Does not wait for acknowledgment from Photopea.
    */
-  sendMessage(message: string): Promise<void>
+  sendMessage(message: string | ArrayBuffer): Promise<void>
 
   /**
    * Provides access to the capabilities of the Photopea transport.

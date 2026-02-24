@@ -1,7 +1,7 @@
 import z from "zod"
 import { PhotopeaChannel } from "@/Channel"
 import type { PhotopeaTransport } from "@/transports/PhotopeaTransport"
-import { timeoutAbortSignal, waitForEvent } from "../helpers"
+import { waitForEvent } from "../helpers"
 import { Contract } from "./Contract"
 import { PDocument, PDocuments, type SaveFormat } from "./PDocument"
 import { PFile } from "./PFile"
@@ -90,14 +90,32 @@ export class App extends Contract {
    */
   async openFromUrl(url: string) {
     return await this.mutexes.documentMutex.runExclusive(async () => {
-      const signal = timeoutAbortSignal(5 * 60 * 1000) // 5 minutes
-
       await Promise.all([
         waitForEvent(this.channel.transport.on, {
-          signal,
+          signal: AbortSignal.timeout(5 * 60 * 1000), // 5 minutes
           event: "blankMessage",
         }),
         this.channel.evaluate<void>(`app.open(${JSON.stringify(url)});`),
+      ])
+
+      return this.activeDocument.$ref()
+    })
+  }
+
+  /**
+   * Opens an image in Photopea from a given ArrayBuffer.
+   * Waits for Photopea to be ready and the file to be loaded.
+   * @param buffer Image data. Will be transferred.
+   * @returns Promise that resolves when the image is loaded.
+   */
+  async openFromBuffer(buffer: ArrayBuffer) {
+    return await this.mutexes.documentMutex.runExclusive(async () => {
+      await Promise.all([
+        waitForEvent(this.channel.transport.on, {
+          signal: AbortSignal.timeout(5 * 60 * 1000), // 5 minutes
+          event: "blankMessage",
+        }),
+        this.channel.transport.sendMessage(buffer),
       ])
 
       return this.activeDocument.$ref()

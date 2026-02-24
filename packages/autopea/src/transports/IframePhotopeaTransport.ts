@@ -56,9 +56,11 @@ export class IframePhotopeaTransport implements PhotopeaTransport {
     return newSetupPromise.then(() => contentWindow)
   }
 
-  async sendMessage(message: string): Promise<void> {
+  async sendMessage(message: string | ArrayBuffer): Promise<void> {
     const contentWindow = await this.waitForSetup(this.contentWindow)
-    contentWindow.postMessage(message, "*")
+
+    const transferList = message instanceof ArrayBuffer ? [message] : undefined
+    contentWindow.postMessage(message, "*", transferList)
   }
 
   get contentWindow() {

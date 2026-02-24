@@ -221,9 +221,10 @@ export class PhotopeaPage implements PhotopeaTransport {
     return this.page.close()
   }
 
-  async sendMessage(message: string) {
+  async sendMessage(message: string | ArrayBuffer) {
     return await this.page.evaluate((msg) => {
-      window.postMessage(msg, "https://www.photopea.com")
+      const transferList = msg instanceof ArrayBuffer ? [msg] : undefined
+      window.postMessage(msg, "https://www.photopea.com", transferList)
     }, message)
   }
 
