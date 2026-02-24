@@ -1,6 +1,6 @@
 {
   "name": "@lifecodeof/autopea",
-  "version": "3.2.2",
+  "version": "3.3.0",
   "description": "Library for automating Photopea",
   "scripts": {
     "start": "tsx main.ts",
@@ -22,10 +22,8 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@types/node": "catalog:",
-    "tsdown": "catalog:",
-    "typescript": "catalog:"
+    "tsdown": "^0.20.3",
+    "typescript": "^5.9.3"
   },
   "exports": {
     ".": {

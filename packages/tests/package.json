@@ -15,11 +15,10 @@
   "dependencies": {
     "@lifecodeof/autopea": "workspace:*",
     "@lifecodeof/autopea-pw": "workspace:*",
-    "playwright": "catalog:"
+    "playwright": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "typescript": "catalog:",
-    "vitest": "^4.0.18",
-    "zod": "catalog:"
+    "vitest": "^4.0.18"
   }
 }

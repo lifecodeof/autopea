@@ -6,12 +6,6 @@ settings:
 
 catalogs:
   default:
-    '@biomejs/biome':
-      specifier: 2.3.14
-      version: 2.3.14
-    '@types/node':
-      specifier: ^25.2.3
-      version: 25.2.3
     async-mutex:
       specifier: ^0.5.0
       version: 0.5.0
@@ -21,12 +15,6 @@ catalogs:
     playwright:
       specifier: ^1.58.1
       version: 1.58.2
-    tsdown:
-      specifier: ^0.20.3
-      version: 0.20.3
-    typescript:
-      specifier: ^5.9.3
-      version: 5.9.3
     zod:
       specifier: ^4.3.6
       version: 4.3.6
@@ -36,7 +24,7 @@ importers:
   .:
     devDependencies:
       '@biomejs/biome':
-        specifier: 'catalog:'
+        specifier: 2.3.14
         version: 2.3.14
 
   packages/autopea:
@@ -51,17 +39,11 @@ importers:
         specifier: 'catalog:'
         version: 4.3.6
     devDependencies:
-      '@biomejs/biome':
-        specifier: 'catalog:'
-        version: 2.3.14
-      '@types/node':
-        specifier: 'catalog:'
-        version: 25.2.3
       tsdown:
-        specifier: 'catalog:'
+        specifier: ^0.20.3
         version: 0.20.3(typescript@5.9.3)
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.9.3
         version: 5.9.3
 
   packages/autopea-pw:
@@ -86,14 +68,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@types/node':
-        specifier: 'catalog:'
+        specifier: ^25.2.3
         version: 25.2.3
-      tsdown:
-        specifier: 'catalog:'
-        version: 0.20.3(typescript@5.9.3)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
 
   packages/tests:
     dependencies:
@@ -106,16 +82,13 @@ importers:
       playwright:
         specifier: 'catalog:'
         version: 1.58.2
-    devDependencies:
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      vitest:
-        specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.2.3)(@vitest/ui@4.0.18)
       zod:
         specifier: 'catalog:'
         version: 4.3.6
+    devDependencies:
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@types/node@25.2.3)(@vitest/ui@4.0.18)
 
 packages:
 
