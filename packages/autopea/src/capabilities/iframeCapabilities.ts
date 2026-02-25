@@ -28,7 +28,7 @@ export const createIframeCapabilities = (
     openFile(this: App, _path: string, _timeout?: number): Promise<PDocument> {
       throw capabilityError
     },
-    uploadFonts(this: App, _fonts: Record<string, Buffer>): Promise<void> {
+    uploadFonts(this: App, _fonts: Record<string, Uint8Array>): Promise<void> {
       throw capabilityError
     },
     pause(): Promise<void> {

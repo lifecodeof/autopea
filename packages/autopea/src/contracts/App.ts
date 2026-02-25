@@ -132,11 +132,11 @@ export class App extends Contract {
     return await this.capabilities.openFile.call(this, path, timeout)
   }
 
-  async uploadFont(font: Buffer, name: string) {
+  async uploadFont(font: Uint8Array, name: string) {
     return await this.uploadFonts({ [name]: font })
   }
 
-  async uploadFonts(fonts: Record<string, Buffer>) {
+  async uploadFonts(fonts: Record<string, Uint8Array>) {
     await this.capabilities.uploadFonts.call(this, fonts)
   }
 

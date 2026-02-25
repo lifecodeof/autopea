@@ -3,7 +3,10 @@ import type { PhotopeaCapabilities } from "@lifecodeof/autopea"
 import { PhotopeaMutexes } from "@lifecodeof/autopea"
 import { App } from "@lifecodeof/autopea/contracts/App"
 import type { ArtLayer } from "@lifecodeof/autopea/contracts/ArtLayer"
-import { type PDocument, SaveFormat } from "@lifecodeof/autopea/contracts/PDocument"
+import {
+  type PDocument,
+  SaveFormat,
+} from "@lifecodeof/autopea/contracts/PDocument"
 import { unzipSync } from "fflate/node"
 import type { ConsoleMessage, Dialog } from "playwright"
 import { errors as pwErrors } from "playwright"
@@ -85,10 +88,10 @@ export const createPlaywrightCapabilities = (
         })
       })
     },
-    async uploadFonts(this: App, fonts: Record<string, Buffer>) {
+    async uploadFonts(this: App, fonts: Record<string, Uint8Array>) {
       const fontsBase64 = Object.entries(fonts).map(([name, buffer]) => ({
         name,
-        base64: buffer.toString("base64"),
+        base64: Buffer.from(buffer).toString("base64"),
       }))
 
       const toArrayBuffer = await makeBase64ToArrayBufferFnHandle(page)
