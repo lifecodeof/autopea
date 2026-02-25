@@ -21,10 +21,6 @@
     "nanoevents": "catalog:",
     "zod": "catalog:"
   },
-  "devDependencies": {
-    "tsdown": "^0.20.3",
-    "typescript": "^5.9.3"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",

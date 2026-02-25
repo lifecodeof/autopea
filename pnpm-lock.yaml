@@ -26,6 +26,12 @@ importers:
       '@biomejs/biome':
         specifier: 2.3.14
         version: 2.3.14
+      tsdown:
+        specifier: ^0.20.3
+        version: 0.20.3(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   packages/autopea:
     dependencies:
@@ -38,13 +44,6 @@ importers:
       zod:
         specifier: 'catalog:'
         version: 4.3.6
-    devDependencies:
-      tsdown:
-        specifier: ^0.20.3
-        version: 0.20.3(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
 
   packages/autopea-pw:
     dependencies:

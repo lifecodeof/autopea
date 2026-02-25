@@ -4,8 +4,6 @@
       "@/*": ["./src/*"]
     },
 
-    "types": ["node"],
-
     "strict": true,
     "noImplicitOverride": true,
 
