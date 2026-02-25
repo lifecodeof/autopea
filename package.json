@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "pnpm run --filter !tests -r build",
-    "publish": "pnpm run typecheck && pnpm publish --filter !tests -r --no-git-checks",
+    "publish": "pnpm typecheck && pnpm lint && pnpm publish --filter !tests -r --no-git-checks",
     "typecheck": "pnpm run build && pnpm --parallel -r exec tsc --noEmit",
     "fix": "biome check --fix",
     "lint": "biome lint"
