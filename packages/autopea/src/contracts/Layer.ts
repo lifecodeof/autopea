@@ -191,9 +191,7 @@ export class Layer extends Contract {
     })
   }
 
-  // TODO: don't rely on activeDocument and rename targetBounds to bounds
-  // TODO: Refactor this method to use new UnitRectLocal getters/setters or even add new ones
-  /** Shrink or grow layer and transform so it does not overflow document bounds */
+  /** Shrink or grow layer and transform it */
   async fitToBounds({
     targetBounds,
     grow = false,
@@ -202,79 +200,82 @@ export class Layer extends Contract {
     preserveAspect = true,
     padding = 0,
   }: {
-    // TODO: indicate mutually exclusive options as types
+    // preserveAspect is incompatible with independent axis growth
     targetBounds?: UnitRectLocal // Default to document bounds
-    grow?: boolean // If true, will also grow the layer if needed
+    grow?: boolean // If true, will grow the layer if needed
     growVertical?: boolean // If true, will also grow the layer vertically if needed
     growHorizontal?: boolean // If true, will also grow the layer horizontally if needed
     preserveAspect?: boolean // If true, will preserve aspect ratio (default: true)
     padding?: number // Padding to apply (default: 0)
   } = {}) {
-    const { App } = await import("./App") // Lazy import to avoid circular dependency
+    const { App } = await import("./App")
 
-    targetBounds ??= await App.of(this).activeDocument.makeBounds()
+    const rawTarget =
+      targetBounds ?? (await App.of(this).activeDocument.makeBounds())
 
-    // Apply padding to target bounds
-    if (padding) {
-      targetBounds = new UnitRectLocal(
-        targetBounds.left + padding,
-        targetBounds.top + padding,
-        targetBounds.right - padding,
-        targetBounds.bottom - padding,
-      )
-    }
+    // Clamp padding to 50% of the target dimension to prevent inverted bounds (negative width/height).
+    // This ensures the safe zone never collapses into a negative coordinate space.
+    const safePaddingX = Math.min(padding, rawTarget.width / 2)
+    const safePaddingY = Math.min(padding, rawTarget.height / 2)
+
+    const target = new UnitRectLocal(
+      /* left: */ rawTarget.left + safePaddingX,
+      /* top: */ rawTarget.top + safePaddingY,
+      /* right: */ rawTarget.right - safePaddingX,
+      /* bottom: */ rawTarget.bottom - safePaddingY,
+    )
 
     const bounds = await this.fetchBounds()
 
-    const layerWidth = bounds.right - bounds.left
-    const layerHeight = bounds.bottom - bounds.top
-    const docWidth = targetBounds.right - targetBounds.left
-    const docHeight = targetBounds.bottom - targetBounds.top
+    // Guard against division by zero for collapsed layers (e.g., 0-width lines or empty text).
+    // Scaling a zero-dimension object is mathematically undefined in this context.
+    if (bounds.width === 0 || bounds.height === 0) return
 
-    const scaleX = docWidth / layerWidth
-    const scaleY = docHeight / layerHeight
+    const scaleX = target.width / bounds.width
+    const scaleY = target.height / bounds.height
 
-    let finalScaleX: number
-    let finalScaleY: number
+    let finalScaleX = 1
+    let finalScaleY = 1
 
     if (preserveAspect) {
+      // preserveAspect is incompatible with independent axis growth
+      // because it enforces a uniform scale factor.
       if (growVertical || growHorizontal) {
         throw new Error(
           "growVertical or growHorizontal is not supported when preserving aspect ratio",
         )
       }
 
-      // Preserve aspect ratio - use the smaller scale for both dimensions
       const uniformScale = grow
         ? Math.min(scaleX, scaleY)
         : Math.min(scaleX, scaleY, 1)
       finalScaleX = uniformScale
       finalScaleY = uniformScale
     } else {
-      // Allow non-uniform scaling - scale each dimension independently
+      // Independent axis scaling. Each dimension is allowed to grow only if its
+      // specific directional flag or the global grow flag is set.
       finalScaleX = grow || growHorizontal ? scaleX : Math.min(scaleX, 1)
       finalScaleY = grow || growVertical ? scaleY : Math.min(scaleY, 1)
     }
 
-    // Resize if we need to shrink or if we need to grow (when grow is enabled)
     if (finalScaleX !== 1 || finalScaleY !== 1) {
       await this.resize(finalScaleX * 100, finalScaleY * 100)
     }
 
-    // Recalculate bounds and move if needed to fit within doc
+    // Post-resize bounds fetch is necessary because the layer's anchor point
+    // (center, top-left, etc.) determines the new coordinate position.
     const newBounds = await this.fetchBounds()
-    let deltaX = 0
-    let deltaY = 0
-    if (newBounds.left < targetBounds.left) {
-      deltaX = targetBounds.left - newBounds.left
-    } else if (newBounds.right > targetBounds.right) {
-      deltaX = targetBounds.right - newBounds.right
-    }
-    if (newBounds.top < targetBounds.top) {
-      deltaY = targetBounds.top - newBounds.top
-    } else if (newBounds.bottom > targetBounds.bottom) {
-      deltaY = targetBounds.bottom - newBounds.bottom
-    }
+
+    // Calculate the minimum translation required to bring the layer back
+    // within the target's clamped boundaries.
+    const deltaX =
+      Math.max(0, target.left - newBounds.left) +
+      Math.min(0, target.right - newBounds.right)
+
+    const deltaY =
+      Math.max(0, target.top - newBounds.top) +
+      Math.min(0, target.bottom - newBounds.bottom)
+
     if (deltaX !== 0 || deltaY !== 0) {
       await this.translate(deltaX, deltaY)
     }
@@ -298,7 +299,7 @@ export class Layer extends Contract {
   }
 
   /** Make all parent layers visible so user can see this layer
-   * @returns Layers that were made visible
+   * @returns Layers that made visible
    */
   async makeVisibleToUser(): Promise<Layer[]> {
     const madeVisibleLayers: Layer[] = []
