@@ -8,7 +8,7 @@ import { LayerSets } from "./LayerSet"
 import { type UnitRect, UnitRectLocal } from "./UnitRect"
 import type { UnitValue } from "./UnitValue"
 
-export  enum SaveFormat {
+export enum SaveFormat {
   PNG = "png",
   JPG = "jpg",
   PSD = "psd",

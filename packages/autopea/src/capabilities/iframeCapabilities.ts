@@ -2,10 +2,10 @@ import type { App } from "@/contracts/App"
 import type { ArtLayer } from "@/contracts/ArtLayer"
 import type { Contract } from "@/contracts/Contract"
 import type { PDocument, SaveFormat } from "@/contracts/PDocument"
+import { waitForEvent } from "@/helpers"
 import { PhotopeaMutexes } from "@/PhotopeaMutexes"
 import type { IframePhotopeaTransport } from "@/transports/IframePhotopeaTransport"
 import type { PhotopeaCapabilities } from "./PhotopeaCapabilities"
-import { waitForEvent } from "@/helpers"
 
 export const createIframeCapabilities = (
   transport: IframePhotopeaTransport,
