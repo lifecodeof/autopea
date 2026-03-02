@@ -108,11 +108,11 @@ export class App extends Contract {
    * @param buffer Image data. Will be transferred.
    * @returns Promise that resolves when the image is loaded.
    */
-  async openFromBuffer(buffer: ArrayBuffer) {
+  async openFromBuffer(buffer: ArrayBuffer, signal?: AbortSignal) {
     return await this.mutexes.documentMutex.runExclusive(async () => {
       await Promise.all([
         waitForEvent(this.channel.transport.on, {
-          signal: AbortSignal.timeout(5 * 60 * 1000), // 5 minutes
+          signal: signal ?? AbortSignal.timeout(5 * 60 * 1000), // 5 minutes
           event: "blankMessage",
         }),
         this.channel.transport.sendMessage(buffer),

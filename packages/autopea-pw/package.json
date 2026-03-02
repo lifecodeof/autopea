@@ -1,6 +1,6 @@
 {
   "name": "@lifecodeof/autopea-pw",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "description": "Playwright transport for autopea",
   "scripts": {
     "build": "tsdown"
