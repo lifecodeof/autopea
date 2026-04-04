@@ -1,4 +1,8 @@
-// photoshop.d.ts
+/**
+ * Reverse-engineered interface reference of the Photopea ExtendScript environment.
+ * This specification is derived from empirical testing and is not official.
+ * Implementation may be incomplete or contain inaccuracies.
+ */
 
 declare namespace Photoshop {
   // Missing types
