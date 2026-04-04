@@ -70,6 +70,18 @@ importers:
         specifier: ^25.2.3
         version: 25.2.3
 
+  packages/examples:
+    dependencies:
+      '@lifecodeof/autopea':
+        specifier: workspace:*
+        version: link:../autopea
+      '@lifecodeof/autopea-pw':
+        specifier: workspace:*
+        version: link:../autopea-pw
+      playwright:
+        specifier: 'catalog:'
+        version: 1.58.2
+
   packages/tests:
     dependencies:
       '@lifecodeof/autopea':

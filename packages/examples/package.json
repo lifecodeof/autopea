@@ -1,0 +1,16 @@
+{
+  "name": "examples",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Example scripts to demonstrate autopea",
+  "scripts": {
+    "start": "tsx example.ts"
+  },
+  "author": "lifecodeof",
+  "type": "module",
+  "dependencies": {
+    "@lifecodeof/autopea": "workspace:*",
+    "@lifecodeof/autopea-pw": "workspace:*",
+    "playwright": "catalog:"
+  }
+}
