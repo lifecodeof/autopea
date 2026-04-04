@@ -10,8 +10,8 @@ Library for automating Photopea with TypeScript.
 
 Key components:
 
-- `**@lifecodeof/autopea**`: Core library containing the Contract system and transport-agnostic logic.
-- `**@lifecodeof/autopea-pw**`: Playwright-specific implementation for browser-based automation.
+- `@lifecodeof/autopea`: Core library containing the Contract system and transport-agnostic logic.
+- `@lifecodeof/autopea-pw`: Playwright-specific implementation for browser-based automation.
 
 ## How
 
