@@ -2,6 +2,8 @@
 
 Library for automating Photopea with TypeScript.
 
+[Demo Video](https://github.com/user-attachments/assets/48e9153d-0b54-41db-95e4-562e8b48251e)
+
 ## What
 
 `autopea` provides a type-safe interface for interacting with Photopea's internal state and objects. It abstracts the underlying ExtendScript communication into a high-level API, allowing for structured automation of image processing tasks.
