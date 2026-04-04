@@ -21,7 +21,9 @@ Install the necessary packages:
 pnpm add @lifecodeof/autopea @lifecodeof/autopea-pw
 ```
 
-Use the library with Playwright:
+Use the library:
+
+Take a look at [example script](./packages/examples/example.ts) or start with quickstart script.
 
 ```typescript
 import { chromium } from "playwright"
@@ -35,10 +37,10 @@ const page = await PhotopeaPage.openFromBrowser(browser)
 const app = App.of(page)
 
 // Open a document from a URL
-await app.openFromUrl("https://www.photopea.com/api/img/test.psd") // Special helper
+await app.openFromUrl("https://www.photopea.com/api/img/test.psd")
 
 // Get the active document name
-const name = await app.activeDocument.name.$get() // Executes: `app.activeDocument.name` in photopea context
+const name = await app.activeDocument.name.$get()
 console.log(`Active document: ${name}`)
 
 // Close the browser

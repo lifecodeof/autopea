@@ -3,7 +3,7 @@ import { PhotopeaPage } from "@lifecodeof/autopea-pw"
 import { App } from "@lifecodeof/autopea/contracts/App"
 import { SaveFormat } from "@lifecodeof/autopea"
 
-const browser = await chromium.launch()
+const browser = await chromium.launch({ headless: false })
 const page = await PhotopeaPage.openFromBrowser(browser)
 
 // Initialize the App contract
@@ -12,22 +12,25 @@ const app = App.of(page)
 // Open example document
 await app.openFile("example.psd")
 
-// Note that `layer` variable hold expression, not real layer reference.
-// If you want to assign it to a stable global variable
-// inside photopea realm use `.$ref()`.
-//
-// And since it holds expression rather than a value you cannot null check it
-// directly. You should use `.$eq(undefined)`
+// Note that the 'layer' variable holds an expression, not a direct layer reference.
+// To assign this to a stable global variable within the Photopea environment, use `.$ref()`.
+// Since it is an expression, use `.$eq(undefined)` for null/existence checks.
 const layer = app.activeDocument.artLayers.getByName("example-text")
 
-// Change "hello world" to "bye world"
-await layer.textItem.contents.$set("bye world")
+// Change "hello world" text
+await layer.textItem.contents.$set("Photopea\nTime")
+// This executes:
+// app.activeDocument.artLayers.getByName("example-text").textItem.contents = "Photopea\nTime"
 
-// This is a helper method that does not exists in photopea extendscript
-// environment. It will center the text layer both horizontally and vertically.
+// Center the text layer both horizontally and vertically.
+// This helper method does not exist in the Photopea ExtendScript environment.
 await layer.position({ horizontal: "center", vertical: "center" })
 
-// Get png buffer to use or write it to somewhere else.
+// Add red solid fill effect to the layer.
+// This is a helper method also.
+await layer.setSolidFill("#ff0000")
+
+// Get PNG buffer for external processing or storage.
 const pngBuffer = await app.saveToBuffer(SaveFormat.PNG)
 console.log("PNG buffer length:", pngBuffer.length)
 
