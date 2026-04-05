@@ -1,42 +1,36 @@
 # `autopea`
 
-Library for automating Photopea with TypeScript.
+JS/TS Library for automating Photopea with TypeScript.
 
 [Demo Video](https://github.com/user-attachments/assets/48e9153d-0b54-41db-95e4-562e8b48251e)
 
-## What
-
-`autopea` provides a type-safe interface for interacting with Photopea's internal state and objects. It abstracts the underlying ExtendScript communication into a high-level API, allowing for structured automation of image processing tasks.
-
-Key components:
-
-- `@lifecodeof/autopea`: Core library containing the Contract system and transport-agnostic logic.
-- `@lifecodeof/autopea-pw`: Playwright-specific implementation for browser-based automation.
-
 ## Why
 
-Automating Photopea without this kind of abstraction is painful. The only native option is sending raw ExtendScript strings over `postMessage` or using the script window manually no types, no structure, no guarantees. `autopea` wraps all of this into a typed, async/await API that works both in Node and directly inside a browser iframe.
+Photopea's only scripting interface is raw ExtendScript strings sent over `postMessage`. There are no types, no structure, and no way to know if what you're sending is correct until it runs.
 
-Most importantly you will be using real ES6 classes. So you don't have to debug erased types or object proxies.
+`autopea` wraps this into a typed, async/await API using real ES6 classes. The API is modeled after [Photoshop's ExtendScript reference](https://github.com/Adobe-CEP/CEP-Resources/blob/master/Documentation/Product%20specific%20Documentation/Photoshop%20Scripting/photoshop-javascript-ref-2020.pdf), so if you've written Photoshop scripts before, it will feel familiar.
 
-`autopea` tries to match Photopea's ExtendScript emulation (parsed via [acorn.js](https://github.com/acornjs/acorn)), which itself tries to match the [Photoshop ExtendScript API](https://github.com/Adobe-CEP/CEP-Resources/blob/master/Documentation/Product%20specific%20Documentation/Photoshop%20Scripting/photoshop-javascript-ref-2020.pdf). If you've worked with Photoshop scripting before, the structure will feel familiar.
+## What
 
-## How
+Two packages:
 
-### Quick start
+- `@lifecodeof/autopea` — core library with the Contract system and transport-agnostic logic
+- `@lifecodeof/autopea-pw` — Playwright-specific implementation for browser-based automation
 
-#### Install the necessary packages:
+## Usage
+
+### Install
 
 ```bash
-pnpm add autopea autopea-pw
+pnpm add @lifecodeof/autopea @lifecodeof/autopea-pw
 ```
 
 > [!NOTE]
-> You may omit `autopea-pw` when operating within an iframe however, advanced functionality such as interacting with smart objects is unavailable due to web platform security restrictions. Utilizing Playwright in conjunction with `autopea-pw` is the recommended implementation.
+> `@lifecodeof/autopea-pw` can be omitted when running inside an iframe, but features like interacting with smart objects are unavailable there due to web platform security restrictions. Playwright with `autopea-pw` is the recommended setup.
 
-#### Use the library:
+### Quick start
 
-Take a look at [example script](./packages/examples/example.ts) or start with quick start script.
+See the [example script](./packages/examples/example.ts) or start here:
 
 ```typescript
 import { chromium } from "playwright"
@@ -46,17 +40,13 @@ import { App } from "@lifecodeof/autopea/contracts/App"
 const browser = await chromium.launch()
 const page = await PhotopeaPage.openFromBrowser(browser)
 
-// Initialize the App contract
 const app = App.of(page)
 
-// Open a document
 await app.openFile("example.psd")
 
-// Get the active document name
 const name = await app.activeDocument.name.$get()
 console.log(`Active document: ${name}`)
 
-// Close the browser
 await browser.close()
 ```
 
@@ -64,16 +54,33 @@ await browser.close()
 
 ### Contracts
 
-Everything is a Contract. These are TypeScript proxies that represent remote objects in Photopea by storing their expressions (e.g., `app.activeDocument`) rather than their data.
+A Contract is a TypeScript proxy that represents a remote object in Photopea. It stores an expression like `app.activeDocument` rather than data, so referencing it requires no network call.
 
-### Live Expressions vs. Stable References
+```typescript
+const doc Contract<PDocument> = app.activeDocument // just an expression
+```
 
-By default, contracts are Live Expressions. They re-evaluate their expressions every time they are used, ensuring you always interact with the current state and eliminating redundant awaits. Use `const newContract = await contract.$ref()` to evaluate a path once and pin it to a stable global handle. This is necessary if an object's path might change (like moving a layer).
+### Live expressions vs stable references
 
-### Data Retrieval
+Contracts re-evaluate their expression on every access, so you always get the current state. If an object's path might change, pin it with `.$ref()` first:
 
-To move data from Photopea into your local code, use `.$get()`. This executes the remote expression and returns a JSON-serializable value (like a string or number) validated against a Zod schema.
+```typescript
+const layer: Contract<Layer> = await app.activeDocument.activeLayer.$ref() // evaluated once
+```
+
+### Reading data
+
+`.$get()` executes the remote expression and returns a local value, validated against a Zod schema.
+
+```typescript
+const name: string = await app.activeDocument.name.$get()
+const width: number = await app.activeDocument.width.$get()
+```
 
 ## Versioning
 
-The packages `autopea` and `autopea-pw` utilize a synchronized versioning strategy. Under this convention, both packages are released with identical version numbers even if a specific update contains source code changes for only one of the two. Consequently, maintaining identical version strings for both dependencies is advised to guarantee compatibility and prevent runtime regressions caused by mismatched internal interfaces.
+Both packages are always released together with the same version number. Keep them in sync to avoid issues from mismatched internals.
+
+## Contributing
+
+This started as an internal tool, so the API has gaps and documentation is sparse in places. Bug reports, feature requests, and pull requests are welcome.
