@@ -34,31 +34,20 @@ type EvalOptions = {
  * Symbol used to mark values that should be treated as raw JavaScript expressions
  * instead of being JSON stringified. Used internally by Contract.transfer().
  */
-export const rawStringSymbol = Symbol("rawString")
+export const rawStringSymbol = Symbol("autopea/rawString")
 
 /**
- * Base class for all Contract types. Contracts are proxies that represent remote objects
- * in Photopea and allow you to safely interact with them from Node.js.
- *
- * The Contract class uses template literal syntax to construct JavaScript expressions
- * that will be evaluated in the remote context (Photopea). It provides several helper
- * methods for different types of remote operations:
- * - `$()` - Get properties that return Contract objects
- * - `$value()` - Get properties that return JSON-serializable values
- * - `$eval()` - Call methods that return void or values
- * - `$evalHandle()` - Call methods that return Contract objects
+ * Represents a remote object in Photopea. Subclasses define specific
+ * interfaces (e.g., `Layer`, `Document`) to interact with the remote context
+ * via a type-safe expression bridge.
  *
  * @example
- * // Accessing a property
- * const width = this.$value(z.number())`.width`
- *
- * @example
- * // Calling a method
- * await this.$eval()`.trim()`
- *
- * @example
- * // Getting a nested Contract object
- * const layers = this.$(Layers)`.layers`
+ * // Update a remote property
+ * await layer.opacity.$set(50)
+ * // Compare remote references
+ * const isVisible: boolean = await layer.visible.$eq(true).$get()
+ * // Assign contract value to stable global reference in Photopea realm
+ * await using ref = await layer.$ref() // [Symbol.asyncDispose] deletes the global variable
  */
 export class Contract {
   /**
@@ -507,16 +496,14 @@ interface PhantomSerializable<T> {
 
 /**
  * A Contract that wraps a JSON-serializable value retrieved from the remote context.
- * Extends Contract but represents a primitive value (string, number, boolean, etc.)
+ * Extends Contract but represents a JSON-serializable value (string, number, boolean, array, plain object etc.)
  * rather than a remote object.
  *
  * @template T The type of value this Contract represents
  *
  * @example
- * // Created by using $value()
- * const width = this.$value(z.number())`.width`
- * // Can be awaited to get the actual value
- * const widthValue = await width.$get()
+ * const widthContract: SerializableContract<number> = layer.bounds.width
+ * const widthValue number = await widthContract.$get()
  */
 export class SerializableContract<T>
   extends Contract
