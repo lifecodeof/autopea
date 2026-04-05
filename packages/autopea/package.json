@@ -8,7 +8,9 @@
     "build": "tsdown"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "dependencies": {
     "async-mutex": "catalog:",
@@ -35,6 +37,7 @@
   },
   "author": "lifecodeof",
   "license": "MIT",
+  "readme": "../../README.md",
   "keywords": [
     "autopea",
     "photopea",
