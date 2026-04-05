@@ -1,4 +1,4 @@
-import { PhotopeaMutexes } from "@lifecodeof/autopea"
+import { PhotopeaMutexes } from "autopea"
 import { expect } from "vitest"
 import { pageTest } from "./testFixtures"
 

@@ -1,4 +1,4 @@
-import { PhotopeaPage, waitForEvent } from "@lifecodeof/autopea-pw"
+import { PhotopeaPage, waitForEvent } from "autopea-playwright"
 import { expect, vi } from "vitest"
 import { browserTest } from "./testFixtures"
 

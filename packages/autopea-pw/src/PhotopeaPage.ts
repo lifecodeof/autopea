@@ -2,7 +2,7 @@ import type {
   PhotopeaCapabilities,
   PhotopeaTransport,
   PhotopeaTransportEventMap,
-} from "@lifecodeof/autopea"
+} from "autopea"
 import { createNanoEvents } from "nanoevents"
 import type { Browser, BrowserContext, Page } from "playwright"
 import { createPlaywrightCapabilities } from "./capabilities/PlaywrightPhotopeaCapabilities"

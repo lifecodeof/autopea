@@ -13,8 +13,8 @@
   "author": "lifecodeof",
   "type": "module",
   "dependencies": {
-    "@lifecodeof/autopea": "workspace:*",
-    "@lifecodeof/autopea-pw": "workspace:*",
+    "autopea": "workspace:*",
+    "autopea-playwright": "workspace:*",
     "playwright": "catalog:",
     "zod": "catalog:"
   },

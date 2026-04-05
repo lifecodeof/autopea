@@ -1,6 +1,6 @@
-import { PhotopeaChannel } from "@lifecodeof/autopea"
-import { App } from "@lifecodeof/autopea/contracts/App"
-import { PhotopeaPage } from "@lifecodeof/autopea-pw"
+import { PhotopeaChannel } from "autopea"
+import { App } from "autopea/contracts/App"
+import { PhotopeaPage } from "autopea-playwright"
 import { type BrowserContext, chromium } from "playwright"
 import { test } from "vitest"
 

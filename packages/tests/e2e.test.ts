@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url"
-import { PDocument } from "@lifecodeof/autopea/contracts/PDocument"
+import { PDocument } from "autopea/contracts/PDocument"
 import { expect } from "vitest"
 import { appTest } from "./testFixtures"
 

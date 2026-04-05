@@ -1,5 +1,5 @@
 {
-  "name": "@lifecodeof/autopea-pw",
+  "name": "autopea-playwright",
   "version": "3.3.1",
   "description": "Playwright transport for autopea",
   "scripts": {
@@ -22,7 +22,7 @@
     "zod": "catalog:"
   },
   "peerDependencies": {
-    "@lifecodeof/autopea": "workspace:*",
+    "autopea": "workspace:*",
     "playwright": "catalog:"
   },
   "devDependencies": {

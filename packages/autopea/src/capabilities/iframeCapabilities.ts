@@ -12,7 +12,7 @@ export const createIframeCapabilities = (
 ): PhotopeaCapabilities => {
   const capabilityError = new Error(
     "autopea does not capable of this action inside web environment. " +
-      "See `@lifecodeof/autopea-pw` package for playwright-based capabilities.",
+      "See `autopea-playwright` package for playwright-based capabilities.",
   )
 
   return {

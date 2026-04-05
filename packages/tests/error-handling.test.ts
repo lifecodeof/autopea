@@ -2,7 +2,7 @@ import {
   PhotopeaChannel,
   PhotopeaChannelEvalError,
   PhotopeaChannelScriptError,
-} from "@lifecodeof/autopea"
+} from "autopea"
 import { describe, expect, test } from "vitest"
 import { pageTest } from "./testFixtures"
 

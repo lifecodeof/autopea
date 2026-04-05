@@ -16,19 +16,19 @@ This library abstracts the underlying ExtendScript communication and lifecycle i
 
 It provides two packages:
 
-- `@lifecodeof/autopea`: core library with the Contract system and transport-agnostic logic. Includes iframe transport and can be used standalone.
-- `@lifecodeof/autopea-pw`: Playwright-specific implementation for browser-based automation.
+- `autopea`: core library with the Contract system and transport-agnostic logic. Includes iframe transport and can be used standalone.
+- `autopea-playwright`: Playwright-specific implementation for browser-based automation.
 
 ## Usage
 
 ### Install
 
 ```bash
-pnpm add @lifecodeof/autopea @lifecodeof/autopea-pw
+pnpm add autopea autopea-playwright
 ```
 
 > [!NOTE]
-> `@lifecodeof/autopea-pw` can be omitted when running inside an iframe, but features like interacting with smart objects are unavailable there due to web platform security restrictions. Playwright with `autopea-pw` is the recommended setup.
+> `autopea-playwright` can be omitted when running inside an iframe, but features like interacting with smart objects are unavailable there due to web platform security restrictions. Playwright with `autopea-playwright` is the recommended setup.
 
 ### Quick start
 
@@ -36,8 +36,8 @@ See the [example script](./packages/examples/introduction/main.ts) or start here
 
 ```typescript
 import { chromium } from "playwright"
-import { PhotopeaPage } from "@lifecodeof/autopea-pw"
-import { App } from "@lifecodeof/autopea/contracts/App"
+import { PhotopeaPage } from "autopea-playwright"
+import { App } from "autopea/contracts/App"
 
 const browser = await chromium.launch()
 const page = await PhotopeaPage.openFromBrowser(browser)

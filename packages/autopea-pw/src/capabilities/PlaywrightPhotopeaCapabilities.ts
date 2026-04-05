@@ -1,12 +1,12 @@
 import { buffer } from "node:stream/consumers"
-import type { PhotopeaCapabilities } from "@lifecodeof/autopea"
-import { PhotopeaMutexes } from "@lifecodeof/autopea"
-import { App } from "@lifecodeof/autopea/contracts/App"
-import type { ArtLayer } from "@lifecodeof/autopea/contracts/ArtLayer"
+import type { PhotopeaCapabilities } from "autopea"
+import { PhotopeaMutexes } from "autopea"
+import { App } from "autopea/contracts/App"
+import type { ArtLayer } from "autopea/contracts/ArtLayer"
 import {
   type PDocument,
   SaveFormat,
-} from "@lifecodeof/autopea/contracts/PDocument"
+} from "autopea/contracts/PDocument"
 import { unzipSync } from "fflate/node"
 import type { ConsoleMessage, Dialog } from "playwright"
 import { errors as pwErrors } from "playwright"

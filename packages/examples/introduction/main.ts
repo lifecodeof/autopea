@@ -1,7 +1,7 @@
 import { chromium } from "playwright"
-import { PhotopeaPage } from "@lifecodeof/autopea-pw"
-import { App } from "@lifecodeof/autopea/contracts/App"
-import { SaveFormat } from "@lifecodeof/autopea"
+import { PhotopeaPage } from "autopea-playwright"
+import { App } from "autopea/contracts/App"
+import { SaveFormat } from "autopea"
 
 const browser = await chromium.launch({ headless: false })
 const page = await PhotopeaPage.openFromBrowser(browser)

@@ -1,4 +1,4 @@
-import { PhotopeaChannelEvalError } from "@lifecodeof/autopea"
+import { PhotopeaChannelEvalError } from "autopea"
 import { expect } from "vitest"
 import { channelTest } from "./testFixtures"
 
