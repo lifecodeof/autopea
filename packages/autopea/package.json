@@ -1,6 +1,6 @@
 {
   "name": "autopea",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "description": "Library for automating Photopea",
   "scripts": {
     "start": "tsx main.ts",

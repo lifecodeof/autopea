@@ -1,6 +1,6 @@
 {
   "name": "autopea-playwright",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "description": "Playwright transport for autopea",
   "scripts": {
     "build": "tsdown"

@@ -41,5 +41,3 @@ jobs:
 
       - name: Publish packages
         run: pnpm publish --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
