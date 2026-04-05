@@ -87,4 +87,4 @@ Both packages are always released together with the same version number. Keep th
 
 ## Contributing
 
-This started as an internal tool, so the API has gaps and documentation is sparse in places. Bug reports, feature requests, and pull requests are welcome.
+This project started as an internal tool, so the API has gaps and documentation is sparse in places. Bug reports, feature requests, and pull requests are welcome.
