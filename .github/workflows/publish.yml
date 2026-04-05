@@ -19,8 +19,8 @@ jobs:
 
       - name: Copy readme files
         run: |
-          cp README.md packages/autopea/README.md
-          cp README.md packages/autopea-playwright/README.md
+          unlink packages/autopea/README.md && cp README.md packages/autopea/README.md
+          unlink  packages/autopea-playwright/README.md && cp README.md packages/autopea-playwright/README.md
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v5
