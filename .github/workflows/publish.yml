@@ -38,5 +38,11 @@ jobs:
       - name: Build packages
         run: pnpm build
 
+      - name: Upload directory for debugging
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-directory-output
+          path: .
+
       - name: Publish packages
         run: pnpm -r publish --no-git-checks
