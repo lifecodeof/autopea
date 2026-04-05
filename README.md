@@ -30,7 +30,7 @@ pnpm add @lifecodeof/autopea @lifecodeof/autopea-pw
 
 ### Quick start
 
-See the [example script](./packages/examples/example.ts) or start here:
+See the [example script](./packages/examples/introduction/main.ts) or start here:
 
 ```typescript
 import { chromium } from "playwright"
