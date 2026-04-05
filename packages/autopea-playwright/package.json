@@ -2,15 +2,13 @@
   "name": "autopea-playwright",
   "version": "3.3.2",
   "description": "Playwright transport for autopea",
+  "type": "module",
   "scripts": {
     "build": "tsdown"
   },
-  "keywords": [],
   "files": [
     "dist"
   ],
-  "author": "lifecodeof",
-  "type": "module",
   "dependencies": {
     "async-mutex": "catalog:",
     "fflate": "^0.8.2",
@@ -29,5 +27,24 @@
       "types": "./dist/index.d.mts",
       "default": "./dist/index.mjs"
     }
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lifecodeof/autopea",
+    "directory": "packages/autopea"
+  },
+  "bugs": {
+    "url": "https://github.com/lifecodeof/autopea/issues"
+  },
+  "author": "lifecodeof",
+  "license": "MIT",
+  "keywords": [
+    "autopea",
+    "photopea",
+    "automation",
+    "image-editing",
+    "psd",
+    "photoshop-scripting",
+    "extendscript"
+  ]
 }
