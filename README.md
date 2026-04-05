@@ -12,10 +12,12 @@ Photopea's only scripting interface is raw ExtendScript strings sent over `postM
 
 ## What
 
-Two packages:
+This library abstracts the underlying ExtendScript communication and lifecycle into a high-level API, allowing for structured automation of image processing tasks.
 
-- `@lifecodeof/autopea` — core library with the Contract system and transport-agnostic logic
-- `@lifecodeof/autopea-pw` — Playwright-specific implementation for browser-based automation
+It provides two packages:
+
+- `@lifecodeof/autopea`: core library with the Contract system and transport-agnostic logic. Includes iframe transport and can be used standalone.
+- `@lifecodeof/autopea-pw`: Playwright-specific implementation for browser-based automation.
 
 ## Usage
 
