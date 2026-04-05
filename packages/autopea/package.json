@@ -6,10 +6,6 @@
     "start": "tsx main.ts",
     "build": "tsdown"
   },
-  "publishConfig": {
-    "access": "restricted",
-    "registry": "https://npm.pkg.github.com"
-  },
   "keywords": [],
   "files": [
     "dist"

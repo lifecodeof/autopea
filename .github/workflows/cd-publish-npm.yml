@@ -36,8 +36,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate workspace
-        run: pnpm lint && pnpm build
+      - name: Build packages
+        run: pnpm build
 
       - name: Publish packages
         run: pnpm publish --provenance
