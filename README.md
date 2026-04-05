@@ -1,8 +1,8 @@
-# `autopea`
+# Autopea
 
 JS/TS Library for automating Photopea with TypeScript.
 
-[Demo Video](https://github.com/user-attachments/assets/48e9153d-0b54-41db-95e4-562e8b48251e)
+[Demo Video](https://github.com/user-attachments/assets/91e0e2ed-9654-4548-bd50-69483a6e899f)
 
 ## Why
 
@@ -16,7 +16,9 @@ This library abstracts the underlying ExtendScript communication and lifecycle i
 
 It provides two packages:
 
-- `autopea`: core library with the Contract system and transport-agnostic logic. Includes iframe transport and can be used standalone.
+- `autopea`: core library with the Contract system and transport-agnostic logic.
+  - Includes iframe transport and can be used standalone.
+  - Can be used inside browser environment.
 - `autopea-playwright`: Playwright-specific implementation for browser-based automation.
 
 ## Usage
