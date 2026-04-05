@@ -1,6 +1,6 @@
 {
   "name": "autopea",
-  "version": "3.3.4",
+  "version": "3.3.5",
   "description": "Library for automating Photopea",
   "type": "module",
   "scripts": {
@@ -37,7 +37,6 @@
   },
   "author": "lifecodeof",
   "license": "MIT",
-  "readme": "../../README.md",
   "keywords": [
     "autopea",
     "photopea",
