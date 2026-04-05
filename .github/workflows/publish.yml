@@ -34,4 +34,4 @@ jobs:
         run: pnpm build
 
       - name: Publish packages
-        run: pnpm publish --provenance
+        run: pnpm -r publish

@@ -1,5 +1,5 @@
 {
-  "name": "autopea",
+  "name": "autopea-monorepo-root",
   "private": true,
   "scripts": {
     "build": "pnpm run --filter !tests -r build",
