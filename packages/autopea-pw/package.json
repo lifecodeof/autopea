@@ -16,13 +16,13 @@
   "author": "lifecodeof",
   "type": "module",
   "dependencies": {
-    "@lifecodeof/autopea": "workspace:*",
     "async-mutex": "catalog:",
     "fflate": "^0.8.2",
     "nanoevents": "catalog:",
     "zod": "catalog:"
   },
   "peerDependencies": {
+    "@lifecodeof/autopea": "workspace:*",
     "playwright": "catalog:"
   },
   "devDependencies": {
