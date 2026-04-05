@@ -34,4 +34,4 @@ jobs:
         run: pnpm build
 
       - name: Publish packages
-        run: pnpm -r publish
+        run: pnpm -r publish --no-git-checks
