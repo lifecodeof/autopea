@@ -10,10 +10,11 @@ import type { PhotopeaCapabilities } from "./PhotopeaCapabilities"
 export const createIframeCapabilities = (
   transport: IframePhotopeaTransport,
 ): PhotopeaCapabilities => {
-  const capabilityError = new Error(
-    "autopea does not capable of this action inside web environment. " +
-      "See `autopea-playwright` package for playwright-based capabilities.",
-  )
+  const newError = (action: string) =>
+    new Error(
+      `autopea does not capable of this action (${action}) inside web environment. ` +
+        "See `autopea-playwright` package for playwright-based capabilities.",
+    )
 
   return {
     getMutexes(this: Contract): PhotopeaMutexes {
@@ -23,19 +24,19 @@ export const createIframeCapabilities = (
       return PhotopeaMutexes.of(transport.contentWindow ?? transport)
     },
     openSmartObject(this: ArtLayer): Promise<PDocument> {
-      throw capabilityError
+      throw newError("openSmartObject")
     },
     openFile(this: App, _path: string, _timeout?: number): Promise<PDocument> {
-      throw capabilityError
+      throw newError("openFile")
     },
     uploadFonts(this: App, _fonts: Record<string, Uint8Array>): Promise<void> {
-      throw capabilityError
+      throw newError("uploadFonts")
     },
     pause(): Promise<void> {
-      throw capabilityError
+      throw newError("pause")
     },
     saveSmartObject(this: PDocument): Promise<void> {
-      throw capabilityError
+      throw newError("saveSmartObject")
     },
     async downloadDocument(
       this: PDocument,
@@ -52,7 +53,7 @@ export const createIframeCapabilities = (
       return await bufferPromise
     },
     duplicateDocument(this: PDocument): Promise<PDocument> {
-      throw capabilityError
+      throw newError("duplicateDocument")
     },
   }
 }
