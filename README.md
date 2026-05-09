@@ -30,7 +30,7 @@ pnpm add autopea autopea-playwright
 ```
 
 > [!NOTE]
-> `autopea-playwright` can be omitted when running inside an iframe, but features like interacting with smart objects are unavailable there due to web platform security restrictions. Playwright with `autopea-playwright` is the recommended setup.
+> `autopea-playwright` can be omitted when targeting web platform, but features like interacting with smart objects are unavailable there due to web platform security restrictions. Playwright with `autopea-playwright` is the recommended setup.
 
 ### Quick start
 
