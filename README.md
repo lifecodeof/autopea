@@ -61,7 +61,7 @@ await browser.close()
 A Contract is a TypeScript proxy that represents a remote object in Photopea. It stores an expression like `app.activeDocument` rather than data, so referencing it requires no network call.
 
 ```typescript
-const doc Contract<PDocument> = app.activeDocument // just an expression
+const doc: Contract<PDocument> = app.activeDocument // just an expression
 ```
 
 ### Live expressions vs stable references
