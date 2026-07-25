@@ -143,7 +143,7 @@ export class PDocument extends Contract {
 }
 
 export class PDocuments extends ContractCollection<PDocument> {
-  itemType = () => PDocument
+  protected itemType = () => PDocument
 
   getByName(name: string) {
     return this.$(PDocument)`.getByName(${name})`
