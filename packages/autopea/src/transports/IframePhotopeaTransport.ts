@@ -60,6 +60,8 @@ export class IframePhotopeaTransport implements PhotopeaTransport {
     const contentWindow = await this.waitForSetup(this.contentWindow)
 
     const transferList = message instanceof ArrayBuffer ? [message] : undefined
+    // Origin is wildcard because the Photopea iframe is cross-origin.
+    // The transport already validates message source via the `predicate` filter.
     contentWindow.postMessage(message, "*", transferList)
   }
 
@@ -129,6 +131,8 @@ const setupContentWindow = async (contentWindow: Window) => {
     .replace(/\n|\r/g, "")
     .replace(/\s+/g, " ")
 
+  // Photopea's fake ActionScript emulation (acornjs-based) filters out `eval`.
+  // This bypasses it by reaching into the Function constructor via the prototype chain.
   const wrappedScript = `\
 window._init_ift = Object.getPrototypeOf(window).constructor.constructor('${setupScript}');
 window._init_ift();`
@@ -188,7 +192,9 @@ const createListener = ({
     let jsonData: Record<string, unknown> | undefined
     try {
       jsonData = JSON.parse(data)
-    } catch {}
+    } catch {
+      // Not JSON — likely a plain string message, ignore
+    }
 
     if (jsonData?.messageType === "ift-response") {
       // Handle structured response messages

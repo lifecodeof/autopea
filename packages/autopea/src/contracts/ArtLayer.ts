@@ -49,12 +49,10 @@ export class ArtLayer extends Layer {
     return this.$eval()`.rasterize(${type})`
   }
 
-  // Utils
   async openSmartObject() {
     return await this.capabilities.openSmartObject.call(this)
   }
 
-  // Utils
   async getDocument() {
     const { PDocument } = await import("./PDocument") // Lazy import to avoid circular dependency
 

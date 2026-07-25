@@ -162,11 +162,14 @@ export class PhotopeaPage implements PhotopeaTransport {
 
     await toBase64Handle.dispose()
 
-    // Somehow, #8887 removes ads
+    // Undocumented Photopea URL fragment that suppresses the landing page ads.
+    // This is fragile and may break if Photopea changes their client-side routing.
+    // See: https://github.com/lifecodeof/autopea/issues
+    const AD_FRAGMENT = "#8887"
     const startTime = Date.now()
     const timeout = options.timeout ?? 30_000
     try {
-      await page.goto("https://www.photopea.com#8887", { timeout })
+      await page.goto(`https://www.photopea.com${AD_FRAGMENT}`, { timeout })
     } catch (error) {
       if (Date.now() - startTime < timeout) {
         await new Promise((resolve) => setTimeout(resolve, 500))

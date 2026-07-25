@@ -6,13 +6,13 @@ export class PhotopeaMutexes {
   /** For opening chrome native dialogs such as window.confirm() */
   public readonly dialogMutex = new Mutex()
 
-  /** For downloading (required for assocating downloads to resources) */
+  /** For downloading (required for associating downloads to resources) */
   public readonly downloadMutex = new Mutex()
 
   /** For user interactions such as opening menus */
   public readonly interactionMutex = new Mutex()
 
-  /** For opening docuements (required for timing issues) */
+  /** For opening documents (required for timing issues) */
   public readonly documentMutex = new Mutex()
 
   static of(referenceObject: object) {

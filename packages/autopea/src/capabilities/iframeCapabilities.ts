@@ -12,13 +12,13 @@ export const createIframeCapabilities = (
 ): PhotopeaCapabilities => {
   const newError = (action: string) =>
     new Error(
-      `autopea does not capable of this action (${action}) inside web environment. ` +
+      `autopea is not capable of this action (${action}) inside web environment. ` +
         "See `autopea-playwright` package for playwright-based capabilities.",
     )
 
   return {
     getMutexes(this: Contract): PhotopeaMutexes {
-      // contentWindow should allways be defined when we can use the app but
+      // contentWindow should always be defined when we can use the app but
       // passing transport itself as reference won't hurt since it is also
       // same reference for null cases which is technically true
       return PhotopeaMutexes.of(transport.contentWindow ?? transport)

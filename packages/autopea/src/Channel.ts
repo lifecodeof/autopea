@@ -266,7 +266,7 @@ export class PhotopeaChannel {
     const accHandle = await this.createHandle({ ref: "" })
 
     try {
-      for (const i in chunks) {
+      for (let i = 0; i < chunks.length; i++) {
         signal?.throwIfAborted()
         await this.evaluate<void>(`acc.ref += ${JSON.stringify(chunks[i])};`, {
           acc: accHandle,
