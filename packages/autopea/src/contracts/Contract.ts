@@ -62,7 +62,7 @@ export class Contract {
   ) {}
 
   protected get capabilities() {
-    return this.channel.transport.capabilities
+    return this.channel.capabilities
   }
 
   /**

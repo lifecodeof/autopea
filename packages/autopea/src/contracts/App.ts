@@ -1,7 +1,6 @@
 import z from "zod"
 import { PhotopeaChannel } from "@/Channel"
 import type { PhotopeaTransport } from "@/transports/PhotopeaTransport"
-import { waitForEvent } from "../helpers"
 import { Contract } from "./Contract"
 import { PDocument, PDocuments, type SaveFormat } from "./PDocument"
 import { PFile } from "./PFile"
@@ -86,46 +85,28 @@ export class App extends Contract {
    * Opens an image in Photopea from a given URL.
    * Waits for Photopea to be ready and the file to be loaded.
    * @param url The URL of the image to open.
+   * @param timeout Maximum time in ms to wait for the file to load (default: 5 minutes).
    * @returns Promise that resolves when the image is loaded.
    */
-  async openFromUrl(url: string) {
-    return await this.mutexes.documentMutex.runExclusive(async () => {
-      await Promise.all([
-        waitForEvent(this.channel.transport.on, {
-          signal: AbortSignal.timeout(5 * 60 * 1000), // 5 minutes
-          event: "blankMessage",
-        }),
-        this.channel.evaluate<void>(`app.open(${JSON.stringify(url)});`),
-      ])
-
-      return this.activeDocument.$ref()
-    })
+  async openFromUrl(url: string, timeout?: number) {
+    return await this.capabilities.openFromUrl.call(this, url, timeout)
   }
 
   /**
    * Opens an image in Photopea from a given ArrayBuffer.
    * Waits for Photopea to be ready and the file to be loaded.
    * @param buffer Image data. Will be transferred.
+   * @param signal Optional AbortSignal to cancel the operation.
    * @returns Promise that resolves when the image is loaded.
    */
   async openFromBuffer(buffer: ArrayBuffer, signal?: AbortSignal) {
-    return await this.mutexes.documentMutex.runExclusive(async () => {
-      await Promise.all([
-        waitForEvent(this.channel.transport.on, {
-          signal: signal ?? AbortSignal.timeout(5 * 60 * 1000), // 5 minutes
-          event: "blankMessage",
-        }),
-        this.channel.transport.sendMessage(buffer),
-      ])
-
-      return this.activeDocument.$ref()
-    })
+    return await this.capabilities.openFromBuffer.call(this, buffer, signal)
   }
 
   /**
    * Opens an image in Photopea from a Buffer.
    * @param path The path to the image file.
-   * @param mimetype The MIME type of the image (default: application/octet-stream).
+   * @param timeout The timeout in ms (default: 5 minutes).
    * @returns Promise that resolves when the image is loaded.
    */
   async openFile(path: string, timeout = 5 * 60 * 1000) {

@@ -33,7 +33,11 @@ export class PhotopeaChannel {
   public timeout: number = 30_000
 
   /** @param transport The PhotopeaTransport instance to communicate with. */
-  constructor(public readonly transport: PhotopeaTransport) {}
+  constructor(protected readonly transport: PhotopeaTransport) {}
+
+  get capabilities() {
+    return this.transport.capabilities
+  }
 
   private makeHandleVarsStatement(handleVars: Record<string, Handleable>) {
     const getExpression = (handleable: Handleable) => {
@@ -138,7 +142,7 @@ export class PhotopeaChannel {
       .then((msg) => {
         abort.abort(new PhotopeaChannelPageError(msg.message))
       })
-      .catch((_) => {}) // Ignore timeout errors
+      .catch((_) => {}) // AbortSignal rejects after abort; safe to ignore
 
     // Abort on timeout
     const timeout = options.timeout ?? this.timeout
@@ -299,7 +303,7 @@ export class PhotopeaChannel {
 var handles = [];
 for (var i = 0; i < ${expression}.length; i++) {
   var value = ${expression}[i];
-  var handle = Math.random().toString(36).slice(2);
+  var handle = Math.random().toString(36).substring(2, 15);
   globalThis["${handlePrefix}" + handle] = value;
   handles.push(handle);
 }

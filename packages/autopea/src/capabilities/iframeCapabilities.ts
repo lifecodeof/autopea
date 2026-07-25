@@ -7,6 +7,8 @@ import { PhotopeaMutexes } from "@/PhotopeaMutexes"
 import type { IframePhotopeaTransport } from "@/transports/IframePhotopeaTransport"
 import type { PhotopeaCapabilities } from "./PhotopeaCapabilities"
 
+const DEFAULT_FILE_TIMEOUT = 5 * 60 * 1000 // 5 minutes
+
 export const createIframeCapabilities = (
   transport: IframePhotopeaTransport,
 ): PhotopeaCapabilities => {
@@ -28,6 +30,40 @@ export const createIframeCapabilities = (
     },
     openFile(this: App, _path: string, _timeout?: number): Promise<PDocument> {
       throw newError("openFile")
+    },
+    openFromUrl(
+      this: App,
+      url: string,
+      timeout = DEFAULT_FILE_TIMEOUT,
+    ): Promise<PDocument> {
+      return this.mutexes.documentMutex.runExclusive(async () => {
+        await Promise.all([
+          waitForEvent(transport.on, {
+            signal: AbortSignal.timeout(timeout),
+            event: "blankMessage",
+          }),
+          this.channel.evaluate<void>(`app.open(${JSON.stringify(url)});`),
+        ])
+
+        return this.activeDocument.$ref()
+      })
+    },
+    openFromBuffer(
+      this: App,
+      buffer: ArrayBuffer,
+      signal?: AbortSignal,
+    ): Promise<PDocument> {
+      return this.mutexes.documentMutex.runExclusive(async () => {
+        await Promise.all([
+          waitForEvent(transport.on, {
+            signal: signal ?? AbortSignal.timeout(DEFAULT_FILE_TIMEOUT),
+            event: "blankMessage",
+          }),
+          transport.sendMessage(buffer),
+        ])
+
+        return this.activeDocument.$ref()
+      })
     },
     uploadFonts(this: App, _fonts: Record<string, Uint8Array>): Promise<void> {
       throw newError("uploadFonts")

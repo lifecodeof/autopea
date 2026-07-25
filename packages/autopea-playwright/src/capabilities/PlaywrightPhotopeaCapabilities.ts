@@ -1,6 +1,6 @@
 import { buffer } from "node:stream/consumers"
 import type { PhotopeaCapabilities } from "autopea"
-import { PhotopeaMutexes } from "autopea"
+import { abortOnTimeout, invariant, PhotopeaMutexes, waitForEvent } from "autopea"
 import { App } from "autopea/contracts/App"
 import type { ArtLayer } from "autopea/contracts/ArtLayer"
 import {
@@ -10,7 +10,6 @@ import {
 import { unzipSync } from "fflate/node"
 import type { ConsoleMessage, Dialog } from "playwright"
 import { errors as pwErrors } from "playwright"
-import { abortOnTimeout, invariant, waitForEvent } from "../helpers"
 import type { PhotopeaPage } from "../PhotopeaPage"
 import { makeBase64ToArrayBufferFnHandle } from "../playwrightLib"
 import { clickToolbarButton } from "../toolbar"
@@ -86,6 +85,40 @@ export const createPlaywrightCapabilities = (
             cleanup()
           }
         })
+      })
+    },
+    openFromUrl(
+      this: App,
+      url: string,
+      timeout = 5 * 60 * 1000,
+    ): Promise<PDocument> {
+      return this.mutexes.documentMutex.runExclusive(async () => {
+        await Promise.all([
+          waitForEvent(pPage.on, {
+            signal: AbortSignal.timeout(timeout),
+            event: "blankMessage",
+          }),
+          this.channel.evaluate<void>(`app.open(${JSON.stringify(url)});`),
+        ])
+
+        return this.activeDocument.$ref()
+      })
+    },
+    openFromBuffer(
+      this: App,
+      buffer: ArrayBuffer,
+      signal?: AbortSignal,
+    ): Promise<PDocument> {
+      return this.mutexes.documentMutex.runExclusive(async () => {
+        await Promise.all([
+          waitForEvent(pPage.on, {
+            signal: signal ?? AbortSignal.timeout(5 * 60 * 1000),
+            event: "blankMessage",
+          }),
+          pPage.sendMessage(buffer),
+        ])
+
+        return this.activeDocument.$ref()
       })
     },
     async uploadFonts(this: App, fonts: Record<string, Uint8Array>) {

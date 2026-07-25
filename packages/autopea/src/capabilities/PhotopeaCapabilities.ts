@@ -8,6 +8,12 @@ export interface PhotopeaCapabilities {
   getMutexes(this: Contract): PhotopeaMutexes
   openSmartObject(this: ArtLayer): Promise<PDocument>
   openFile(this: App, path: string, timeout?: number): Promise<PDocument>
+  openFromUrl(this: App, url: string, timeout?: number): Promise<PDocument>
+  openFromBuffer(
+    this: App,
+    buffer: ArrayBuffer,
+    signal?: AbortSignal,
+  ): Promise<PDocument>
   uploadFonts(this: App, fonts: Record<string, Uint8Array>): Promise<void>
   pause(): Promise<void>
   saveSmartObject(this: PDocument): Promise<void>
