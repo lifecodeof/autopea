@@ -99,7 +99,7 @@ export class Layer extends Contract {
   }
 
   merge() {
-    return this.$(Layer)`.merge()`
+    return this.$evalHandle(Layer)`.merge()`
   }
 
   /** More reliable than `this.bounds.$fetch()`

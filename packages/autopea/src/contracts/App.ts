@@ -52,7 +52,7 @@ export class App extends Contract {
     return this.$eval()`.runMenuItem(${menuID})`
   }
   openDialog() {
-    return this.$(PFile)`.openDialog()`
+    return this.$evalHandle(PFile)`.openDialog()`
   }
   load(file: unknown) {
     return this.$eval()`.load(${file})`
