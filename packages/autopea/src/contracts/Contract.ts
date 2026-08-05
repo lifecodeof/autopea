@@ -265,7 +265,7 @@ export class Contract {
     if (schemaOrOptions instanceof ZodType) {
       schema = schemaOrOptions
     } else {
-      schema = z.null().optional()
+      schema = z.void().nullable()
       options = schemaOrOptions
     }
 
