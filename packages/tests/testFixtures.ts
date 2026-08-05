@@ -20,9 +20,10 @@ export const browserTest = test.extend<{
   ],
 })
 
-const pageFixture =
-  (_shared: boolean) =>
-  async (
+export const pageTest = browserTest.extend<{
+  page: PhotopeaPage
+}>({
+  page: async (
     { browserCtx }: { browserCtx: BrowserContext },
     use: (page: PhotopeaPage) => Promise<void>,
   ) => {
@@ -31,12 +32,7 @@ const pageFixture =
     })
     await use(page)
     await page.close()
-  }
-
-export const pageTest = browserTest.extend<{
-  page: PhotopeaPage
-}>({
-  page: pageFixture(false),
+  },
 })
 
 export const channelTest = pageTest.extend<{

@@ -1,4 +1,4 @@
-import { expect } from "vitest"
+import { expect, suite } from "vitest"
 import { channelTest } from "./testFixtures"
 
 channelTest.concurrent.for([
@@ -50,7 +50,7 @@ channelTest.concurrent.for([
   120_000,
 )
 
-channelTest(
+channelTest.concurrent(
   "PhotopeaChannel - should handle large strings with chunking",
   async ({ channel }) => {
     const largeString = "a".repeat(200000) // 200KB string
@@ -60,7 +60,7 @@ channelTest(
   },
 )
 
-channelTest(
+channelTest.concurrent(
   "PhotopeaChannel - should iterate over array handles",
   async ({ channel }) => {
     const arrayHandle = await channel.createHandle([1, 2, 3, 4, 5])
@@ -74,7 +74,7 @@ channelTest(
   },
 )
 
-channelTest(
+channelTest.concurrent(
   "PhotopeaChannel - should handle complex handle operations",
   async ({ channel }) => {
     const dataHandle = await channel.createHandle({ items: [1, 2, 3] })
@@ -91,7 +91,7 @@ channelTest(
   },
 )
 
-channelTest(
+channelTest.concurrent(
   "PhotopeaChannel - should handle complex expressions with handles",
   async ({ channel }) => {
     const handle1 = await channel.createHandle(10)
