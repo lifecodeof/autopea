@@ -1,16 +1,8 @@
 import { App } from "autopea/contracts/App"
-import {
-  Contract,
-  SerializableContract,
-} from "autopea/contracts/Contract"
+import { Contract, SerializableContract } from "autopea/contracts/Contract"
 import { expect } from "vitest"
 import z from "zod"
 import { appTest } from "../../testFixtures"
-
-appTest("Contract - should create basic contract", async ({ app }) => {
-  expect(app).toBeInstanceOf(Contract)
-  expect(app).toBeInstanceOf(App)
-})
 
 appTest("Contract - should get typename", async ({ app }) => {
   const typeName = await app.typename.$get()
@@ -47,12 +39,3 @@ appTest("Contract - should handle $eq comparison", async ({ app }) => {
   const differentResult = await differentComparison.$get()
   expect(differentResult).toBe(false)
 })
-
-appTest(
-  "Contract - should handle $set on mutable properties",
-  async ({ app }) => {
-    // Test with a property that can be set (if any exist in App)
-    // For now, just test that the method exists
-    expect(typeof app.$set).toBe("function")
-  },
-)

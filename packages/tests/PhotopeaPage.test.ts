@@ -13,21 +13,28 @@ browserTest(
   },
 )
 
-browserTest(
-  "PhotopeaPage - should send and receive messages",
-  async ({ browserCtx }) => {
+browserTest.concurrent.for([
+  { message: "Hello World" },
+  { message: "" },
+  { message: "Hello\n\tWorld\r\n\"quotes\"'single'" },
+])(
+  "PhotopeaPage - should echo messages %#",
+  async ({ message }, { browserCtx }) => {
     await using page = await PhotopeaPage.openFromBrowser(browserCtx)
 
     let receivedMessage: string | undefined
-    page.on("message", (message) => {
-      receivedMessage = message
+    page.on("message", (msg) => {
+      receivedMessage = msg
     })
 
-    await page.sendMessage('app.echoToOE("Hello World");')
+    const jsonEncodedMessage = JSON.stringify(message)
+    await page.sendMessage(`app.echoToOE(${jsonEncodedMessage});`)
 
-    await vi.waitUntil(() => receivedMessage !== undefined, { timeout: 5000 })
+    await vi.waitUntil(() => receivedMessage !== undefined, {
+      timeout: 5000,
+    })
 
-    expect(receivedMessage).toBe("Hello World")
+    expect(receivedMessage).toBe(message)
   },
 )
 
@@ -79,25 +86,26 @@ browserTest(
 )
 
 browserTest(
-  "PhotopeaPage - should handle message buffering",
+  "PhotopeaPage - should handle multiple messages in order",
   async ({ browserCtx }) => {
     const page = await PhotopeaPage.openFromBrowser(browserCtx)
 
-    const messages: string[] = []
+    const receivedMessages: string[] = []
     page.on("message", (message) => {
-      messages.push(message)
+      receivedMessages.push(message)
     })
 
-    // Send multiple parts that should be buffered
-    await page.sendMessage('app.echoToOE("part1");')
-    await page.sendMessage('app.echoToOE("part2");')
+    // Send multiple messages
+    await page.sendMessage('app.echoToOE("First");')
+    await page.sendMessage('app.echoToOE("Second");')
+    await page.sendMessage('app.echoToOE("Third");')
 
-    await vi.waitUntil(() => messages.length >= 2, {
+    // Wait for all messages
+    await vi.waitUntil(() => receivedMessages.length >= 3, {
       timeout: 5000,
     })
 
-    expect(messages).toContain("part1")
-    expect(messages).toContain("part2")
+    expect(receivedMessages).toEqual(["First", "Second", "Third"])
     await page.close()
   },
 )
@@ -133,77 +141,6 @@ browserTest(
       "response3",
       "response4",
     ])
-    await page.close()
-  },
-)
-
-browserTest(
-  "PhotopeaPage - should handle multiple messages",
-  async ({ browserCtx }) => {
-    const page = await PhotopeaPage.openFromBrowser(browserCtx)
-
-    const receivedMessages: string[] = []
-    page.on("message", (message) => {
-      receivedMessages.push(message)
-    })
-
-    // Send multiple messages
-    await page.sendMessage('app.echoToOE("First");')
-    await page.sendMessage('app.echoToOE("Second");')
-    await page.sendMessage('app.echoToOE("Third");')
-
-    // Wait for all messages
-    await vi.waitUntil(() => receivedMessages.length >= 3, {
-      timeout: 5000,
-    })
-
-    expect(receivedMessages).toEqual(["First", "Second", "Third"])
-    await page.close()
-  },
-)
-
-browserTest(
-  "PhotopeaPage - should handle empty messages",
-  async ({ browserCtx }) => {
-    const page = await PhotopeaPage.openFromBrowser(browserCtx)
-
-    let receivedMessage: string | undefined
-    page.on("message", (message) => {
-      receivedMessage = message
-    })
-
-    // Send empty message
-    await page.sendMessage('app.echoToOE("");')
-
-    await vi.waitUntil(() => receivedMessage !== undefined, {
-      timeout: 5000,
-    })
-
-    expect(receivedMessage).toBe("")
-    await page.close()
-  },
-)
-
-browserTest(
-  "PhotopeaPage - should handle special characters in messages",
-  async ({ browserCtx }) => {
-    const page = await PhotopeaPage.openFromBrowser(browserCtx)
-
-    let receivedMessage: string | undefined
-    page.on("message", (message) => {
-      receivedMessage = message
-    })
-
-    const specialMessage = "Hello\n\tWorld\r\n\"quotes\"'single'"
-    // Send message with special characters
-    const jsonEncodedMessage = JSON.stringify(specialMessage)
-    await page.sendMessage(`app.echoToOE(${jsonEncodedMessage});`)
-
-    await vi.waitUntil(() => receivedMessage !== undefined, {
-      timeout: 5000,
-    })
-
-    expect(receivedMessage).toBe(specialMessage)
     await page.close()
   },
 )
