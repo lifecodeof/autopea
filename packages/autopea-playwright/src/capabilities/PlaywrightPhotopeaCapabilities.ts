@@ -1,12 +1,14 @@
 import { buffer } from "node:stream/consumers"
 import type { PhotopeaCapabilities } from "autopea"
-import { abortOnTimeout, invariant, PhotopeaMutexes, waitForEvent } from "autopea"
+import {
+  abortOnTimeout,
+  invariant,
+  PhotopeaMutexes,
+  waitForEvent,
+} from "autopea"
 import { App } from "autopea/contracts/App"
 import type { ArtLayer } from "autopea/contracts/ArtLayer"
-import {
-  type PDocument,
-  SaveFormat,
-} from "autopea/contracts/PDocument"
+import { type PDocument, SaveFormat } from "autopea/contracts/PDocument"
 import { unzipSync } from "fflate/node"
 import type { ConsoleMessage, Dialog } from "playwright"
 import { errors as pwErrors } from "playwright"
