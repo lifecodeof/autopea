@@ -12,5 +12,8 @@
     "autopea": "workspace:*",
     "autopea-playwright": "workspace:*",
     "playwright": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
   }
 }

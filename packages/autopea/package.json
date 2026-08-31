@@ -1,6 +1,6 @@
 {
   "name": "autopea",
-  "version": "3.3.7",
+  "version": "3.3.8",
   "description": "Library for automating Photopea",
   "type": "module",
   "scripts": {
@@ -16,6 +16,10 @@
     "async-mutex": "catalog:",
     "nanoevents": "catalog:",
     "zod": "catalog:"
+  },
+  "devDependencies": {
+    "tsdown": "catalog:",
+    "typescript": "catalog:"
   },
   "exports": {
     ".": {
