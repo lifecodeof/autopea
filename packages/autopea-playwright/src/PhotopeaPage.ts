@@ -103,7 +103,7 @@ export class PhotopeaPage implements PhotopeaTransport {
       const request = route.request()
       if (
         request.resourceType() === "script" &&
-        !/^https:\/\/vecpea\.com\/code\//.test(request.url())
+        !/^https:\/\/(www\.)?(vec|photo)pea\.com/.test(request.url())
       ) {
         // Block disallowed scripts
         route.abort()
@@ -164,7 +164,6 @@ export class PhotopeaPage implements PhotopeaTransport {
 
     // Undocumented Photopea URL fragment that suppresses the landing page ads.
     // This is fragile and may break if Photopea changes their client-side routing.
-    // See: https://github.com/lifecodeof/autopea/issues
     const AD_FRAGMENT = "#8887"
     const startTime = Date.now()
     const timeout = options.timeout ?? 30_000
