@@ -60,7 +60,10 @@ export async function waitForEvent<
     const abortHandler = () => {
       cleanup()
       signal?.removeEventListener("abort", abortHandler)
-      reject(new Error("Aborted"))
+      const reason = signal?.reason
+      const cause = reason instanceof Error ? reason : undefined
+      const detail = cause?.message ? `: ${cause.message}` : ""
+      reject(new Error(`Waiting for event "${event}" aborted${detail}`, { cause }))
     }
 
     const cleanup = onFn(event, (...args: TEventArgs) => {
